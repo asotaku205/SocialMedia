@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'features/auth/login_page.dart';
 import 'firebase_options.dart';
+import 'createpost/createpost.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Auth UI',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Roboto'),
-      home: const LoginPage(),
+      home: const CreatePost(),
     );
   }
 }

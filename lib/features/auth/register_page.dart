@@ -66,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('🔙 Back to Login', style: TextStyle(color: Colors.white)),
+                  child: const Text('Back to Login', style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(height: 40),
 

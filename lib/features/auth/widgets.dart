@@ -47,6 +47,7 @@ Widget customTextField({
       )
           : null,
       filled: true,
+      // ignore: deprecated_member_use
       fillColor: Colors.white.withOpacity(0.95),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
