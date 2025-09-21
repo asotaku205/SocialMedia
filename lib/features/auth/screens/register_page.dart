@@ -74,7 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     delay: const Duration(milliseconds: 100),
                     child: SizedBox(
                       height: 180,
-                      child: Lottie.asset('assets/animations/signup.json', repeat: true),
+                      child: Image.asset('assets/logo/logoApp.webp', fit: BoxFit.contain),
                     ),
                   ),
                   const SizedBox(height: 20),

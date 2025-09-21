@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
@@ -78,7 +77,8 @@ class _LoginPageState extends State<LoginPage> {
                     delay: const Duration(milliseconds: 100),
                     child: SizedBox(
                       height: 200,
-                      child: Lottie.asset('assets/animations/login.json', repeat: true),
+                      child: Image.asset('assets/logo/logoApp.webp', fit: BoxFit.contain),
+
                     ),
                   ),
                   const SizedBox(height: 20),

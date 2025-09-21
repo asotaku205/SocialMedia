@@ -63,7 +63,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     delay: const Duration(milliseconds: 100),
                     child: SizedBox(
                       height: 250,
-                      child: Lottie.asset('assets/animations/forgot_password.json', repeat: true),
+                      child: Image.asset('assets/logo/logoApp.webp', fit: BoxFit.contain),
                     ),
                   ),
                   const SizedBox(height: 20),
