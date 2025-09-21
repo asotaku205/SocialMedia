@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'features/auth/screens/login_page.dart';
-import 'features/auth/login_page.dart';
+import 'features/auth/screens/login_page.dart';
 import 'profile/main_profile.dart';
 import 'firebase_options.dart';
 import 'createpost/createpost.dart';
-
-Future<void> main() async {
 import 'profile/setting.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
