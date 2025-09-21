@@ -1,5 +1,7 @@
+// Import package Flutter UI cần thiết
 import 'package:flutter/material.dart';
 
+// EditProfile - Widget StatefulWidget để chỉnh sửa thông tin profile
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
 
@@ -7,6 +9,7 @@ class EditProfile extends StatefulWidget {
   State<EditProfile> createState() => _EditProfileState();
 }
 
+// State class chứa logic và UI cho EditProfile
 class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
@@ -14,12 +17,13 @@ class _EditProfileState extends State<EditProfile> {
       appBar: AppBar(
         title: const Text('Edit Profile'),
         backgroundColor: Colors.white,
-
       ),
+
       body: Container(
         color: Colors.white,
         child: ListView(
           children: [
+            // Header hiển thị avatar và tên user hiện tại
             Center(
               child: Column(
                 children: [
@@ -29,12 +33,13 @@ class _EditProfileState extends State<EditProfile> {
                     backgroundImage: NetworkImage('https://example.com/profile.jpg'),
                   ),
                   SizedBox(height: 10),
-                  Text('Anh Son',style: TextStyle(fontSize: 24,fontWeight: FontWeight.bold)),
-
+                  Text('Anh Son', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
             SizedBox(height: 20),
+
+            // Form field để chỉnh sửa tên
             Container(
               padding: EdgeInsets.all(10),
               child: TextFormField(
@@ -44,6 +49,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
             SizedBox(height: 10),
+
+            // Form field để chỉnh sửa email
             Container(
               padding: EdgeInsets.all(10),
               child: TextFormField(
@@ -53,6 +60,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
             SizedBox(height: 10),
+
+            // Form field để chỉnh sửa bio (mô tả) - cho phép nhiều dòng
             Container(
               padding: EdgeInsets.all(10),
               child: TextFormField(
@@ -63,10 +72,13 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
             SizedBox(height: 20),
+
+            // Button Save Changes - lưu các thay đổi
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Save profile changes
+                  // TODO: Save profile changes logic
+                  // Chưa implement logic lưu thay đổi profile
                 },
                 child: Text('Save Changes'),
                 style: ElevatedButton.styleFrom(
@@ -79,9 +91,8 @@ class _EditProfileState extends State<EditProfile> {
               ),
             ),
           ],
-
         ),
-      )
+      ),
     );
   }
 }

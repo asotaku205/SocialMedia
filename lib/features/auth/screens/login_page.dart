@@ -5,6 +5,7 @@ import '../widgets/textformfield_email.dart';
 import '../widgets/textformfield_password.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
+import '../../../profile/main_profile.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,6 +36,8 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text.trim(),
       );
       // TODO: Điều hướng đến trang chủ sau khi đăng nhập thành công
+      if (mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainProfile()));      }
     } on FirebaseAuthException catch (e) {
       String message = 'An error occurred. Please check your credentials.';
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {

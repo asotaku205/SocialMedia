@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
 import '../widgets/textformfield_password.dart';
+import '../widgets/textformfield_username.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,12 +15,14 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -86,6 +89,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   FadeSlide(
                     delay: const Duration(milliseconds: 300),
                     child: EmailTextField(controller: _emailController),
+                  ),
+                  const SizedBox(height: 40),
+                  FadeSlide(
+                    delay: const Duration(milliseconds: 300),
+                    child: UserNameTextField(controller: _usernameController),
                   ),
                   const SizedBox(height: 20),
                   FadeSlide(
