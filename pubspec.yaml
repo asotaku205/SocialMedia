@@ -38,13 +38,11 @@ dependencies:
   firebase_auth: ^6.0.2
   cloud_firestore: ^6.0.1
   firebase_storage: ^13.0.1
-<<<<<<< HEAD
   image_picker: ^1.2.0
-=======
+
   google_fonts: ^6.0.0
   lottie: ^2.7.0
   http: ^1.2.0
->>>>>>> login
 
 dev_dependencies:
   flutter_test:
