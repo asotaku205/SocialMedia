@@ -7,8 +7,9 @@ import 'features/profile/main_profile.dart'; // Import màn hình profile chính
 import 'firebase_options.dart'; // File config Firebase được tạo tự động
 import 'features/createpost/createpost.dart'; // Import màn hình tạo bài viết
 import 'features/profile/setting.dart'; // Import màn hình cài đặt
+import 'features/feed_Screen/main_feed.dart';
+import 'package:flutter/foundation.dart';
 
-// Hàm main - điểm khởi đầu của ứng dụng Flutter
 void main() async {
   // Đảm bảo rằng Flutter framework đã được khởi tạo hoàn toàn
   // Cần thiết khi sử dụng async operations trước runApp()
