@@ -1,4 +1,4 @@
-import 'package:blogapp/feed_Screen/post_card.dart';
+import 'post_card.dart';
 import 'package:blogapp/resource/color.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,11 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: Text('Tieu de'),
+        title: Image.asset(
+          'assets/logo/logoApp.webp',
+          fit: BoxFit.contain,
+          height: kToolbarHeight,
+        ),
         actions: [
           IconButton(
             onPressed: (){},
