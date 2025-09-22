@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
       ),
 
       // Màn hình khởi đầu của app
-      home: const FeedScreen(), // Bắt đầu với màn hình đăng nhập
+      home: LoginPage(), // Bắt đầu với màn hình đăng nhập
     );
   }
 }

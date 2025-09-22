@@ -1,3 +1,4 @@
+import 'package:blogapp/features/feed_Screen/main_feed.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/fade_slide.dart';
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       // TODO: Điều hướng đến trang chủ sau khi đăng nhập thành công
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainProfile()));      }
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const FeedScreen()));      }
     } on FirebaseAuthException catch (e) {
       String message = 'An error occurred. Please check your credentials.';
       if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
