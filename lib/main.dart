@@ -9,6 +9,7 @@ import 'features/createpost/createpost.dart'; // Import màn hình tạo bài vi
 import 'features/profile/setting.dart'; // Import màn hình cài đặt
 import 'features/feed_Screen/main_feed.dart';
 import 'package:flutter/foundation.dart';
+import 'package:blogapp/features/auth/auth_wrapper.dart'; // Import AuthWrapper để quản lý auth state
 
 void main() async {
   // Đảm bảo rằng Flutter framework đã được khởi tạo hoàn toàn
@@ -84,7 +85,7 @@ class MyApp extends StatelessWidget {
       ),
 
       // Màn hình khởi đầu của app
-      home: const LoginPage(), // Bắt đầu với màn hình đăng nhập
+      home: const AuthWrapper(), // Bắt đầu với màn hình đăng nhập
     );
   }
 }

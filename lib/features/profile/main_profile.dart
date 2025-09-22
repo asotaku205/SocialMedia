@@ -1,22 +1,56 @@
 // Import các package cần thiết cho Flutter UI
 import 'package:flutter/material.dart';
+import '../../../models/user_model.dart';
+import '../../../services/auth_service.dart';
 import 'setting.dart';
 
 // MainProfile - Widget StatefulWidget để hiển thị trang profile người dùng
 class MainProfile extends StatefulWidget {
-  const MainProfile({super.key});
+  String? uid;
+  MainProfile({super.key,this.uid});
 
   @override
   State<MainProfile> createState() => _MainProfileState();
 }
 
 class _MainProfileState extends State<MainProfile> {
+  UserModel? currentUser;
+  bool isLoading = true;
+  void initState() {
+    super.initState();
+      _getUser();
+  }
+  Future<void> _getUser() async {
+    try {
+      String? uid = AuthService.currentUser?.uid;
+      if (uid != null) {
+        UserModel? user = await AuthService.getUser();
+        setState(() {
+          currentUser = user;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }catch (e) {
+        if(mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+        print('Error fetching user data: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text('@${currentUser?.displayName ?? currentUser?.userName}'),
         backgroundColor: Colors.white,
       ),
 
@@ -31,7 +65,9 @@ class _MainProfileState extends State<MainProfile> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: NetworkImage('https://example.com/profile.jpg'),
+                      backgroundImage: NetworkImage(
+                        currentUser?.photoURL ?? 'https://example.com/default_avatar.png'
+                      ),
                     ),
                     SizedBox(width: 16),
 
@@ -40,7 +76,7 @@ class _MainProfileState extends State<MainProfile> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Anh Son',
+                            '@${currentUser?.displayName ?? currentUser?.userName}',
                             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
                           ),
 
@@ -52,14 +88,14 @@ class _MainProfileState extends State<MainProfile> {
                               Column(
                                 children: [
                                   Text('Posts', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                                  Text('120', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  Text('${currentUser?.followers}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               // Cột Friends - hiển thị số bạn bè
                               Column(
                                 children: [
                                   Text('Friends', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                                  Text('300', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  Text('${currentUser?.following}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                             ],
@@ -74,7 +110,7 @@ class _MainProfileState extends State<MainProfile> {
                 // Container chứa bio/mô tả người dùng
                 Container(
                   child: Text(
-                    'This is a brief bio about the user. It can span multiple lines and give more information about the user.',
+                    '${currentUser?.bio ?? "This is the user bio."}',
                     style: TextStyle(fontSize: 15),
                   ),
                 ),

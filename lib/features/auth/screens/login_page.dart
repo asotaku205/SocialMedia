@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
 import '../widgets/textformfield_password.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 import '../../profile/main_profile.dart';
+import '../../../services/auth_service.dart';
+import '../../../models/user_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,28 +28,62 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  // Method đăng nhập sử dụng AuthService
   Future<void> _login() async {
+    // Kiểm tra validation form trước khi tiếp tục
     if (!_formKey.currentState!.validate()) return;
+
+    // Bật loading state
     setState(() => _isLoading = true);
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Sử dụng AuthService.signIn() - trả về UserModel nếu thành công, null nếu thất bại
+      UserModel? user = await AuthService.signIn(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // TODO: Điều hướng đến trang chủ sau khi đăng nhập thành công
-      if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainProfile()));      }
-    } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred. Please check your credentials.';
-      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        message = 'Incorrect email or password.';
+
+      // Kiểm tra kết quả đăng nhập
+      if (user != null) {
+        // Đăng nhập thành công - có UserModel
+        if (mounted) {
+          // Hiển thị thông báo chào mừng
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Chào mừng trở lại, ${user.displayName}!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+
+          // Điều hướng đến trang chủ
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => MainProfile()));
+        }
+      } else {
+        // Đăng nhập thất bại - user == null
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Email hoặc mật khẩu không đúng'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
+    } catch (e) {
+      // Xử lý các lỗi không mong muốn
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Đã xảy ra lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
+      // Tắt loading state trong mọi trường hợp
       if (mounted) setState(() => _isLoading = false);
     }
   }

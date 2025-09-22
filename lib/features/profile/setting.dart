@@ -1,6 +1,8 @@
 // Import các package cần thiết cho Flutter UI
 import 'package:flutter/material.dart';
 import 'edit_profile.dart';
+import '../../../services/auth_service.dart';
+
 
 // Setting - Widget StatefulWidget để hiển thị màn hình cài đặt
 class Setting extends StatefulWidget {
@@ -12,6 +14,10 @@ class Setting extends StatefulWidget {
 
 class _SettingState extends State<Setting> {
   @override
+  //logout
+  logout() async{
+    await AuthService.logout();
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -99,7 +105,7 @@ class _SettingState extends State<Setting> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Handle logout logic here
+                  logout();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey,

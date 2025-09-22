@@ -1,4 +1,4 @@
-import 'package:blogapp/feed_Screen/post_card.dart';
+import 'post_card.dart';
 import 'package:blogapp/resource/color.dart';
 import 'package:flutter/material.dart';
 

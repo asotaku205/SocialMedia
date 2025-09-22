@@ -15,15 +15,7 @@ class EmailTextField extends StatelessWidget {
         labelText: 'Email',
         prefixIcon: Icon(Icons.email_outlined),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your email';
-        }
-        if (!value.contains('@') || !value.contains('.')) {
-          return 'Please enter a valid email';
-        }
-        return null;
-      },
+
     );
   }
 }
