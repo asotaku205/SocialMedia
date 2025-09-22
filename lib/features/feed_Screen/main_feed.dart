@@ -1,7 +1,6 @@
-import 'package:blogapp/feed_Screen/post_card.dart';
+import 'package:blogapp/features/feed_Screen/post_card.dart';
 import 'package:blogapp/resource/color.dart';
 import 'package:flutter/material.dart';
-
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
