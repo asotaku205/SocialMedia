@@ -1,4 +1,4 @@
-import "package:blogapp/createpost/upload_image.dart";
+import "package:blogapp/features/createpost/upload_image.dart";
 import "package:flutter/material.dart";
 import "dart:io";
 

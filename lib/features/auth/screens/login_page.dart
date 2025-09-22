@@ -5,7 +5,7 @@ import '../widgets/textformfield_email.dart';
 import '../widgets/textformfield_password.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
-import '../../../profile/main_profile.dart';
+import '../../profile/main_profile.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

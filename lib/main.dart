@@ -3,10 +3,10 @@ import 'package:flutter/material.dart'; // Package chính của Flutter để t�
 import 'package:firebase_core/firebase_core.dart'; // Package để khởi tạo Firebase
 import 'features/auth/screens/login_page.dart'; // Import màn hình đăng nhập
 import 'features/auth/screens/login_page.dart'; // Import duplicate - có thể xóa
-import 'profile/main_profile.dart'; // Import màn hình profile chính
+import 'features/profile/main_profile.dart'; // Import màn hình profile chính
 import 'firebase_options.dart'; // File config Firebase được tạo tự động
-import 'createpost/createpost.dart'; // Import màn hình tạo bài viết
-import 'profile/setting.dart'; // Import màn hình cài đặt
+import 'features/createpost/createpost.dart'; // Import màn hình tạo bài viết
+import 'features/profile/setting.dart'; // Import màn hình cài đặt
 
 // Hàm main - điểm khởi đầu của ứng dụng Flutter
 void main() async {

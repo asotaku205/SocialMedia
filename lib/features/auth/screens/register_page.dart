@@ -90,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     delay: const Duration(milliseconds: 300),
                     child: EmailTextField(controller: _emailController),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
                   FadeSlide(
                     delay: const Duration(milliseconds: 300),
                     child: UserNameTextField(controller: _usernameController),
