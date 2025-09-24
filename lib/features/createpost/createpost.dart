@@ -1,6 +1,7 @@
 import "package:blogapp/features/createpost/upload_image.dart";
 import "package:flutter/material.dart";
 import "dart:io";
+import 'package:icons_plus/icons_plus.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -12,9 +13,8 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   final _formKey = GlobalKey<FormState>();
   final _commentController = TextEditingController();
-  //khởi tạo đối tượng uploadimg
   final UploadImageService _uploadService = UploadImageService();
-  File? _imageFile; // Lưu ảnh đã chọn
+  File? _imageFile;
 
   @override
   void dispose() {
@@ -30,122 +30,311 @@ class _CreatePostState extends State<CreatePost> {
       });
     }
   }
+
+  void _removeImage() {
+    setState(() {
+      _imageFile = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //Tiêu đề với nút thoát
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        //Tiêu đề
         title: const Text(
           "Create Post",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.close, size: 25)),
-        ],
-      ),
-      resizeToAvoidBottomInset: true,
-
-      body: SingleChildScrollView(
-        //để cuộn nội dung xuống được
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 80,
-          //set padding bên dưới cho giao diện dài ra khi bàn phím hiện lên ko bị che các
-          //widget khác
-        ),
-        child: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Ô tải ảnh
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  height: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.grey[200],
-                  ),
-                  child: _imageFile == null
-                      //nếu image vẫn null thì chạy vào đoạn code ở dưới
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              onPressed: _uploadImage,
-                              icon: const Icon(Icons.add, size: 72),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              "Add image here",
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        )
-                      //nếu image ko null ảnh sẽ hiên ra ở container
-                      : ClipRRect(//dùng widget này để cắt nội dung bo góc đúng với container bo góc
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.file(//hiển thị ảnh từ 1 file cục bộ trên máy
-                            _imageFile!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-                ),
-                // Ô nhập text
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: TextFormField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      labelText: "What's on your mind?",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "This field is required";
-                      }
-                      return null;
-                    },
-                    keyboardType: TextInputType.multiline, //tự động xuống dòng
-                    minLines: 7, //5 dòng mà tối thiểu
-                    maxLines: null, //ko giới hạn số dòng
-                  ),
-                ),
-              ],
-            ),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 24,
+            letterSpacing: -0.5,
+            color: Colors.white,
           ),
         ),
       ),
-      // button create post
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.all(20),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // Phần hiện profile 
+                    Row(
+                      children: [
+                        //ô avatar
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Colors.white, Colors.white],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.black,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            //Tên
+                            Text(
+                              "Your Name",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              "Share your thoughts...",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Ô nhập text bài viết
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                      ),
+                      child: TextFormField(
+                        controller: _commentController,
+                        decoration: const InputDecoration(
+                          hintText: "What's on your mind?",
+                          hintStyle: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.all(20),
+                        ),
+                        //check giá trị nếu null hoặc rỗng hiện ra thông báo đỏ
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please share your thoughts";
+                          }
+                          return null;
+                        },
+                        keyboardType: TextInputType.multiline,
+                        minLines: 5,
+                        maxLines: null,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Phần app load ảnh
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: _imageFile != null ? 280 : 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: _imageFile == null // nếu biến _imageFile ko null thì nhảy vào
+                      //phần chỉ hiện logo và text nếu khi đã chọn ảnh _imageFile có giá trị
+                      //hình ảnh sẽ đc hiển
+                          ? InkWell(
+                              onTap: _uploadImage,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(50),
+                                    ),
+                                    child: const Icon(
+                                      BoxIcons.bx_image_add,
+                                      size: 32,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    "Add Photo",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Tap to choose from gallery",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Image.file(
+                                    _imageFile!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 12,
+                                  right: 12,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: IconButton(
+                                      onPressed: _removeImage,
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      padding: const EdgeInsets.all(8),
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 12,
+                                  left: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Icon(
+                                          Icons.photo,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        SizedBox(width: 6),
+                                        Text(
+                                          "Photo added",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+
+                    const SizedBox(height: 100), // space for bottom button
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // button gửi đi
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          bottom: MediaQuery.of(context).padding.bottom + 20,
+          top: 20,
+        ),
+        color: Colors.black,
         child: SizedBox(
-          height: 80,
-          width: double.infinity,
+          height: 56,
           child: ElevatedButton(
             onPressed: () {
               if (_formKey.currentState?.validate() ?? false) {
-                //đk trong if chạy tất cả các validate nếu true hết thì chạy
-                //câu lệnh bên trong if
+                //nếu các hàm val đều true sẽ hiện ra màn hình thông báo
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Post created successfully!"),
+                    backgroundColor: Colors.green,
+                  ),
+                );
                 debugPrint("Post created: ${_commentController.text}");
+                //khi gửi set lại giá trị
+                setState(() {
+                  _imageFile = null;
+                  _commentController.clear();
+                });
               }
             },
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              side: const BorderSide(color: Colors.white, width: 2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(28),
               ),
-              backgroundColor: const Color(0xFF6f61ef),
             ),
-            child: const Text(
-              "Create Post",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text(
+                  "Share Post",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
