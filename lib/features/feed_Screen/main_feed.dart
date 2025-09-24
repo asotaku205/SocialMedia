@@ -39,7 +39,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ],
       ),
-      body: PostCard(),
+      body:ListView(children:[ PostCard()]),
     );
   }
 }
