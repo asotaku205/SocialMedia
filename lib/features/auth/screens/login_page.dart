@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
 import '../widgets/textformfield_password.dart';
 import 'forgot_password_page.dart';
 import 'register_page.dart';
 import '../../profile/main_profile.dart';
+import '../../../services/auth_service.dart';
+import '../../../models/user_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,23 +30,49 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _isLoading = true);
+
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserModel? user = await AuthService.signIn(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // TODO: Điều hướng đến trang chủ sau khi đăng nhập thành công
-      if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainProfile()));      }
-    } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred. Please check your credentials.';
-      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
-        message = 'Incorrect email or password.';
+
+      if (user != null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Chào mừng trở lại, ${user.displayName}!'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainProfile()),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Email hoặc mật khẩu không đúng'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Đã xảy ra lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -56,91 +83,122 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.grey.shade50,
-              Colors.white,
-            ],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 100),
-                    child: SizedBox(
-                      height: 200,
-                      child: Image.asset('assets/logo/logoApp.webp', fit: BoxFit.contain),
-
+      backgroundColor: Colors.black, // Nền đen đồng bộ theme
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FadeSlide(
+                  delay: const Duration(milliseconds: 100),
+                  child: SizedBox(
+                    height: 250,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: AssetImage(
+                        'assets/logo/logoAppRemovebg.webp',
+                      ),
+                      backgroundColor: Colors.transparent,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const FadeSlide(
-                    delay: Duration(milliseconds: 200),
-                    child: Text('Welcome back!', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                ),
+                const SizedBox(height: 20),
+                const FadeSlide(
+                  delay: Duration(milliseconds: 200),
+                  child: Text(
+                    'Welcome back!',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white, // chữ trắng
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
-                  const FadeSlide(
-                    delay: Duration(milliseconds: 300),
-                    child: Text('Login to continue', style: TextStyle(fontSize: 16, color: Colors.grey), textAlign: TextAlign.center),
-                  ),
-                  const SizedBox(height: 40),
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 400),
-                    child: EmailTextField(controller: _emailController),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 500),
-                    child: PasswordTextField(controller: _passwordController),
-                  ),
-                  const SizedBox(height: 12),
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 600),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage())),
-                        child: const Text('Forgot Password?'),
+                ),
+                const SizedBox(height: 35),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 400),
+                  child: EmailTextField(controller: _emailController),
+                ),
+                const SizedBox(height: 20),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 500),
+                  child: PasswordTextField(controller: _passwordController),
+                ),
+                const SizedBox(height: 5),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 600),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordPage(),
+                        ),
+                      ),
+                      child: const Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Colors.white), // chữ trắng
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 700),
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _login,
-                      child: _isLoading
-                          ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('Login'),
+                ),
+                const SizedBox(height: 5),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 700),
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent, // button outline
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white, width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Login'),
                   ),
-                  const SizedBox(height: 20),
-                  FadeSlide(
-                    delay: const Duration(milliseconds: 800),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Don't have an account?"),
-                        TextButton(
-                          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterPage())),
-                          child: const Text('Register now'),
+                ),
+                const SizedBox(height: 20),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 800),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(color: Colors.white), // chữ trắng
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const RegisterPage()),
                         ),
-                      ],
-                    ),
+                        child: const Text(
+                          'Register now',
+                          style: TextStyle(color: Colors.white), // chữ trắng
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

@@ -6,21 +6,33 @@ class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
 
   @override
-  State<EditProfile> createState() => _EditProfileState();
+  State<EditProfile> createState() =>
+      _EditProfileState();
 }
 
 // State class chứa logic và UI cho EditProfile
-class _EditProfileState extends State<EditProfile> {
+class _EditProfileState
+    extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile'),
-        backgroundColor: Colors.white,
+        title: const Text(
+          'Edit Profile',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(
+              15,
+            ), // bo 2 góc dưới
+          ),
+        ),
       ),
 
       body: Container(
-        color: Colors.white,
         child: ListView(
           children: [
             // Header hiển thị avatar và tên user hiện tại
@@ -30,10 +42,18 @@ class _EditProfileState extends State<EditProfile> {
                   SizedBox(height: 10),
                   CircleAvatar(
                     radius: 50,
-                    backgroundImage: NetworkImage('https://example.com/profile.jpg'),
+                         backgroundImage: NetworkImage(
+                          "https://picsum.photos/100/100?random=1",
+                        ),
                   ),
                   SizedBox(height: 10),
-                  Text('Anh Son', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Anh Son',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -82,10 +102,17 @@ class _EditProfileState extends State<EditProfile> {
                 },
                 child: Text('Save Changes'),
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 15,
+                  ),
+                  textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius:
+                        BorderRadius.circular(40),
                   ),
                 ),
               ),

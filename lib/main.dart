@@ -1,90 +1,143 @@
-// Import các package cần thiết cho Flutter và Firebase
-import 'package:flutter/material.dart'; // Package chính của Flutter để tạo UI
-import 'package:firebase_core/firebase_core.dart'; // Package để khởi tạo Firebase
-import 'features/auth/screens/login_page.dart'; // Import màn hình đăng nhập
-import 'features/auth/screens/login_page.dart'; // Import duplicate - có thể xóa
-import 'features/profile/main_profile.dart'; // Import màn hình profile chính
-import 'firebase_options.dart'; // File config Firebase được tạo tự động
-import 'features/createpost/createpost.dart'; // Import màn hình tạo bài viết
-import 'features/profile/setting.dart'; // Import màn hình cài đặt
+// Import các package cần thiết
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
+// Import các màn hình trong app
+import 'features/auth/screens/login_page.dart';
+import 'features/profile/main_profile.dart';
+import 'features/createpost/createpost.dart';
+import 'features/profile/setting.dart';
 import 'features/feed_Screen/main_feed.dart';
-import 'package:flutter/foundation.dart';
+import 'features/auth/auth_wrapper.dart';
 
 void main() async {
-  // Đảm bảo rằng Flutter framework đã được khởi tạo hoàn toàn
-  // Cần thiết khi sử dụng async operations trước runApp()
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Khởi tạo Firebase với config phù hợp cho platform hiện tại
-  // Await để đợi Firebase init hoàn tất trước khi chạy app
+  // Khởi tạo Firebase
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Config tự động theo platform (iOS/Android/Web)
+    options:
+        DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Chạy ứng dụng Flutter với widget gốc MyApp
+  // Chạy app
   runApp(const MyApp());
 }
 
-// Widget gốc của ứng dụng - kế thừa StatelessWidget vì không cần state
 class MyApp extends StatelessWidget {
-  // Constructor với key optional để tối ưu performance
   const MyApp({super.key});
 
-  // Method bắt buộc của StatelessWidget - xây dựng UI
   @override
   Widget build(BuildContext context) {
-    // MaterialApp - widget gốc cung cấp Material Design theme và navigation
     return MaterialApp(
-      title: 'Flutter Auth Demo', // Tiêu đề app hiển thị trên task manager
-      debugShowCheckedModeBanner: false, // Ẩn banner "DEBUG" ở góc phải trên
+      title: 'Flutter Auth Demo',
+      debugShowCheckedModeBanner: false,
 
-      // Cấu hình theme chính cho toàn bộ app
       theme: ThemeData(
-        brightness: Brightness.light, // Chế độ sáng (light mode)
-
-        // Tạo color scheme từ màu gốc teal
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal, // Màu chủ đạo của app
+        fontFamily:
+            'SFProDisplay', // set font cho toàn app
+        brightness:
+            Brightness.dark, // Chế độ dark
+        scaffoldBackgroundColor:
+            Colors.black, // Nền app đen
+        primaryColor: Colors.white,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.white,
+          secondary: Colors.white,
+          background: Colors.black,
+        ),
+        // AppBar theme
+        appBarTheme: const AppBarTheme(
+          backgroundColor:
+              Colors.black, // nền đen
+          foregroundColor: Colors
+              .white, // chữ/trở lại/ icon trắng
+          elevation: 0, // loại bỏ shadow nếu muốn
         ),
 
-        useMaterial3: true, // Sử dụng Material Design 3 (phiên bản mới nhất)
-        scaffoldBackgroundColor: Colors.white, // Màu nền cho tất cả Scaffold
-
-        // Theme cho các input field trong toàn app
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true, // Cho phép fill màu nền cho input
-          fillColor: Colors.grey.shade100, // Màu nền nhạt cho input
-
-          // Border mặc định cho input field
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12), // Bo góc 12px
-            borderSide: BorderSide(color: Colors.grey.shade200), // Viền xám nhạt
-          ),
-
-          // Border khi input không được focus
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12), // Bo góc 12px
-            borderSide: BorderSide(color: Colors.grey.shade200), // Viền xám nhạt
-          ),
-        ),
-
-        // Theme cho tất cả ElevatedButton trong app
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal, // Màu nền button
-            foregroundColor: Colors.white, // Màu text button
-            padding: const EdgeInsets.symmetric(vertical: 16), // Padding trên dưới 16px
-
-            // Hình dạng button với góc bo tròn
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // Bo góc 12px
+        bottomNavigationBarTheme:
+            const BottomNavigationBarThemeData(
+              backgroundColor:
+                  Colors.black,
+              type: BottomNavigationBarType
+                  .fixed, // hiển thị tất cả item
             ),
+        // Text mặc định màu trắng
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(
+            color: Colors.white,
+          ),
+          bodyMedium: TextStyle(
+            color: Colors.white,
+          ),
+          bodySmall: TextStyle(
+            color: Colors.white,
+          ),
+          titleLarge: TextStyle(
+            color: Colors.white,
+          ),
+          titleMedium: TextStyle(
+            color: Colors.white,
+          ),
+          titleSmall: TextStyle(
+            color: Colors.white,
           ),
         ),
+
+        // Input field theme
+        inputDecorationTheme:
+            InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.grey[900],
+              hintStyle: const TextStyle(
+                color: Colors.grey,
+              ),
+              labelStyle: const TextStyle(
+                color: Colors.white,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Colors.white,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius:
+                    BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: Colors.white,
+                  width: 2,
+                ),
+              ),
+            ),
+
+        // Button theme - Outline trắng
+        elevatedButtonTheme:
+            ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors
+                    .transparent, // Nền trong suốt
+                foregroundColor:
+                    Colors.white, // Chữ trắng
+                side: const BorderSide(
+                  color: Colors.white,
+                  width: 1.5,
+                ), // Viền trắng
+                padding:
+                    const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(12),
+                ),
+              ),
+            ),
       ),
 
-      // Màn hình khởi đầu của app
-      home: const LoginPage(), // Bắt đầu với màn hình đăng nhập
+      // Màn hình khởi đầu
+      home: const AuthWrapper(),
     );
   }
 }

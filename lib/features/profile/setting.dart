@@ -1,8 +1,7 @@
-// Import các package cần thiết cho Flutter UI
 import 'package:flutter/material.dart';
 import 'edit_profile.dart';
-
-// Setting - Widget StatefulWidget để hiển thị màn hình cài đặt
+import '../../../services/auth_service.dart';
+import 'package:icons_plus/icons_plus.dart';
 class Setting extends StatefulWidget {
   const Setting({super.key});
 
@@ -12,111 +11,109 @@ class Setting extends StatefulWidget {
 
 class _SettingState extends State<Setting> {
   @override
+  logout() async {
+    await AuthService.logout();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Setting'),
-        backgroundColor: Colors.white,
+        title: const Text(
+          'Setting',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        children: [
+          // Header User
+          Center(
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: NetworkImage(
+                      "https://picsum.photos/100/100?random=1",
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Anh Son',
+                  style: TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'email@example.com',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Divider(color: Colors.grey, thickness: 1),
+          const SizedBox(height: 20,),
+          // Edit Profile
+          ListTile(
+            leading: const Icon(BoxIcons.bx_user),
+            title: const Text('Edit Profile', style: TextStyle(fontSize: 16, color: Colors.white)),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => EditProfile()));
+            },
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            tileColor: const Color(0xFF1F1F1F),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+          ),
+          const SizedBox(height: 10),
 
-      body: Container(
-        color: Colors.white,
-        child: ListView(
-          children: [
-            // Phần header hiển thị thông tin user
-            Center(
-              child: Column(
-                children: [
-                  SizedBox(height: 10),
-                  Text('Anh Son', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  Text('email', style: TextStyle(fontSize: 16, color: Colors.grey)),
-                  SizedBox(height: 10),
+          // Change Password
+          ListTile(
+            leading: const Icon(BoxIcons.bx_lock),
+            title: const Text('Change Password', style: TextStyle(fontSize: 16, color: Colors.white)),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+            onTap: () {
+              // TODO: navigate to change password
+            },
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            tileColor: const Color(0xFF1F1F1F),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+          ),
+          const SizedBox(height: 30),
+
+          // Log Out Button
+          Center(
+            child: Container(
+              width: 200,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
                 ],
               ),
-            ),
-
-            const Divider(),
-
-            // ListTile cho Edit Profile
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Edit Profile'),
-              trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                // Navigation đến màn hình EditProfile khi tap
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EditProfile())
-                );
-              },
-            ),
-
-            const Divider(),
-
-            // ListTile cho Change Password
-            ListTile(
-              leading: Icon(Icons.notifications),
-              title: Text('Change Password'),
-              trailing: Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                // TODO: Navigate to change password screen
-              },
-            ),
-
-            const Divider(),
-            SizedBox(height: 18),
-
-            // Phần chọn theme mode (Light/Dark)
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement light mode logic
-                    },
-                    child: Text(
-                      'Light Mode',
-                      style: TextStyle(fontSize: 16, color: Colors.grey)
-                    )
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement dark mode logic
-                    },
-                    child: Text(
-                      'Dark Mode',
-                      style: TextStyle(fontSize: 16, color: Colors.grey)
-                    )
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 18),
-
-            // Button Log Out - nút đăng xuất
-            Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Handle logout logic here
-                },
+                onPressed: logout,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Log Out',
-                  style: TextStyle(fontSize: 16, color: Colors.white)
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
-            )
-          ],
-        ),
-      )
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
