@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class FeedScreen extends StatefulWidget {
+
   const FeedScreen({super.key});
   @override
   State<FeedScreen> createState() =>
@@ -38,21 +39,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Column(
-            children: [
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-            ],
-          ),
-        ],
-      ),
-
+      body: PostCard(),
     );
   }
 }
