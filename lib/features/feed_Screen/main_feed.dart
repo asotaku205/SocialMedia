@@ -15,7 +15,11 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: Text('Tieu de'),
+        title: Image.asset(
+          'assets/logo/logoApp.webp',
+          fit: BoxFit.contain,
+          height: kToolbarHeight,
+        ),
         actions: [
           IconButton(
             onPressed: (){},
