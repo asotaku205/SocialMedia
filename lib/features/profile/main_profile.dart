@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../feed_Screen/post_card.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:blogapp/features/feed_Screen/post_card.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 import 'setting.dart';
@@ -51,6 +49,22 @@ class _MainProfileState extends State<MainProfile> {
     }
   }
 
+  //ham widget tra ve avatar proflie
+  // Trả về String? (URL) hoặc null nếu không có avatar
+  Future<String?> getUserAvatarUrl() async {
+    try {
+      UserModel? user = await AuthService.getUser();
+      if (user != null && user.photoURL.isNotEmpty) {
+        return user.photoURL;
+      } else {
+        return null; // Không có avatar -> hiển thị icon
+      }
+    } catch (e) {
+      print("Error getting user avatar: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,12 +87,63 @@ class _MainProfileState extends State<MainProfile> {
                       // Row chứa avatar và thông tin user
                       Row(
                         children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundImage: const NetworkImage(
-                              "https://picsum.photos/100/100?random=1",
-                            ),
+                  FutureBuilder<String?>(
+                      future: getUserAvatarUrl(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      // Neu dang trang thai cho se hien ra loading
+                      return Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Colors.white, Colors.white],
                           ),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.black,
+                          size: 50,
+                        ),
+                      );
+                    }
+
+                    String? avatarUrl = snapshot.data;
+                    //gan URL tu snapshot cho bien avatarURL
+
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Colors.white, Colors.white],
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child:
+                        avatarUrl !=
+                            null //check dk neu avatarUrl ko bang null
+                            ? Image.network(
+                          //nhay vao day neu true
+                          avatarUrl,
+                          fit: BoxFit.cover,
+                          width: 100,
+                          height: 100,
+                        )
+                            : const Icon(
+                          //nhay vao day neu false
+                          Icons.person,
+                          color: Colors.black,
+                          size: 50,
+                        ),
+                      ),
+                    );
+                  },
+                  ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(

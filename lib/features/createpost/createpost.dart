@@ -1,7 +1,10 @@
 import "package:blogapp/features/createpost/upload_image.dart";
+import "package:blogapp/services/auth_service.dart";
+import "package:blogapp/services/post_services.dart";
 import "package:flutter/material.dart";
 import "dart:io";
 import 'package:icons_plus/icons_plus.dart';
+import 'package:blogapp/models/user_model.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -16,12 +19,33 @@ class _CreatePostState extends State<CreatePost> {
   final UploadImageService _uploadService = UploadImageService();
   File? _imageFile;
 
+  // State để quản lý loading và thông tin user
+  bool _isLoading = false;
+  UserModel? _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
   }
 
+  /// Lấy thông tin người dùng và lưu vào state để tái sử dụng
+  Future<void> _loadCurrentUser() async {
+    final user = await AuthService.getUser();
+    if (mounted) { // Kiểm tra để chắc chắn widget vẫn còn tồn tại
+      setState(() {
+        _currentUser = user;
+      });
+    }
+  }
+
+  /// Hàm chọn ảnh từ thư viện
   Future<void> _uploadImage() async {
     final image = await _uploadService.uploadFromGallery();
     if (image != null) {
@@ -31,10 +55,46 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
+  /// Hàm xóa ảnh đã chọn
   void _removeImage() {
     setState(() {
       _imageFile = null;
     });
+  }
+  
+  /// Hàm xử lý logic đăng bài hoàn chỉnh
+  Future<void> _sharePost() async {
+    // Kiểm tra form có hợp lệ không
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true; // Bật trạng thái loading
+    });
+
+    // Gọi PostService để tạo bài viết, truyền cả nội dung và file ảnh
+    final result = await PostService.createPost(
+      content: _commentController.text.trim(),
+      imageFile: _imageFile,
+    );
+    
+    // Tắt loading sau khi hoàn tất
+    if (mounted) {
+       setState(() {
+        _isLoading = false;
+      });
+    }
+
+    if (result == 'success' && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đăng bài thành công!"), backgroundColor: Colors.green),
+      );
+    } else if (mounted) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -44,7 +104,6 @@ class _CreatePostState extends State<CreatePost> {
         elevation: 0,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        //Tiêu đề
         title: const Text(
           "Create Post",
           style: TextStyle(
@@ -66,57 +125,43 @@ class _CreatePostState extends State<CreatePost> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 20),
-
-                    // Phần hiện profile 
+                    // Hiển thị thông tin user từ state, không dùng FutureBuilder
                     Row(
                       children: [
-                        //ô avatar
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Colors.white, Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 24,
-                          ),
+                        // Avatar
+                        CircleAvatar(
+                          radius: 25,
+                           backgroundImage: (_currentUser?.photoURL ?? '').isNotEmpty
+                              ? NetworkImage(_currentUser!.photoURL)
+                              : null,
+                          child: _currentUser == null
+                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                              : (_currentUser!.photoURL.isEmpty
+                                  ? Text(_currentUser!.displayName.isNotEmpty ? _currentUser!.displayName[0].toUpperCase() : 'U')
+                                  : null),
                         ),
                         const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            //Tên
-                            Text(
-                              "Your Name",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: Colors.white,
+                        // Tên người dùng
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _currentUser?.displayName ?? "Loading...",
+                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              "Share your thoughts...",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              const Text("Share your thoughts...", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 24),
-
-                    // Ô nhập text bài viết
+                    
+                    // Ô nhập text
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.grey[900],
@@ -127,48 +172,36 @@ class _CreatePostState extends State<CreatePost> {
                         controller: _commentController,
                         decoration: const InputDecoration(
                           hintText: "What's on your mind?",
-                          hintStyle: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
+                          hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.all(20),
                         ),
-                        //check giá trị nếu null hoặc rỗng hiện ra thông báo đỏ
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Please share your thoughts";
+                          // Chỉ báo lỗi nếu cả text và ảnh đều rỗng
+                          if ((value == null || value.trim().isEmpty) && _imageFile == null) {
+                            return "Bài viết phải có nội dung hoặc hình ảnh";
                           }
                           return null;
                         },
                         keyboardType: TextInputType.multiline,
                         minLines: 5,
                         maxLines: null,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          height: 1.5,
-                          color: Colors.white,
-                        ),
+                        style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.white),
                       ),
                     ),
 
                     const SizedBox(height: 24),
 
-                    // Phần app load ảnh
+                    // Phần chọn ảnh
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       height: _imageFile != null ? 280 : 200,
                       decoration: BoxDecoration(
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.5),
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
                       ),
-                      child: _imageFile == null // nếu biến _imageFile ko null thì nhảy vào
-                      //phần chỉ hiện logo và text nếu khi đã chọn ảnh _imageFile có giá trị
-                      //hình ảnh sẽ đc hiển
+                      child: _imageFile == null
                           ? InkWell(
                               onTap: _uploadImage,
                               borderRadius: BorderRadius.circular(20),
@@ -181,29 +214,12 @@ class _CreatePostState extends State<CreatePost> {
                                       color: Colors.white.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
-                                    child: const Icon(
-                                      BoxIcons.bx_image_add,
-                                      size: 32,
-                                      color: Colors.white,
-                                    ),
+                                    child: const Icon(BoxIcons.bx_image_add, size: 32, color: Colors.white),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
-                                    "Add Photo",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                  const Text("Add Photo", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                                   const SizedBox(height: 4),
-                                  const Text(
-                                    "Tap to choose from gallery",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
+                                  const Text("Tap to choose from gallery", style: TextStyle(fontSize: 12, color: Colors.grey)),
                                 ],
                               ),
                             )
@@ -211,71 +227,25 @@ class _CreatePostState extends State<CreatePost> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(18),
-                                  child: Image.file(
-                                    _imageFile!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
+                                  child: Image.file(_imageFile!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
                                 ),
                                 Positioned(
                                   top: 12,
                                   right: 12,
                                   child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
+                                    decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(20)),
                                     child: IconButton(
                                       onPressed: _removeImage,
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
+                                      icon: const Icon(Icons.close, color: Colors.white, size: 18),
                                       padding: const EdgeInsets.all(8),
                                       constraints: const BoxConstraints(),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 12,
-                                  left: 12,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: const [
-                                        Icon(
-                                          Icons.photo,
-                                          color: Colors.white,
-                                          size: 14,
-                                        ),
-                                        SizedBox(width: 6),
-                                        Text(
-                                          "Photo added",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                     ),
-
-                    const SizedBox(height: 100), // space for bottom button
+                    const SizedBox(height: 100), // Khoảng trống cho nút ở dưới
                   ],
                 ),
               ),
@@ -284,58 +254,32 @@ class _CreatePostState extends State<CreatePost> {
         ],
       ),
 
-      // button gửi đi
+      // Nút gửi đi
       bottomNavigationBar: Container(
-        padding: EdgeInsets.only(
-          left: 20,
-          right: 20,
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-          top: 20,
-        ),
+        padding: EdgeInsets.only(left: 20, right: 20, bottom: MediaQuery.of(context).padding.bottom + 20, top: 20),
         color: Colors.black,
         child: SizedBox(
           height: 56,
           child: ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                //nếu các hàm val đều true sẽ hiện ra màn hình thông báo
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Post created successfully!"),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                debugPrint("Post created: ${_commentController.text}");
-                //khi gửi set lại giá trị
-                setState(() {
-                  _imageFile = null;
-                  _commentController.clear();
-                });
-              }
-            },
+            onPressed: _isLoading ? null : _sharePost, // Vô hiệu hóa nút khi đang loading
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               side: const BorderSide(color: Colors.white, width: 2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+              disabledBackgroundColor: Colors.grey[800], // Màu khi nút bị vô hiệu hóa
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.send_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text(
-                  "Share Post",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+            child: _isLoading
+                // Hiển thị vòng xoay khi đang loading
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      SizedBox(width: 8),
+                      Text("Share Post", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
