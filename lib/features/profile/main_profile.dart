@@ -46,13 +46,33 @@ class _MainProfileState extends State<MainProfile> {
     }
   }
 
+  //ham widget tra ve avatar proflie
+  // Trả về String? (URL) hoặc null nếu không có avatar
+  Future<String?> getUserAvatarUrl() async {
+    try {
+      UserModel? user = await AuthService.getUser();
+      if (user != null && user.photoURL.isNotEmpty) {
+        return user.photoURL;
+      } else {
+        return null; // Không có avatar -> hiển thị icon
+      }
+    } catch (e) {
+      print("Error getting user avatar: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           '@${currentUser?.displayName ?? currentUser?.userName}',
-          style: const TextStyle(color: Colors.white,fontSize: 30,fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         // shape: const RoundedRectangleBorder(
         //   borderRadius: BorderRadius.vertical(
@@ -70,11 +90,62 @@ class _MainProfileState extends State<MainProfile> {
                 // Row chứa avatar và thông tin user
                 Row(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                        backgroundImage: NetworkImage(
-                          "https://picsum.photos/100/100?random=1",
-                        ),
+                    FutureBuilder<String?>(
+                      future: getUserAvatarUrl(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          // Neu dang trang thai cho se hien ra loading
+                          return Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.white, Colors.white],
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size: 50,
+                            ),
+                          );
+                        }
+
+                        String? avatarUrl = snapshot.data;
+                        //gan URL tu snapshot cho bien avatarURL
+
+                        return Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Colors.white, Colors.white],
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child:
+                                avatarUrl !=
+                                    null //check dk neu avatarUrl ko bang null
+                                ? Image.network(
+                                    //nhay vao day neu true
+                                    avatarUrl,
+                                    fit: BoxFit.cover,
+                                    width: 100,
+                                    height: 100,
+                                  )
+                                : const Icon(
+                                    //nhay vao day neu false
+                                    Icons.person,
+                                    color: Colors.black,
+                                    size: 50,
+                                  ),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -145,34 +216,36 @@ class _MainProfileState extends State<MainProfile> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '${currentUser?.bio ?? "This is the user bio."}',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 15, color: Colors.white70),
                   ),
                 ),
                 const SizedBox(height: 15),
                 // Button Edit Profile
-               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Setting()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white, width: 1),
-                  minimumSize: const Size(150, 35), // giảm chiều rộng và chiều cao
-                  padding: const EdgeInsets.symmetric(horizontal: 140, vertical: 15), // padding nhỏ hơn
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Setting()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.white, width: 1),
+                    minimumSize: const Size(
+                      150,
+                      35,
+                    ), // giảm chiều rộng và chiều cao
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 140,
+                      vertical: 15,
+                    ), // padding nhỏ hơn
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
+                  child: const Text('Edit Profile'),
                 ),
-                child: const Text('Edit Profile'),
-              ),
-
               ],
             ),
           ),
@@ -183,8 +256,7 @@ class _MainProfileState extends State<MainProfile> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: 5,
             itemBuilder: (context, index) {
-              return PostCard(
-              );
+              return PostCard();
             },
           ),
         ],

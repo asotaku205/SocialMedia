@@ -1,7 +1,10 @@
 import "package:blogapp/features/createpost/upload_image.dart";
+import "package:blogapp/services/auth_service.dart";
+import "package:blogapp/services/post_services.dart";
 import "package:flutter/material.dart";
 import "dart:io";
 import 'package:icons_plus/icons_plus.dart';
+import 'package:blogapp/models/user_model.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -37,6 +40,37 @@ class _CreatePostState extends State<CreatePost> {
     });
   }
 
+  //ham lay ten user
+  Future<String> getNameUser() async {
+    try {
+      final user = await AuthService.getUser();
+      if (user != null) {
+        return user.displayName; // lay ten nguoi dung
+      } else {
+        return "Unknown User";
+      }
+    } catch (e) {
+      print('Error getting user name: $e');
+      return "Unknown User";
+    }
+  }
+
+  //ham widget tra ve avatar proflie
+  // Trả về String? (URL) hoặc null nếu không có avatar
+  Future<String?> getUserAvatarUrl() async {
+    try {
+      UserModel? user = await AuthService.getUser();
+      if (user != null && user.photoURL.isNotEmpty) {
+        return user.photoURL;
+      } else {
+        return null; // Không có avatar -> hiển thị icon
+      }
+    } catch (e) {
+      print("Error getting user avatar: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,42 +100,110 @@ class _CreatePostState extends State<CreatePost> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 20),
-
-                    // Phần hiện profile 
+                    // Phần hiện profile
                     Row(
                       children: [
                         //ô avatar
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Colors.white, Colors.white],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 24,
-                          ),
+                        FutureBuilder<String?>(
+                          future: getUserAvatarUrl(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              // Neu dang trang thai cho se hien ra loading
+                              return Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Colors.white, Colors.white],
+                                  ),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: const Icon(
+                                  Icons.person,
+                                  color: Colors.black,
+                                  size: 24,
+                                ),
+                              );
+                            }
+
+                            String? avatarUrl = snapshot.data;
+                            //gan URL tu snapshot cho bien avatarURL
+
+                            return Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Colors.white, Colors.white],
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(25),
+                                child:
+                                    avatarUrl !=
+                                        null //check dk neu avatarUrl ko bang null
+                                    ? Image.network(
+                                        //nhay vao day neu true
+                                        avatarUrl,
+                                        fit: BoxFit.cover,
+                                        width: 50,
+                                        height: 50,
+                                      )
+                                    : const Icon(
+                                        //nhay vao day neu false
+                                        Icons.person,
+                                        color: Colors.black,
+                                        size: 24,
+                                      ),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             //Tên
-                            Text(
-                              "Your Name",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
+                            FutureBuilder<String>(
+                              future: getNameUser(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  //neu dang o trang thai cho se tra ve text Loading
+                                  return Text(
+                                    "Loading...",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                } else if (snapshot.hasError) {
+                                  //neu xay ra loi se tra ve text Error
+                                  return Text(
+                                    "Error",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                } else {
+                                  return Text(
+                                    snapshot.data ??
+                                        "Your Name", //neu napshot.data null se tra ve text Your Name
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
                               "Share your thoughts...",
                               style: TextStyle(
@@ -115,13 +217,14 @@ class _CreatePostState extends State<CreatePost> {
                     ),
 
                     const SizedBox(height: 24),
-
                     // Ô nhập text bài viết
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                        ),
                       ),
                       child: TextFormField(
                         controller: _commentController,
@@ -166,9 +269,11 @@ class _CreatePostState extends State<CreatePost> {
                           width: 1.5,
                         ),
                       ),
-                      child: _imageFile == null // nếu biến _imageFile ko null thì nhảy vào
-                      //phần chỉ hiện logo và text nếu khi đã chọn ảnh _imageFile có giá trị
-                      //hình ảnh sẽ đc hiển
+                      child:
+                          _imageFile ==
+                              null // nếu biến _imageFile ko null thì nhảy vào
+                          //phần chỉ hiện logo và text nếu khi đã chọn ảnh _imageFile có giá trị
+                          //hình ảnh sẽ đc hiển
                           ? InkWell(
                               onTap: _uploadImage,
                               borderRadius: BorderRadius.circular(20),
@@ -296,21 +401,40 @@ class _CreatePostState extends State<CreatePost> {
         child: SizedBox(
           height: 56,
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_formKey.currentState?.validate() ?? false) {
-                //nếu các hàm val đều true sẽ hiện ra màn hình thông báo
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Post created successfully!"),
-                    backgroundColor: Colors.green,
-                  ),
+                // Lấy nội dung text
+                String content = _commentController.text.trim();
+
+                // Gọi hàm createPost để lưu lên Firebase
+                String result = await PostService.createPost(
+                  content: content,
+                  imageFile: _imageFile,
                 );
-                debugPrint("Post created: ${_commentController.text}");
-                //khi gửi set lại giá trị
-                setState(() {
-                  _imageFile = null;
-                  _commentController.clear();
-                });
+
+                if (result == 'success') {
+                  // Hiển thị thông báo thành công
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Post created successfully!"),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+
+                  // Reset trạng thái sau khi gửi
+                  setState(() {
+                    _imageFile = null;
+                    _commentController.clear();
+                  });
+                } else {
+                  // Hiển thị lỗi nếu không thành công
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(
