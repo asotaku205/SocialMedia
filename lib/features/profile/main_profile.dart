@@ -56,7 +56,7 @@ class _MainProfileState extends State<MainProfile> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '@${currentUser?.displayName ?? currentUser?.userName ?? "Profile"}',
+          '${currentUser?.userName ?? currentUser?.displayName ?? "Profile"}',
           style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
         ),
       ),
@@ -85,7 +85,7 @@ class _MainProfileState extends State<MainProfile> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '@${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
+                                  '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.bold,
