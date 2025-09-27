@@ -200,13 +200,6 @@ void _showMoreOptions() {
                           ),
                         ],
                       ),
-                      Text(
-                        '@noone',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 14,
-                        ),
-                      ),
                     ],
                   ),
                 ),
