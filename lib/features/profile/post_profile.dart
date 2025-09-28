@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-class PostCard extends StatefulWidget {
-  const PostCard({super.key});
+class PostProfile extends StatefulWidget {
+  const PostProfile({super.key});
 
   @override
-  State<PostCard> createState() => _PostCardState();
+  State<PostProfile> createState() => _PostProfileState();
 }
 
-class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
+class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin {
   bool isLiked = false;
   bool isBookmarked = false;
   int likeCount = 128;
@@ -91,8 +91,8 @@ void _showMoreOptions() {
             onTap: () => Navigator.pop(context),
           ),
           _buildOptionItem(
-            icon: BoxIcons.bx_flag,
-            title: 'Report',
+            icon: BoxIcons.bx_trash,
+            title: 'Delete',
             onTap: () => Navigator.pop(context),
             isDestructive: true,
           ),

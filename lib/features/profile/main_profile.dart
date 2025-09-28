@@ -1,3 +1,4 @@
+import 'package:blogapp/features/profile/post_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:blogapp/features/feed_Screen/post_card.dart';
 import '../../../models/user_model.dart';
@@ -256,7 +257,7 @@ class _MainProfileState extends State<MainProfile> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: 5,
             itemBuilder: (context, index) {
-              return PostCard();
+              return PostProfile();
             },
           ),
         ],
