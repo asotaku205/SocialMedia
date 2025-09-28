@@ -1,0 +1,150 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==== USER COLLECTION ====
+    // Users chỉ có thể đọc/ghi dữ liệu của chính mình
+    match /users/{userId} {
+      // Đọc: Tất cả user đã đăng nhập có thể xem profile (cần cho search, follow)
+      allow read: if request.auth != null;
+
+      // Ghi: Chỉ owner mới có thể tạo/sửa profile của chính mình
+      allow write: if request.auth != null &&
+                  request.auth.uid == userId &&
+                  // Đảm bảo uid không thể thay đổi
+                  request.resource.data.uid == userId;
+    }
+
+    // ==== POSTS COLLECTION ====
+    match /posts/{postId} {
+      // Đọc: Tất cả user đã đăng nhập có thể xem posts (public feed)
+      allow read: if request.auth != null;
+
+      // Tạo: User chỉ có thể tạo post với authorId là chính mình
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.authorId &&
+                   request.resource.data.keys().hasAll(['authorId', 'content', 'createdAt']);
+
+      // Sửa/Xóa: Chỉ author mới có thể sửa/xóa post của mình
+      allow update, delete: if request.auth != null &&
+                           request.auth.uid == resource.data.authorId;
+    }
+
+    // ==== COMMENTS COLLECTION ====
+    match /comments/{commentId} {
+      // Đọc: Tất cả user đã đăng nhập có thể xem comments
+      allow read: if request.auth != null;
+
+      // Tạo: User chỉ có thể comment với userId là chính mình
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.userId &&
+                   request.resource.data.keys().hasAll(['userId', 'postId', 'content', 'createdAt']);
+
+      // Sửa/Xóa: Chỉ người comment mới có thể sửa/xóa comment của mình
+      // HOẶC author của post có thể xóa comment trên post của mình
+      allow update, delete: if request.auth != null &&
+                           (request.auth.uid == resource.data.userId ||
+                            request.auth.uid == get(/databases/$(database)/documents/posts/$(resource.data.postId)).data.authorId);
+    }
+
+    // ==== LIKES COLLECTION ====
+    match /likes/{likeId} {
+      // Đọc: Tất cả user đã đăng nhập có thể xem likes
+      allow read: if request.auth != null;
+
+      // Tạo: User chỉ có thể like với userId là chính mình
+      // likeId format: {postId}_{userId}
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.userId &&
+                   likeId == request.resource.data.postId + '_' + request.auth.uid;
+
+      // Xóa: Chỉ người like mới có thể unlike
+      allow delete: if request.auth != null &&
+                   request.auth.uid == resource.data.userId;
+    }
+
+    // ==== FOLLOWS COLLECTION ====
+    match /follows/{followId} {
+      // Đọc: Tất cả user đã đăng nhập có thể xem follows (cần cho follower count)
+      allow read: if request.auth != null;
+
+      // Tạo: User chỉ có thể follow với followerId là chính mình
+      // followId format: {followerId}_{followingId}
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.followerId &&
+                   followId == request.auth.uid + '_' + request.resource.data.followingId &&
+                   // Không thể follow chính mình
+                   request.auth.uid != request.resource.data.followingId;
+
+      // Xóa: Chỉ follower mới có thể unfollow
+      allow delete: if request.auth != null &&
+                   request.auth.uid == resource.data.followerId;
+    }
+
+    // ==== NOTIFICATIONS COLLECTION ====
+    match /notifications/{notificationId} {
+      // Đọc: User chỉ có thể xem notification của chính mình
+      allow read: if request.auth != null &&
+                 request.auth.uid == resource.data.userId;
+
+      // Tạo: System tạo notification, user không tự tạo
+      allow create: if false;
+
+      // Sửa: User có thể đánh dấu đã đọc notification của mình
+      allow update: if request.auth != null &&
+                   request.auth.uid == resource.data.userId &&
+                   // Chỉ cho phép thay đổi isRead
+                   request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'updatedAt']);
+
+      // Xóa: User có thể xóa notification của mình
+      allow delete: if request.auth != null &&
+                   request.auth.uid == resource.data.userId;
+    }
+
+    // ==== CHATS COLLECTION (nếu có chat feature) ====
+    match /chats/{chatId} {
+      // Đọc/Ghi: Chỉ participants mới có thể truy cập chat
+      allow read, write: if request.auth != null &&
+                        request.auth.uid in resource.data.participants;
+    }
+
+    match /messages/{messageId} {
+      // Đọc: Chỉ participants của chat mới đọc được message
+      allow read: if request.auth != null &&
+                 request.auth.uid in get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.participants;
+
+      // Tạo: User chỉ có thể gửi message với senderId là chính mình
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.senderId &&
+                   request.auth.uid in get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.participants;
+
+      // Sửa/Xóa: Chỉ sender mới có thể sửa/xóa message của mình
+      allow update, delete: if request.auth != null &&
+                           request.auth.uid == resource.data.senderId;
+    }
+
+    // ==== REPORTS COLLECTION ====
+    match /reports/{reportId} {
+      // Đọc: Chỉ admin hoặc người report mới đọc được
+      allow read: if request.auth != null &&
+                 (request.auth.uid == resource.data.reporterId ||
+                  get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+
+      // Tạo: User có thể tạo report
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.reporterId;
+
+      // Sửa: Chỉ admin mới có thể update status
+      allow update: if request.auth != null &&
+                   get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ==== ADMIN RULES ====
+    // Admin có thể đọc/ghi tất cả (trừ password)
+    match /{document=**} {
+      allow read, write: if request.auth != null &&
+                        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 class FeedScreen extends StatefulWidget {
+
   const FeedScreen({super.key});
   @override
   State<FeedScreen> createState() =>
@@ -24,7 +25,7 @@ class _FeedScreenState extends State<FeedScreen> {
           child: Image.asset(
             'assets/logo/logoAppRemovebg.webp',
             height:
-                45, 
+                45,
             fit: BoxFit
                 .contain, // giữ nguyên tỉ lệ không méo
             filterQuality: FilterQuality.high,
@@ -38,21 +39,7 @@ class _FeedScreenState extends State<FeedScreen> {
           ),
         ],
       ),
-      body: ListView(
-        children: [
-          Column(
-            children: [
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-              PostCard(),
-            ],
-          ),
-        ],
-      ),
-
+      body:ListView(children:[ PostCard()]),
     );
   }
 }

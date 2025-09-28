@@ -21,6 +21,26 @@ class AuthService {
   // Tự động emit events khi user đăng nhập/đăng xuất
   static Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  static Future<String> forgotPassword({required String email}) async {
+    try {
+      if (email.isEmpty) {
+        return 'Please enter your email';
+      }
+
+      await _auth.sendPasswordResetEmail(email: email.trim());
+      return 'success';
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return 'No user found for that email';
+      } else if (e.code == 'invalid-email') {
+        return 'Invalid email format';
+      } else {
+        return 'An unknown error occurred: ${e.message}';
+      }
+    } catch (e) {
+      return 'An unexpected error occurred: $e';
+    }
+  }
 
   static Future<String> signUp({
     required String email,
@@ -263,4 +283,5 @@ class AuthService {
       return 'Failed to update profile: $e';
     }
   }
+
 }

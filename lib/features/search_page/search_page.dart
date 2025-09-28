@@ -66,6 +66,7 @@ class _WidgetSearchState
           "Search",
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 25,
           ),
         ),
         bottom: PreferredSize(

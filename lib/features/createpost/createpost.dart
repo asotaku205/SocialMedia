@@ -108,7 +108,7 @@ class _CreatePostState extends State<CreatePost> {
           "Create Post",
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 24,
+            fontSize: 25,
             letterSpacing: -0.5,
             color: Colors.white,
           ),

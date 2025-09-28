@@ -2,15 +2,52 @@ import 'package:flutter/material.dart';
 import 'edit_profile.dart';
 import '../../../services/auth_service.dart';
 import 'package:icons_plus/icons_plus.dart';
+import '../auth/screens/forgot_password_page.dart';
+import '../../../models/user_model.dart';
 class Setting extends StatefulWidget {
-  const Setting({super.key});
+  final String? uid;
+  const Setting({super.key, this.uid});
 
   @override
   State<Setting> createState() => _SettingState();
 }
 
 class _SettingState extends State<Setting> {
+  UserModel? currentUser;
+  bool isLoading = true;
+
   @override
+  void initState() {
+    super.initState();
+    _getUser();
+  }
+
+  Future<void> _getUser() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      String? uid = AuthService.currentUser?.uid;
+      if (uid != null) {
+        UserModel? user = await AuthService.getUser();
+        setState(() {
+          currentUser = user;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      print('Error fetching user data: $e');
+    }
+  }
   logout() async {
     await AuthService.logout();
   }
@@ -21,7 +58,11 @@ class _SettingState extends State<Setting> {
       appBar: AppBar(
         title: const Text(
           'Setting',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 25,
+            ),
         ),
       ),
       body: ListView(
@@ -38,14 +79,14 @@ class _SettingState extends State<Setting> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Anh Son',
+                 Text(
+                  '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
                   style: TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'email@example.com',
+                Text(
+                  '${currentUser?.email ?? "Email"}',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ],
@@ -75,7 +116,11 @@ class _SettingState extends State<Setting> {
             title: const Text('Change Password', style: TextStyle(fontSize: 16, color: Colors.white)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
             onTap: () {
-              // TODO: navigate to change password
+              Navigator.push(context,
+                MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordPage(),
+                ),
+              );
             },
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             tileColor: const Color(0xFF1F1F1F),
