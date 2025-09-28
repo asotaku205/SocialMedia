@@ -45,6 +45,10 @@ dependencies:
   http: ^1.2.0
   #Thêm package thêm dùng icon bên ngoài
   icons_plus: ^5.0.0
+  #package dung de can chinh time khi hien thi
+  timeago: ^3.6.0
+  #package dung de an bot text khi qua dai
+  readmore: ^2.2.0
 
 dev_dependencies:
   flutter_test:

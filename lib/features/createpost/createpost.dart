@@ -90,6 +90,10 @@ class _CreatePostState extends State<CreatePost> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Đăng bài thành công!"), backgroundColor: Colors.green),
       );
+      setState(() {
+        _commentController.clear();
+        _imageFile=null;
+      });
     } else if (mounted) {
        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result), backgroundColor: Colors.red),
@@ -137,7 +141,7 @@ class _CreatePostState extends State<CreatePost> {
                           child: _currentUser == null
                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                               : (_currentUser!.photoURL.isEmpty
-                                  ? Text(_currentUser!.displayName.isNotEmpty ? _currentUser!.displayName[0].toUpperCase() : 'U')
+                                  ?Icon(Icons.person)
                                   : null),
                         ),
                         const SizedBox(width: 12),
