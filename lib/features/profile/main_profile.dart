@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:blogapp/features/feed_Screen/post_card.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
+import 'friends_screen.dart';
 import 'setting.dart';
 
 class MainProfile extends StatefulWidget {
@@ -49,22 +50,6 @@ class _MainProfileState extends State<MainProfile> {
     }
   }
 
-  //ham widget tra ve avatar proflie
-  // Trả về String? (URL) hoặc null nếu không có avatar
-  Future<String?> getUserAvatarUrl() async {
-    try {
-      UserModel? user = await AuthService.getUser();
-      if (user != null && user.photoURL.isNotEmpty) {
-        return user.photoURL;
-      } else {
-        return null; // Không có avatar -> hiển thị icon
-      }
-    } catch (e) {
-      print("Error getting user avatar: $e");
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,63 +72,13 @@ class _MainProfileState extends State<MainProfile> {
                       // Row chứa avatar và thông tin user
                       Row(
                         children: [
-                  FutureBuilder<String?>(
-                      future: getUserAvatarUrl(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState ==
-                        ConnectionState.waiting) {
-                      // Neu dang trang thai cho se hien ra loading
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Colors.white, Colors.white],
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty
+                                ? NetworkImage(currentUser!.photoURL!)
+                                : const NetworkImage("https://picsum.photos/100/100?random=1"),
                           ),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.black,
-                          size: 50,
-                        ),
-                      );
-                    }
-
-                    String? avatarUrl = snapshot.data;
-                    //gan URL tu snapshot cho bien avatarURL
-
-                    return Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Colors.white, Colors.white],
-                        ),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child:
-                        avatarUrl !=
-                            null //check dk neu avatarUrl ko bang null
-                            ? Image.network(
-                          //nhay vao day neu true
-                          avatarUrl,
-                          fit: BoxFit.cover,
-                          width: 100,
-                          height: 100,
-                        )
-                            : const Icon(
-                          //nhay vao day neu false
-                          Icons.person,
-                          color: Colors.black,
-                          size: 50,
-                        ),
-                      ),
-                    );
-                  },
-                  ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -172,7 +107,7 @@ class _MainProfileState extends State<MainProfile> {
                                           ),
                                         ),
                                         Text(
-                                          '${currentUser?.followers ?? 0}',
+                                          '0', // TODO: implement posts count
                                           style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.bold,
@@ -181,24 +116,34 @@ class _MainProfileState extends State<MainProfile> {
                                         ),
                                       ],
                                     ),
-                                    Column(
-                                      children: [
-                                        const Text(
-                                          'friends',
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                            color: Colors.grey,
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const FriendsScreen(),
                                           ),
-                                        ),
-                                        Text(
-                                          '${currentUser?.following ?? 0}',
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
+                                        );
+                                      },
+                                      child: Column(
+                                        children: [
+                                          const Text(
+                                            'friends',
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                              color: Colors.grey,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            '${currentUser?.friendCount ?? 0}',
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),

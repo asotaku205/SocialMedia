@@ -266,6 +266,7 @@ class AuthService {
       }
       if (photoURL != null && photoURL.isNotEmpty) {
         updateData['photoURL'] = photoURL.trim();
+        print('Updating photoURL: $photoURL'); // Debug log
       }
 
       // Nếu có ít nhất 1 field để update
@@ -275,11 +276,13 @@ class AuthService {
 
         // Thực hiện update document trong Firestore
         await userRef.update(updateData);
+        print('Profile updated successfully with data: $updateData'); // Debug log
       }
 
       return 'success';
     } catch (e) {
       // Xử lý lỗi và trả về message
+      print('Error updating profile: $e'); // Debug log
       return 'Failed to update profile: $e';
     }
   }
