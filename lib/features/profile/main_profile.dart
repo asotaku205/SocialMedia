@@ -1,6 +1,5 @@
 import 'package:blogapp/features/profile/post_profile.dart';
 import 'package:flutter/material.dart';
-import 'package:blogapp/features/feed_Screen/post_card.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 import 'friends_screen.dart';
@@ -25,9 +24,7 @@ class _MainProfileState extends State<MainProfile> {
   }
 
   Future<void> _getUser() async {
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
     try {
       String? uid = AuthService.currentUser?.uid;
       if (uid != null) {
@@ -37,21 +34,14 @@ class _MainProfileState extends State<MainProfile> {
           isLoading = false;
         });
       } else {
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
       print('Error fetching user data: $e');
     }
   }
 
-  // giả sử bạn có hàm getUserAvatarUrl() trong services
   Future<String?> getUserAvatarUrl() async {
     return currentUser?.photoURL;
   }
@@ -59,7 +49,9 @@ class _MainProfileState extends State<MainProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: const Text(
           "Profile",
           style: TextStyle(
@@ -68,72 +60,45 @@ class _MainProfileState extends State<MainProfile> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  // User Info Section
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
+          : CustomScrollView(
+              slivers: [
+                // Header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Row chứa avatar và thông tin user
                         Row(
                           children: [
-                            FutureBuilder<String?>(
-                              future: getUserAvatarUrl(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  // đang loading
-                                  return Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Colors.white, Colors.white],
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[900],
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(50),
+                                child:
+                                    currentUser?.photoURL != null &&
+                                        currentUser!.photoURL!.isNotEmpty
+                                    ? Image.network(
+                                        currentUser!.photoURL!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : const Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                        size: 50,
                                       ),
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: Colors.black,
-                                      size: 50,
-                                    ),
-                                  );
-                                }
-
-                                String? avatarUrl = snapshot.data;
-
-                                return Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Colors.white, Colors.white],
-                                    ),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: avatarUrl != null
-                                        ? Image.network(
-                                            avatarUrl,
-                                            fit: BoxFit.cover,
-                                            width: 100,
-                                            height: 100,
-                                          )
-                                        : const Icon(
-                                            Icons.person,
-                                            color: Colors.black,
-                                            size: 50,
-                                          ),
-                                  ),
-                                );
-                              },
+                              ),
                             ),
+
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
@@ -142,36 +107,35 @@ class _MainProfileState extends State<MainProfile> {
                                   Text(
                                     '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  // Row thống kê Posts và Friends
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
                                     children: [
                                       Column(
                                         children: const [
                                           Text(
-                                            'Posts',
+                                            "Posts",
                                             style: TextStyle(
-                                              fontSize: 17,
                                               color: Colors.grey,
+                                              fontSize: 14,
                                             ),
                                           ),
+                                          SizedBox(height: 4),
                                           Text(
-                                            '0', // TODO: count posts
+                                            "0",
                                             style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
                                               color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
                                       ),
+                                      const SizedBox(width: 40),
                                       GestureDetector(
                                         onTap: () {
                                           Navigator.push(
@@ -185,18 +149,19 @@ class _MainProfileState extends State<MainProfile> {
                                         child: Column(
                                           children: [
                                             const Text(
-                                              'Friends',
+                                              "Friends",
                                               style: TextStyle(
-                                                fontSize: 17,
                                                 color: Colors.grey,
+                                                fontSize: 14,
                                               ),
                                             ),
+                                            const SizedBox(height: 4),
                                             Text(
                                               '${currentUser?.friendCount ?? 0}',
                                               style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold,
                                                 color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                           ],
@@ -209,8 +174,7 @@ class _MainProfileState extends State<MainProfile> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 15),
-                        // Button Edit Profile
+                        const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
@@ -228,21 +192,24 @@ class _MainProfileState extends State<MainProfile> {
                               width: 1,
                             ),
                             minimumSize: const Size(double.infinity, 40),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          child: const Text('Edit Profile'),
+                          child: const Text("Edit Profile"),
                         ),
+                        const SizedBox(height: 20),
+                        const Divider(color: Colors.grey),
                       ],
                     ),
                   ),
-                  const Divider(color: Colors.grey, thickness: 1),
-                  // PostCard
-                  const PostProfile(),
-                ],
-              ),
+                ),
+
+                // Post List
+                SliverFillRemaining(
+                  child: PostProfile(), // để nguyên ListView bên trong
+                ),
+              ],
             ),
     );
   }

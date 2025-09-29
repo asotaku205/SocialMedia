@@ -1,5 +1,12 @@
+import 'package:blogapp/models/post_model.dart';
+import 'package:blogapp/services/post_services.dart';
+import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import '../profile/main_profile.dart';
+import 'package:blogapp/features/feed_Screen/comment_ui.dart';
+import 'package:readmore/readmore.dart';
 
 class PostProfile extends StatefulWidget {
   const PostProfile({super.key});
@@ -8,12 +15,9 @@ class PostProfile extends StatefulWidget {
   State<PostProfile> createState() => _PostProfileState();
 }
 
-class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin {
-  bool isLiked = false;
-  bool isBookmarked = false;
-  int likeCount = 128;
-  int commentCount = 24;
-  
+class _PostProfileState extends State<PostProfile>
+    with TickerProviderStateMixin {
+  bool isBookmarked = false; // Cờ bookmark (global cho demo)
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
 
@@ -24,13 +28,12 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _likeAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _likeAnimationController,
-      curve: Curves.elasticOut,
-    ));
+    _likeAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(
+        parent: _likeAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
   }
 
   @override
@@ -39,113 +42,62 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
     super.dispose();
   }
 
-  void _toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked) {
-        likeCount++;
-        _likeAnimationController.forward().then((_) {
-          _likeAnimationController.reverse();
-        });
-      } else {
-        likeCount--;
-      }
-    });
-  }
-  //hàm để xử lí khi nhấn vào nút more options
-void _showMoreOptions() {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: const Color(0xFF1A1A1A),
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) => Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey[600],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          _buildOptionItem(
-            icon: BoxIcons.bx_bookmark,
-            title: isBookmarked ? 'Unsave' : 'Save Post',
-            onTap: () {
-              setState(() {
-                isBookmarked = !isBookmarked;
-              });
-              Navigator.pop(context);
-            },
-          ),
-          _buildOptionItem(
-            icon: BoxIcons.bx_link,
-            title: 'Copy Link',
-            onTap: () => Navigator.pop(context),
-          ),
-          _buildOptionItem(
-            icon: BoxIcons.bx_trash,
-            title: 'Delete',
-            onTap: () => Navigator.pop(context),
-            isDestructive: true,
-          ),
-        ],
-      ),
-    ),
-  );
-}
+  // Build toàn bộ list post từ stream
+  Widget buildListPost() {
+    final String? idUser =
+        AuthService.currentUser?.uid; // lấy uid tại thời điểm render
 
+    return StreamBuilder<List<PostModel>>(
+      stream:
+          PostService.getPostsStream(), // nếu có thể, thay bằng getUserPostsStream(idUser)
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Icon(Icons.error, size: 40));
+        }
+        final allPosts = snapshot.data ?? [];
 
-  Widget _buildOptionItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    bool isDestructive = false,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isDestructive ? Colors.red : Colors.white,
-              size: 22,
+        // Lọc posts của user hiện tại trước khi build ListView
+        final userPosts = idUser == null
+            ? <PostModel>[] //neu user null tra ve list rong
+            : allPosts.where((p) => p.authorId == idUser).toList();
+        //tim tat ca user co id = authorId bai viet
+        if (userPosts.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text("No posts yet", style: TextStyle(color: Colors.grey)),
             ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isDestructive ? Colors.red : Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+        return ListView.builder(
+          itemCount: userPosts.length,
+          itemBuilder: (context, index) {
+            final post = userPosts[index];
+            return buildUiPost(post);
+          },
+        );
+      },
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  // UI cho từng post
+  Widget buildUiPost(PostModel post) {
+    final time = timeago.format(post.createdAt);
+    final String? currentUserId = AuthService.currentUser?.uid;
+    final int likeCount = post.likes;
+    final int commentCount = post.comments;
+    final bool isLiked =
+        currentUserId != null && post.likedBy.contains(currentUserId);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
       decoration: const BoxDecoration(
         color: Colors.black,
         border: Border(
-          bottom: BorderSide(
-            color: Color(0xFF262626),
-            width: 0.5,
-          ),
+          bottom: BorderSide(color: Color(0xFF262626), width: 0.5),
         ),
       ),
       child: Padding(
@@ -153,43 +105,47 @@ void _showMoreOptions() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //Avatar + User Info + More Options
+            // Header
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFF262626),
-                          width: 1,
-                        ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainProfile(),
                       ),
-                      child: const CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(
-                          "https://picsum.photos/100/100?random=1",
-                        ),
-                      ),
-                    ),
-                    
-                  ],
-                ),
-                const SizedBox(width: 12),
-                // Thông tin người dùng
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    );
+                  },
+                  child: Row(
                     children: [
-                      Row(
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: post.authorAvatar.isNotEmpty
+                            ? NetworkImage(post.authorAvatar)
+                            : null,
+                        child: post.authorAvatar.isEmpty
+                            ? const Icon(Icons.person)
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'username',
-                            style: TextStyle(
+                          Text(
+                            post.authorName,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
                             ),
                           ),
                         ],
@@ -197,78 +153,63 @@ void _showMoreOptions() {
                     ],
                   ),
                 ),
-                // Nút more options
                 GestureDetector(
-                  onTap: _showMoreOptions,//gọi hàm khi nhấn vào
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      Icons.more_horiz,
-                      color: Colors.grey[400],
-                      size: 20,
-                    ),
-                  ),
+                  onTap: () {
+                    // show options (save/copy link)
+                    _showMoreOptions(post);
+                  },
+                  child: const Icon(Icons.more_horiz, color: Colors.grey),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
-            // Nội dung bài viết
-            const Text(
-              'Enjoying the beautiful sunset today! 🌅 Nature never fails to amaze me with its incredible colors and peaceful moments.',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-              ),
+
+            // Content
+            ReadMoreText(
+              post.content,
+              trimLines: 6,
+              trimMode: TrimMode.Line,
+              trimCollapsedText: " More",
+              trimExpandedText: "  Hide",
+              moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+              lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
             ),
-            
+
             const SizedBox(height: 12),
-            
-            //Ảnh bài viết
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.3,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A1A),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+
+            // Image (nếu có) với errorBuilder
+            if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  "https://picsum.photos/400/300?random=2",
+                  post.imageUrls.first,
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.3,
                   fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: const Color(0xFF1A1A1A),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.grey[600],
-                          strokeWidth: 2,
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: const Color(0xFF1A1A1A),
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: Colors.grey,
-                          size: 48,
-                        ),
-                      ),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: MediaQuery.of(context).size.height * 0.3,
+                    color: Colors.grey[900],
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: Colors.white70,
+                    ),
+                  ),
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      child: const Center(child: CircularProgressIndicator()),
                     );
                   },
                 ),
               ),
-            ),
-            
+
             const SizedBox(height: 12),
-            
-            // Biểu thị lượt tim và bình luận
+
+            // Like & Comment counts
             Row(
               children: [
                 Text(
@@ -290,83 +231,79 @@ void _showMoreOptions() {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
-            //các bút bấm trạng thái
+
+            // Action buttons
             Row(
               children: [
-                // Like 
                 GestureDetector(
-                  onTap: _toggleLike,
+                  onTap: () async {
+                    final uid = AuthService.currentUser?.uid;
+                    if (uid == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Bạn cần đăng nhập để thực hiện thao tác này.',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                    _likeAnimationController.forward().then((_) {
+                      _likeAnimationController.reverse();
+                    });
+                    await PostService.toggleLike(post.id, uid);
+                  },
                   child: AnimatedBuilder(
                     animation: _likeAnimation,
                     builder: (context, child) {
                       return Transform.scale(
                         scale: _likeAnimation.value,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: Icon(
-                            isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                            color: isLiked ? Colors.red : Colors.grey[400],
-                            size: 22,
-                          ),
+                        child: Icon(
+                          isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
+                          color: isLiked ? Colors.red : Colors.grey[400],
+                          size: 22,
                         ),
                       );
                     },
                   ),
                 ),
-                
-                const SizedBox(width: 4),
-                
-                // Comment
+
+                const SizedBox(width: 16),
+
                 GestureDetector(
                   onTap: () {
-                    // xử lí hành động đẻ e chuyển sang trang commnet ở đây
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CommentUi(),
+                      ),
+                    );
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      BoxIcons.bx_message_rounded,
-                      color: Colors.grey[400],
-                      size: 22,
-                    ),
+                  child: Icon(
+                    BoxIcons.bx_message_rounded,
+                    color: Colors.grey[400],
+                    size: 22,
                   ),
                 ),
-                
-                const SizedBox(width: 4),
-                
-                // Share button
-                GestureDetector(
-                  onTap: () {
-                    // Xử lí hành động share ở đây
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      BoxIcons.bx_send,
-                      color: Colors.grey[400],
-                      size: 22,
-                    ),
-                  ),
-                ),
-                
+
+                const SizedBox(width: 16),
+
+                Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
+
                 const Spacer(),
-                
-                // Bookmark button
+
                 GestureDetector(
                   onTap: () {
                     setState(() {
                       isBookmarked = !isBookmarked;
                     });
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                      color: isBookmarked ? const Color(0xFF1DA1F2) : Colors.grey[400],
-                      size: 22,
-                    ),
+                  child: Icon(
+                    isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
+                    color: isBookmarked ? Colors.yellow : Colors.grey[400],
+                    size: 22,
                   ),
                 ),
               ],
@@ -375,5 +312,120 @@ void _showMoreOptions() {
         ),
       ),
     );
+  }
+
+  void _showMoreOptions(PostModel post) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[600],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  isBookmarked = !isBookmarked;
+                });
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Icon(BoxIcons.bx_bookmark, color: Colors.white, size: 22),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Save Post',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Icon(BoxIcons.bx_link, color: Colors.white, size: 22),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Copy Link',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () async{
+                Navigator.pop(context);
+                final delPost = PostService.deletePost(post.id);
+                if(delPost == "success"){
+                  SnackBar(content: Text("Delete success"));
+                }
+                else{
+                  SnackBar(content: Text("Error"));
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: [
+                    Icon(BoxIcons.bx_trash, color: Colors.white, size: 22),
+                    const SizedBox(width: 16),
+                    const Text(
+                      'Delete',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return buildListPost();
   }
 }
