@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:blogapp/features/feed_Screen/post_card.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
+import 'friends_screen.dart';
 import 'setting.dart';
 
 class MainProfile extends StatefulWidget {
@@ -50,29 +51,18 @@ class _MainProfileState extends State<MainProfile> {
     }
   }
 
-  //ham widget tra ve avatar proflie
-  // Trả về String? (URL) hoặc null nếu không có avatar
+  // giả sử bạn có hàm getUserAvatarUrl() trong services
   Future<String?> getUserAvatarUrl() async {
-    try {
-      UserModel? user = await AuthService.getUser();
-      if (user != null && user.photoURL.isNotEmpty) {
-        return user.photoURL;
-      } else {
-        return null; // Không có avatar -> hiển thị icon
-      }
-    } catch (e) {
-      print("Error getting user avatar: $e");
-      return null;
-    }
+    return currentUser?.photoURL;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Profile",
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
             fontSize: 25,
             fontWeight: FontWeight.bold,
@@ -97,7 +87,7 @@ class _MainProfileState extends State<MainProfile> {
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  // Neu dang trang thai cho se hien ra loading
+                                  // đang loading
                                   return Container(
                                     width: 100,
                                     height: 100,
@@ -116,7 +106,6 @@ class _MainProfileState extends State<MainProfile> {
                                 }
 
                                 String? avatarUrl = snapshot.data;
-                                //gan URL tu snapshot cho bien avatarURL
 
                                 return Container(
                                   width: 100,
@@ -129,18 +118,14 @@ class _MainProfileState extends State<MainProfile> {
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(50),
-                                    child:
-                                        avatarUrl !=
-                                            null //check dk neu avatarUrl ko bang null
+                                    child: avatarUrl != null
                                         ? Image.network(
-                                            //nhay vao day neu true
                                             avatarUrl,
                                             fit: BoxFit.cover,
                                             width: 100,
                                             height: 100,
                                           )
                                         : const Icon(
-                                            //nhay vao day neu false
                                             Icons.person,
                                             color: Colors.black,
                                             size: 50,
@@ -163,23 +148,23 @@ class _MainProfileState extends State<MainProfile> {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
-                                  // Row chứa thống kê Posts và Friends
+                                  // Row thống kê Posts và Friends
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
                                       Column(
-                                        children: [
-                                          const Text(
-                                            'posts',
+                                        children: const [
+                                          Text(
+                                            'Posts',
                                             style: TextStyle(
                                               fontSize: 17,
                                               color: Colors.grey,
                                             ),
                                           ),
                                           Text(
-                                            '${currentUser?.followers ?? 0}',
-                                            style: const TextStyle(
+                                            '0', // TODO: count posts
+                                            style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
@@ -187,24 +172,35 @@ class _MainProfileState extends State<MainProfile> {
                                           ),
                                         ],
                                       ),
-                                      Column(
-                                        children: [
-                                          const Text(
-                                            'friends',
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                              color: Colors.grey,
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const FriendsScreen(),
                                             ),
-                                          ),
-                                          Text(
-                                            '${currentUser?.following ?? 0}',
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                          );
+                                        },
+                                        child: Column(
+                                          children: [
+                                            const Text(
+                                              'Friends',
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                                color: Colors.grey,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            Text(
+                                              '${currentUser?.friendCount ?? 0}',
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -212,18 +208,6 @@ class _MainProfileState extends State<MainProfile> {
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 15),
-                        // Container chứa bio/mô tả người dùng
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '${currentUser?.bio ?? "This is the user bio."}',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white70,
-                            ),
-                          ),
                         ),
                         const SizedBox(height: 15),
                         // Button Edit Profile
@@ -254,10 +238,9 @@ class _MainProfileState extends State<MainProfile> {
                       ],
                     ),
                   ),
-
                   const Divider(color: Colors.grey, thickness: 1),
                   // PostCard
-                  const PostCard(),
+                  const PostProfile(),
                 ],
               ),
             ),

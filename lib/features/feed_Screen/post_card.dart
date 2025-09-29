@@ -1,5 +1,6 @@
 import 'package:blogapp/models/post_model.dart';
 import 'package:blogapp/services/post_services.dart';
+import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -15,17 +16,16 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
-  bool isLiked = false;
-  bool isBookmarked = false;
-  int likeCount = 128;
-  int commentCount = 24;
+  bool isBookmarked = false; // Cờ lưu trạng thái bookmark post
 
+  // Controller để điều khiển animation khi bấm "like"
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Khởi tạo animation controller cho hiệu ứng "tim to ra rồi nhỏ lại"
     _likeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
@@ -44,21 +44,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-      if (isLiked) {
-        likeCount++;
-        _likeAnimationController.forward().then((_) {
-          _likeAnimationController.reverse();
-        });
-      } else {
-        likeCount--;
-      }
-    });
-  }
-
-  //ham show them nhieu option cho bai viet
+  /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
@@ -71,6 +57,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Thanh kéo nhỏ ở trên
             Container(
               width: 40,
               height: 4,
@@ -80,6 +67,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+            // Nút save/unsave
             _buildOptionItem(
               icon: BoxIcons.bx_bookmark,
               title: isBookmarked ? 'Unsave' : 'Save Post',
@@ -90,6 +78,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 Navigator.pop(context);
               },
             ),
+            // Nút copy link
             _buildOptionItem(
               icon: BoxIcons.bx_link,
               title: 'Copy Link',
@@ -101,6 +90,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     );
   }
 
+  /// Widget cho từng item trong bottom sheet
   Widget _buildOptionItem({
     required IconData icon,
     required String title,
@@ -133,30 +123,27 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     );
   }
 
-  //ham hien giao dien bai viet dong
+  /// StreamBuilder lắng nghe dữ liệu post từ Firestore
   Widget buidListPost() {
     return StreamBuilder(
-      stream: PostService.getPostsStream(),
+      stream: PostService.getPostsStream(), // lấy stream post
       builder: (context, snapshot) {
-        //trang thai dang load
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator()); // đang load
         }
-        //neu xay ra loi
         if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error, size: 40));
+          return const Center(child: Icon(Icons.error, size: 40)); // có lỗi
         }
-        //neu ko co bai viet nao
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No posts yet"));
+          return const Center(child: Text("No posts yet")); // không có post
         }
-        //Neu co du lieu hien thi danh sach bai viet
+
         final posts = snapshot.data!;
+        // Duyệt danh sách post và build UI cho từng cái
         return ListView.builder(
           itemCount: posts.length,
           itemBuilder: (context, index) {
             final post = posts[index];
-            //tra ve giao dien lay data tu posts truyen vao
             return buidUiPost(post);
           },
         );
@@ -164,12 +151,18 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     );
   }
 
+  /// UI cho từng post
   Widget buidUiPost(PostModel post) {
-    //bien luu thoi gian duoc format qua gio
-    final time = timeago.format(post.createdAt);
-    //luot like va luot commnet
+    final time = timeago.format(post.createdAt); // thời gian đăng dạng "2h ago"
+
+    // Lấy uid của user hiện tại
+    final String? currentUserId = AuthService.currentUser?.uid;
+
+    // Lấy thông tin like/comment từ post
     int likeCount = post.likes;
     int commentCount = post.comments;
+    bool isLiked = currentUserId != null && post.likedBy.contains(currentUserId);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
       decoration: const BoxDecoration(
@@ -178,289 +171,215 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           bottom: BorderSide(color: Color(0xFF262626), width: 0.5),
         ),
       ),
-
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
+            // ---------------- Header ----------------
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    //bat su kien khi nhan vao avatar va ten hien profile nguoi do
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MainProfile(),
-                          ),
-                        );
-                      },
-                      child: Row(
+                // Avatar + Tên + Thời gian
+                GestureDetector(
+                  onTap: () {
+                    // Điều hướng sang trang profile
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainProfile(),
+                      ),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundImage: post.authorAvatar.isNotEmpty
+                            ? NetworkImage(post.authorAvatar)
+                            : null,
+                        child: post.authorAvatar.isEmpty
+                            ? const Icon(Icons.person)
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //anh profile
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFF262626),
-                                width: 1,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 20,
-                              //neu co avatar hien ra ko tra ve null
-                              backgroundImage: post.authorAvatar.isNotEmpty
-                                  ? NetworkImage(post.authorAvatar)
-                                  : null,
-                              //neu ko co avatar hien ra icon person
-                              child: post.authorAvatar.isEmpty
-                                  ? const Icon(Icons.person)
-                                  : null,
+                          Text(
+                            post.authorName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          //name va thoi gian tao bai viet
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              //ten user dang bai
-                              Text(
-                                post.authorName,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              //thoi gian tao bai viet
-                              Text(
-                                time,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                            ],
+                          Text(
+                            time,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-
-                    GestureDetector(
-                      onTap: _showMoreOptions,
-                      child: Container(
-                        padding: EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.more_horiz,
-                          color: Colors.grey[400],
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-
-                SizedBox(height: 12),
-
-                //hien thi ra noi dung cua bai viet
-                ReadMoreText(
-                  post.content, //noi dung bai viet
-                  trimLines: 6, //hien thi 6 dong truoc phan du se an
-                  trimMode: TrimMode.Line,
-                  trimCollapsedText: " More",
-                  trimExpandedText: "  Hide",
-                  moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                  lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                  textAlign: TextAlign.start,
+                // Nút 3 chấm
+                GestureDetector(
+                  onTap: _showMoreOptions,
+                  child: const Icon(Icons.more_horiz, color: Colors.grey),
                 ),
+              ],
+            ),
 
-                SizedBox(height: 12),
-                //Anh bai viet
-                if (post.imageUrls.isNotEmpty &&
-                    post.imageUrls.first.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: double.infinity,
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A),
-                        borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 12),
+
+            // ---------------- Nội dung bài viết ----------------
+            ReadMoreText(
+              post.content,
+              trimLines: 6,
+              trimMode: TrimMode.Line,
+              trimCollapsedText: " More",
+              trimExpandedText: "  Hide",
+              moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+              lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+              style: const TextStyle(fontSize: 20, color: Colors.white),
+              textAlign: TextAlign.start,
+            ),
+
+            const SizedBox(height: 12),
+
+            // ---------------- Ảnh trong post ----------------
+            if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  post.imageUrls.first,
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+            const SizedBox(height: 12),
+
+            // ---------------- Số like + comment ----------------
+            Row(
+              children: [
+                Text(
+                  '$likeCount Like',
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Bấm vào comment count để mở màn comment
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CommentUi(),
                       ),
-                      child: Image.network(
-                        post.imageUrls.first,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: const Color(0xFF1A1A1A),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.grey[600],
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: const Color(0xFF1A1A1A),
-                            child: const Center(
-                              child: Icon(
-                                Icons.image_not_supported,
-                                color: Colors.grey,
-                                size: 48,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    );
+                  },
+                  child: Text(
+                    '$commentCount Comment',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
+                ),
+              ],
+            ),
 
-                SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-                //nut like va comment
-                Row(
-                  children: [
-                    Text(
-                      '${likeCount.toString()} Like',
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CommentUi(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        '${commentCount.toString()} Comment',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+            // ---------------- Hàng nút Like / Comment / Share / Bookmark ----------------
+            Row(
+              children: [
+                // LIKE BUTTON 
+                GestureDetector(
+                  onTap: () async {
+                    final uid = AuthService.currentUser?.uid;
+                    if (uid == null) {
+                      // Nếu chưa login thì báo lỗi
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Bạn cần đăng nhập để thực hiện thao tác này.'),
                         ),
-                      ),
-                    ),
-                  ],
+                      );
+                      return;
+                    }
+
+                    // Play animation ngay khi bấm (cho cảm giác mượt)
+                    _likeAnimationController.forward().then((_) {
+                      _likeAnimationController.reverse();
+                    });
+
+                    // Gọi service để toggle like trên Firestore
+                    await PostService.toggleLike(post.id, uid);
+                    // UI sẽ tự update nhờ stream
+                  },
+                  child: AnimatedBuilder(
+                    animation: _likeAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _likeAnimation.value,
+                        child: Icon(
+                          isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
+                          color: isLiked ? Colors.red : Colors.grey[400],
+                          size: 22,
+                        ),
+                      );
+                    },
+                  ),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(width: 16),
 
-                // Action buttons
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isLiked = !isLiked;
-                          if (isLiked) {
-                            likeCount++;
-                            _likeAnimationController.forward().then((_) {
-                              _likeAnimationController.reverse();
-                            });
-                          } else {
-                            likeCount--;
-                          }
-                        });
-                      },
-                      child: AnimatedBuilder(
-                        animation: _likeAnimation,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _likeAnimation.value,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                isLiked
-                                    ? BoxIcons.bxs_heart
-                                    : BoxIcons.bx_heart,
-                                color: isLiked ? Colors.red : Colors.grey[400],
-                                size: 22,
-                              ),
-                            ),
-                          );
-                        },
+                // COMMENT BUTTON 
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CommentUi(),
                       ),
-                    ),
+                    );
+                  },
+                  child: Icon(
+                    BoxIcons.bx_message_rounded,
+                    color: Colors.grey[400],
+                    size: 22,
+                  ),
+                ),
 
-                    const SizedBox(width: 4),
+                const SizedBox(width: 16),
 
-                    // Comment button
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CommentUi(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          BoxIcons.bx_message_rounded,
-                          color: Colors.grey[400],
-                          size: 22,
-                        ),
-                      ),
-                    ),
+                // SHARE BUTTON 
+                Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
 
-                    const SizedBox(width: 4),
+                const Spacer(),
 
-                    // Share button
-                    GestureDetector(
-                      onTap: () {
-                        // Handle share action
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          BoxIcons.bx_send,
-                          color: Colors.grey[400],
-                          size: 22,
-                        ),
-                      ),
-                    ),
-
-                    const Spacer(),
-
-                    // Bookmark button
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isBookmarked = !isBookmarked;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          isBookmarked
-                              ? BoxIcons.bxs_bookmark
-                              : BoxIcons.bx_bookmark,
-                          color: isBookmarked
-                              ? Colors.yellow
-                              : Colors.grey[400],
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ],
+                // BOOKMARK BUTTON 
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isBookmarked = !isBookmarked;
+                    });
+                  },
+                  child: Icon(
+                    isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
+                    color: isBookmarked ? Colors.yellow : Colors.grey[400],
+                    size: 22,
+                  ),
                 ),
               ],
             ),
@@ -472,6 +391,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Build list post từ stream
     return buidListPost();
   }
 }

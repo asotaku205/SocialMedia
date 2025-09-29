@@ -1,8 +1,11 @@
 // Import package Flutter UI cần thiết
 import 'package:blogapp/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
+import "package:blogapp/features/createpost/upload_image.dart";
+import 'dart:io';
 
 // EditProfile - Widget StatefulWidget để chỉnh sửa thông tin profile
 class EditProfile extends StatefulWidget {
@@ -16,6 +19,8 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   bool isLoading = false;
   UserModel? currentUser;
+  File? image;
+  final UploadImageService _uploadService = UploadImageService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController bioController = TextEditingController();
   final TextEditingController photoController = TextEditingController();
@@ -32,7 +37,35 @@ class _EditProfileState extends State<EditProfile> {
     bioController.dispose();
     super.dispose();
   }
+  Future<void> _pickImage() async {
+    try {
+      File? pickedImage = await _uploadService.uploadFromGallery();
+      if (pickedImage != null) {
+        setState(() {
+          image = pickedImage; // Lưu ảnh đã chọn vào biến image
+        });
 
+        // Hiển thị thông báo đã chọn ảnh thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã chọn ảnh thành công'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi chọn ảnh: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
   Future<void> _loadUserData() async {
     setState(() {
       isLoading = true;
@@ -66,42 +99,96 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
+
   Future<void> updateProfile() async {
     setState(() {
       isLoading = true;
     });
 
     try {
+      String? uploadedImageUrl;
+
+      // Nếu có ảnh mới được chọn, upload lên Firebase Storage
+      if (image != null) {
+        print('Uploading new image...');
+
+        // Hiển thị progress cho user
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 16),
+                Text('Đang upload ảnh...'),
+              ],
+            ),
+            duration: Duration(seconds: 10),
+          ),
+        );
+
+        uploadedImageUrl = await _uploadService.uploadImage(image!);
+        print('Image uploaded successfully: $uploadedImageUrl');
+
+        // Xóa thông báo upload
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+      } else {
+        // Nếu không có ảnh mới, giữ nguyên ảnh cũ
+        uploadedImageUrl = currentUser?.photoURL;
+        print('No new image selected, keeping current photo');
+      }
+
+      print('Updating profile with data:');
+      print('DisplayName: ${nameController.text.trim()}');
+      print('Bio: ${bioController.text.trim()}');
+      print('PhotoURL: $uploadedImageUrl');
+
       String result = await AuthService.updateProfile(
         displayName: nameController.text.trim(),
         bio: bioController.text.trim(),
+        photoURL: uploadedImageUrl,
       );
 
       if (result == 'success') {
+        // Reload user data để cập nhật UI
+        await _loadUserData();
+
+        // Reset image state
+        setState(() {
+          image = null;
+        });
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Profile updated successfully'),
+              content: Text('Cập nhật profile thành công!'),
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop(); // Quay lại màn hình trước
+          Navigator.of(context).pop(true); // Trả về true để báo hiệu đã update thành công
         }
       } else {
+        print('Update profile failed: $result');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: $result'),
+              content: Text('Lỗi: $result'),
               backgroundColor: Colors.red,
             ),
           );
         }
       }
     } catch (e) {
+      print('Exception in updateProfile: $e');
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating profile: $e'),
+            content: Text('Lỗi khi cập nhật profile: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -146,7 +233,7 @@ class _EditProfileState extends State<EditProfile> {
                             children: [
                               CircleAvatar(
                                 radius: 50,
-                                backgroundImage: (currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty)
+                              backgroundImage:image != null ? FileImage(image!) : (currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty)
                                     ? NetworkImage(currentUser!.photoURL!)
                                     : const NetworkImage("https://picsum.photos/100/100?random=1"),
                               ),
@@ -162,7 +249,7 @@ class _EditProfileState extends State<EditProfile> {
                             ],
                           ),
                           onTap: () {
-                            // TODO: Implement image picker
+                            _pickImage();
                           }
                         ),
                         const SizedBox(height: 10),
