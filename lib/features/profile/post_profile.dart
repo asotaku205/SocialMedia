@@ -1,23 +1,24 @@
+import 'package:blogapp/features/feed_Screen/comment_ui.dart';
 import 'package:blogapp/models/post_model.dart';
-import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
+import 'package:blogapp/services/post_services.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import '../profile/main_profile.dart';
-import 'package:blogapp/features/feed_Screen/comment_ui.dart';
 import 'package:readmore/readmore.dart';
+import 'package:timeago/timeago.dart' as timeago;
+
+import '../../resource/navigation.dart';
 
 class PostProfile extends StatefulWidget {
   final String? userId;
-  const PostProfile({super.key,this.userId});
+
+  const PostProfile({super.key, this.userId});
 
   @override
   State<PostProfile> createState() => _PostProfileState();
 }
 
-class _PostProfileState extends State<PostProfile>
-    with TickerProviderStateMixin {
+class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin {
   bool isBookmarked = false; // Cờ bookmark (global cho demo)
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
@@ -25,16 +26,11 @@ class _PostProfileState extends State<PostProfile>
   @override
   void initState() {
     super.initState();
-    _likeAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 150),
-      vsync: this,
-    );
-    _likeAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(
-        parent: _likeAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
+    _likeAnimationController = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
+    _likeAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.2,
+    ).animate(CurvedAnimation(parent: _likeAnimationController, curve: Curves.elasticOut));
   }
 
   @override
@@ -47,8 +43,7 @@ class _PostProfileState extends State<PostProfile>
   Widget buildListPost() {
     final String? targetUserId = widget.userId ?? AuthService.currentUser?.uid; // lấy uid tại thời điểm render
     return StreamBuilder<List<PostModel>>(
-      stream:
-          PostService.getPostsStream(),
+      stream: PostService.getPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -90,16 +85,13 @@ class _PostProfileState extends State<PostProfile>
     final String? currentUserId = AuthService.currentUser?.uid;
     final int likeCount = post.likes;
     final int commentCount = post.comments;
-    final bool isLiked =
-        currentUserId != null && post.likedBy.contains(currentUserId);
+    final bool isLiked = currentUserId != null && post.likedBy.contains(currentUserId);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
       decoration: const BoxDecoration(
         color: Colors.black,
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF262626), width: 0.5),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFF262626), width: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -111,24 +103,13 @@ class _PostProfileState extends State<PostProfile>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MainProfile(),
-                      ),
-                    );
-                  },
+                  onTap: () => NavigationUtils.navigateToProfile(context, post.authorId),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 20,
-                        backgroundImage: post.authorAvatar.isNotEmpty
-                            ? NetworkImage(post.authorAvatar)
-                            : null,
-                        child: post.authorAvatar.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
+                        backgroundImage: post.authorAvatar.isNotEmpty ? NetworkImage(post.authorAvatar) : null,
+                        child: post.authorAvatar.isEmpty ? const Icon(Icons.person) : null,
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -136,19 +117,9 @@ class _PostProfileState extends State<PostProfile>
                         children: [
                           Text(
                             post.authorName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
                           ),
-                          Text(
-                            time,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                            ),
-                          ),
+                          Text(time, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
                         ],
                       ),
                     ],
@@ -167,15 +138,20 @@ class _PostProfileState extends State<PostProfile>
             const SizedBox(height: 12),
 
             // Content
-            ReadMoreText(
-              post.content,
-              trimLines: 6,
-              trimMode: TrimMode.Line,
-              trimCollapsedText: " More",
-              trimExpandedText: "  Hide",
-              moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              style: const TextStyle(fontSize: 20, color: Colors.white),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
+              },
+              child: ReadMoreText(
+                post.content,
+                trimLines: 6,
+                trimMode: TrimMode.Line,
+                trimCollapsedText: " More",
+                trimExpandedText: "  Hide",
+                moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -193,10 +169,7 @@ class _PostProfileState extends State<PostProfile>
                     height: MediaQuery.of(context).size.height * 0.3,
                     color: Colors.grey[900],
                     alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.broken_image,
-                      color: Colors.white70,
-                    ),
+                    child: const Icon(Icons.broken_image, color: Colors.white70),
                   ),
                   loadingBuilder: (context, child, progress) {
                     if (progress == null) return child;
@@ -215,19 +188,16 @@ class _PostProfileState extends State<PostProfile>
               children: [
                 Text(
                   '$likeCount Like',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 16),
-                Text(
-                  '$commentCount Comment',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
+                  },
+                  child: Text(
+                    '$commentCount Comment',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ),
               ],
@@ -242,13 +212,9 @@ class _PostProfileState extends State<PostProfile>
                   onTap: () async {
                     final uid = AuthService.currentUser?.uid;
                     if (uid == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Bạn cần đăng nhập để thực hiện thao tác này.',
-                          ),
-                        ),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Bạn cần đăng nhập để thực hiện thao tác này.')));
                       return;
                     }
                     _likeAnimationController.forward().then((_) {
@@ -275,18 +241,9 @@ class _PostProfileState extends State<PostProfile>
 
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentUi(post: post),
-                      ),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
                   },
-                  child: Icon(
-                    BoxIcons.bx_message_rounded,
-                    color: Colors.grey[400],
-                    size: 22,
-                  ),
+                  child: Icon(BoxIcons.bx_message_rounded, color: Colors.grey[400], size: 22),
                 ),
 
                 const SizedBox(width: 16),
@@ -322,9 +279,7 @@ class _PostProfileState extends State<PostProfile>
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
@@ -334,10 +289,7 @@ class _PostProfileState extends State<PostProfile>
               width: 40,
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[600],
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
             ),
             InkWell(
               onTap: () {
@@ -347,21 +299,14 @@ class _PostProfileState extends State<PostProfile>
                 Navigator.pop(context);
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
                   children: [
                     Icon(BoxIcons.bx_bookmark, color: Colors.white, size: 22),
                     const SizedBox(width: 16),
                     const Text(
                       'Save Post',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -370,21 +315,14 @@ class _PostProfileState extends State<PostProfile>
             InkWell(
               onTap: () => Navigator.pop(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
                   children: [
                     Icon(BoxIcons.bx_link, color: Colors.white, size: 22),
                     const SizedBox(width: 16),
                     const Text(
                       'Copy Link',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -398,36 +336,23 @@ class _PostProfileState extends State<PostProfile>
                   try {
                     final delPost = await PostService.deletePost(post.id);
                     if (delPost == "success") {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Delete success")),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete success")));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Error deleting post")),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error deleting post")));
                     }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Error: $e")),
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Row(
                     children: [
                       Icon(BoxIcons.bx_trash, color: Colors.red, size: 22),
                       const SizedBox(width: 16),
                       const Text(
                         'Delete',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),

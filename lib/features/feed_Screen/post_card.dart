@@ -5,6 +5,7 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../../resource/navigation.dart';
 import '../profile/main_profile.dart';
 import 'comment_ui.dart';
 import 'package:readmore/readmore.dart';
@@ -29,27 +30,6 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   List<PostModel> _displayedPosts = [];
   static const int _postsPerPage = 10;
   bool _isLoadingMore = false;
-
-  void _navigateToProfile(String postAuthorId) {
-    final String? currentUserId = AuthService.currentUser?.uid;
-    if (currentUserId == postAuthorId) {
-      // Đây là bài viết của chính mình -> vào MainProfile
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MainProfile(),
-        ),
-      );
-    } else {
-      // Đây là bài viết của người khác -> vào OtherUserProfileScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OtherUserProfileScreen(userId: postAuthorId),
-        ),
-      );
-    }
-  }
 
   @override
   void initState() {
@@ -313,7 +293,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               children: [
                 // Avatar + Tên + Thời gian
                 GestureDetector(
-                  onTap: () => _navigateToProfile(post.authorId),
+                  onTap: () => NavigationUtils.navigateToProfile(context, post.authorId),
                   child: Row(
                     children: [
                       CircleAvatar(
@@ -360,20 +340,29 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             const SizedBox(height: 12),
 
             // ---------------- Nội dung bài viết ----------------
-            ReadMoreText(
-              post.content,
-              trimLines: 6,
-              trimMode: TrimMode.Line,
-              trimCollapsedText: " More",
-              trimExpandedText: "  Hide",
-              moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              style: const TextStyle(fontSize: 20, color: Colors.white),
-              textAlign: TextAlign.start,
+
+            GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CommentUi(post: post),
+                    ),
+                  );
+              },
+              child: ReadMoreText(
+                post.content,
+                trimLines: 6,
+                trimMode: TrimMode.Line,
+                trimCollapsedText: " More",
+                trimExpandedText: "  Hide",
+                moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+                textAlign: TextAlign.start,
+              ),
             ),
-
             const SizedBox(height: 12),
-
             // ---------------- Ảnh trong post ----------------
             if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
               ClipRRect(
@@ -427,7 +416,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             // ---------------- Hàng nút Like / Comment / Share / Bookmark ----------------
             Row(
               children: [
-                // LIKE BUTTON 
+                // LIKE BUTTON
                 GestureDetector(
                   onTap: () async {
                     final uid = AuthService.currentUser?.uid;
@@ -467,7 +456,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
                 const SizedBox(width: 16),
 
-                // COMMENT BUTTON 
+                // COMMENT BUTTON
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -486,12 +475,12 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
                 const SizedBox(width: 16),
 
-                // SHARE BUTTON 
+                // SHARE BUTTON
                 Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
 
                 const Spacer(),
 
-                // BOOKMARK BUTTON 
+                // BOOKMARK BUTTON
                 GestureDetector(
                   onTap: () {
                     setState(() {
