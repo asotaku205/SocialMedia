@@ -4,18 +4,17 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../profile/main_profile.dart';
-import 'comment_ui.dart';
+import 'package:blogapp/features/profile/main_profile.dart';
 import 'package:readmore/readmore.dart';
 
-class PostCard extends StatefulWidget {
-  const PostCard({super.key});
-
+class SinglePostCard extends StatefulWidget {
+  final PostModel post;
+    const SinglePostCard({Key? key, required this.post}) : super(key: key);
   @override
-  State<PostCard> createState() => _PostCardState();
+  State<SinglePostCard> createState() => _SinglePostCardState();
 }
 
-class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
+class _SinglePostCardState extends State<SinglePostCard> with TickerProviderStateMixin {
   bool isBookmarked = false; // Cờ lưu trạng thái bookmark post
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
@@ -96,35 +95,6 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       ),
     );
   }
-
-  /// StreamBuilder lắng nghe dữ liệu post từ Firestore
-  Widget buidListPost() {
-    return StreamBuilder(
-      stream: PostService.getPostsStream(), // lấy stream post
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator()); // đang load
-        }
-        if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error, size: 40)); // có lỗi
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No posts yet")); // không có post
-        }
-
-        final posts = snapshot.data!;
-        // Duyệt danh sách post và build UI cho từng cái
-        return ListView.builder(
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts[index];
-            return buidUiPost(post);
-          },
-        );
-      },
-    );
-  }
-
   /// UI cho từng post
   Widget buidUiPost(PostModel post) {
     final time = timeago.format(post.createdAt); // thời gian đăng dạng "2h ago"
@@ -238,104 +208,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 ),
               ),
 
-            const SizedBox(height: 12),
-
-            // ---------------- Số like + comment ----------------
-            Row(
-              children: [
-                Text(
-                  '$likeCount Like',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  '$commentCount Comment',
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // ---------------- Hàng nút Like / Comment / Share / Bookmark ----------------
-            Row(
-              children: [
-                // LIKE BUTTON
-                GestureDetector(
-                  onTap: () async {
-                    final uid = AuthService.currentUser?.uid;
-                    if (uid == null) {
-                      // Nếu chưa login thì báo lỗi
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Bạn cần đăng nhập để thực hiện thao tác này.',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-
-                    // Gọi service để toggle like trên Firestore
-                    await PostService.toggleLike(post.id, uid);
-                    // UI sẽ tự update nhờ stream
-                  },
-                  child: Icon(
-                    isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                    color: isLiked ? Colors.red : Colors.grey[400],
-                    size: 22,
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // COMMENT BUTTON xu li sk
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentUi(post: post),
-                      ),
-                    );
-                  },
-                  child: Icon(
-                    BoxIcons.bx_message_rounded,
-                    color: Colors.grey[400],
-                    size: 22,
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // SHARE BUTTON
-                Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
-
-                const Spacer(),
-
-                // BOOKMARK BUTTON
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isBookmarked = !isBookmarked;
-                    });
-                  },
-                  child: Icon(
-                    isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                    color: isBookmarked ? Colors.yellow : Colors.grey[400],
-                    size: 22,
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 10),
           ],
         ),
       ),
@@ -345,6 +218,6 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     // Build list post từ stream
-    return buidListPost();
+    return buidUiPost(widget.post);
   }
 }

@@ -23,8 +23,8 @@ class friendShipModel {
       senderId: map['senderId'] ?? '',
       receiverId: map['receiverId'] ?? '',
       status: map['status'] ?? 'pending',
-      createdAt: map['createdAt']?.toDate(),
-      updatedAt: map['updatedAt']?.toDate(),
+      createdAt: map['createdAt'] is Timestamp ? map['createdAt'].toDate() : null,
+      updatedAt: map['updatedAt'] is Timestamp ? map['updatedAt'].toDate() : null,
     );
   }
 

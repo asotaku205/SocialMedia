@@ -73,6 +73,8 @@ class _PostProfileState extends State<PostProfile>
           );
         }
         return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           itemCount: userPosts.length,
           itemBuilder: (context, index) {
             final post = userPosts[index];
@@ -277,7 +279,7 @@ class _PostProfileState extends State<PostProfile>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const CommentUi(),
+                        builder: (context) => CommentUi(post: post),
                       ),
                     );
                   },

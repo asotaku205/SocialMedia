@@ -197,9 +197,12 @@ class FriendService {
               senderDoc.id
           );
           pendingRequests.add({
-            'friendship': friendship,
-            'sender': sender,
-            'id': doc.id, // Thêm ID để có thể accept/decline
+            'friendship': friendship.toMap(),
+            'sender': {
+              ...sender.toMap(),
+              'uid': sender.uid, // Thêm trường uid vào Map
+            },
+            'id': doc.id,
           });
         }
       }
@@ -506,4 +509,3 @@ class FriendService {
     }
   }
 }
-

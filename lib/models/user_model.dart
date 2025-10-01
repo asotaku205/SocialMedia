@@ -37,9 +37,9 @@ class UserModel {
       userName: map['userName'] ?? '',
       photoURL: map['photoURL'] ?? '',
       bio: map['bio'] ?? '',
-      friendCount: map['friends'] ?? 0,
-      createdAt: map['createdAt']?.toDate(),
-      updatedAt: map['updatedAt']?.toDate(),
+      friendCount: map['friendCount'] ?? 0, // Sửa đúng kiểu int
+      createdAt: map['createdAt'] is Timestamp ? map['createdAt'].toDate() : null,
+      updatedAt: map['updatedAt'] is Timestamp ? map['updatedAt'].toDate() : null,
       isVerified: map['isVerified'] ?? false,
       interests: List<String>.from(map['interests'] ?? []),
       friends: List<String>.from(map['friends'] ?? []),

@@ -16,7 +16,6 @@ class FriendRequestCard extends StatelessWidget {
 
   Future<void> _acceptRequest(BuildContext context) async {
     try {
-      // Show loading
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -32,11 +31,8 @@ class FriendRequestCard extends StatelessWidget {
           ),
         ),
       );
-
-      // Gọi service để chấp nhận lời mời
-      await FriendService.AcceptFriendRequest(friendship['id']);
-
-      // Hide loading và show success
+      // Sử dụng userId của sender
+      await FriendService.acceptFriendRequestFromUser(sender.uid);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -44,8 +40,6 @@ class FriendRequestCard extends StatelessWidget {
           backgroundColor: Colors.green,
         ),
       );
-
-      // Reload data
       if (onActionCompleted != null) {
         onActionCompleted!();
       }
@@ -62,7 +56,6 @@ class FriendRequestCard extends StatelessWidget {
 
   Future<void> _declineRequest(BuildContext context) async {
     try {
-      // Show loading
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -78,11 +71,7 @@ class FriendRequestCard extends StatelessWidget {
           ),
         ),
       );
-
-      // Gọi service để từ chối lời mời
-      await FriendService.declineFriendRequest(friendship['id']);
-
-      // Hide loading và show success
+      await FriendService.cancelFriendRequest(sender.uid);
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -90,8 +79,6 @@ class FriendRequestCard extends StatelessWidget {
           backgroundColor: Colors.orange,
         ),
       );
-
-      // Reload data
       if (onActionCompleted != null) {
         onActionCompleted!();
       }
@@ -105,104 +92,49 @@ class FriendRequestCard extends StatelessWidget {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar
-            CircleAvatar(
-              radius: 25,
-              backgroundImage: sender.photoURL.isNotEmpty
-                  ? NetworkImage(sender.photoURL)
-                  : null,
-              child: sender.photoURL.isEmpty
-                  ? Text(
-                      sender.displayName.isNotEmpty
-                          ? sender.displayName[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-
-            // User Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    sender.displayName.isNotEmpty
-                        ? sender.displayName
-                        : sender.userName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  if (sender.userName.isNotEmpty)
-                    Text(
-                      '@${sender.userName}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                  if (sender.bio.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        sender.bio,
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  const SizedBox(height: 8),
-
-                  // Action Buttons
-                  Row(
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage:
+                      sender.photoURL.isNotEmpty ? NetworkImage(sender.photoURL) : null,
+                  child: sender.photoURL.isEmpty ? const Icon(Icons.person) : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _acceptRequest(context),
-                          icon: const Icon(Icons.check, size: 18),
-                          label: const Text('Chấp nhận'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _declineRequest(context),
-                          icon: const Icon(Icons.close, size: 18),
-                          label: const Text('Từ chối'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                          ),
-                        ),
-                      ),
+                      Text(sender.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text('Lời mời kết bạn', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                     ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => _acceptRequest(context),
+                  child: const Text('Chấp nhận'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.green),
+                ),
+                TextButton(
+                  onPressed: () => _declineRequest(context),
+                  child: const Text('Từ chối'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                ),
+              ],
             ),
+
+
           ],
         ),
       ),

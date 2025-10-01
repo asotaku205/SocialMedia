@@ -2,6 +2,7 @@
 // Đây là model cho bài đăng (Post) trong ứng dụng Flutter kết nối với Firebase Firestore
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:blogapp/models/comment_model.dart';
 
 /// Class PostModel đại diện cho một bài đăng
 class PostModel {
@@ -29,6 +30,9 @@ class PostModel {
   // Số lượt bình luận
   final int comments;
 
+  //cac doi tuong binh luan bai viet
+  final List<CommentModel> commentsList;
+
   // Thời gian tạo bài đăng
   final DateTime createdAt;
 
@@ -55,6 +59,7 @@ class PostModel {
     this.imageUrls = const [],
     this.likes = 0,
     this.comments = 0,
+    this.commentsList = const [],
     required this.createdAt,
     required this.updatedAt,
     this.hashtags = const [],
