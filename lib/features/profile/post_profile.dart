@@ -73,6 +73,8 @@ class _PostProfileState extends State<PostProfile>
           );
         }
         return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           itemCount: userPosts.length,
           itemBuilder: (context, index) {
             final post = userPosts[index];

@@ -204,7 +204,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                         itemBuilder: (context, index) {
                           Map<String, dynamic> request = pendingRequests[index];
                           return FriendRequestCard(
-                            sender: request['sender'],
+                            sender: UserModel.fromMap(request['sender'], request['sender']['uid'] ?? ''),
                             friendship: request['friendship'],
                             onActionCompleted: _loadData, // Reload cả 2 tab
                           );

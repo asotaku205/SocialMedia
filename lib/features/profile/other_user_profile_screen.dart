@@ -4,7 +4,8 @@ import '../../services/friend_services.dart';
 import '../../services/auth_service.dart';
 import '../feed_Screen/post_card.dart';
 import '../../models/post_model.dart';
-
+import 'friends_screen.dart';
+import 'post_profile.dart';
 class OtherUserProfileScreen extends StatefulWidget {
   final String userId;
   final String? username;
@@ -363,74 +364,65 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                   Text(
                                     '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
                                     style: const TextStyle(
-                                      fontSize: 25,
+                                      fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  if (currentUser?.userName?.isNotEmpty == true)
-                                    Text(
-                                      '@${currentUser!.userName}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
-                                  if (currentUser?.bio?.isNotEmpty == true)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        currentUser!.bio,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[300],
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
                                   const SizedBox(height: 10),
-                                  // Row chứa thống kê Posts và Friends
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                                     children: [
                                       Column(
-                                        children: [
-                                          const Text(
-                                            'posts',
+                                        children: const [
+                                          Text(
+                                            "Posts",
                                             style: TextStyle(
-                                              fontSize: 17,
                                               color: Colors.grey,
+                                              fontSize: 14,
                                             ),
                                           ),
+                                          SizedBox(height: 4),
                                           Text(
-                                            '${userPosts.length}',
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
+                                            "0",
+                                            style: TextStyle(
                                               color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
                                       ),
-                                      Column(
-                                        children: [
-                                          const Text(
-                                            'friends',
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                              color: Colors.grey,
+                                      const SizedBox(width: 40),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                              const FriendsScreen(),
                                             ),
-                                          ),
-                                          Text(
-                                            '${currentUser?.friendCount ?? 0}',
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
+                                          );
+                                        },
+                                        child: Column(
+                                          children: [
+                                            const Text(
+                                              "Friends",
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 14,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${currentUser?.friendCount ?? 0}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -438,6 +430,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 15),
+                        // Container chứa bio/mô tả người dùng
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${currentUser?.bio ?? "This is the user bio."}',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.white70,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 20),
                         // Friend Action Button
@@ -468,14 +472,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: userPosts.length,
-                            itemBuilder: (context, index) {
-                              return PostCard();
-                            },
-                          ),
+                          PostProfile(),
                         ],
                       ),
                     )
