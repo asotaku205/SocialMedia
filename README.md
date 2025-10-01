@@ -1,16 +1,28 @@
-# blogapp
+# Social Media App With Flutter and Firebase
 
-A new Flutter project.
+This project is a Social Medial App built using Flutter and Firebase services. Firebase for backend services.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+Authentication: User sign-up and login functionalities using Firebase Authentication.
 
-A few resources to get you started if this is your first Flutter project:
+Real-time Database: Store and retrieve user data, posts, chat and related information using Firebase Firestore.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Storage: Upload and retrieve images for user profiles and posts using Firebase Storage.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Feed: Displaying a feed with posts from followed users.
+
+Post Creation: Ability to create and upload new posts with captions and images.
+
+Chat: Chat real-time with End-to-End Encryption
+
+Profile: User profiles with followers, following counts, and editable profile details.
+
+Explore: Discover new users and content.
+
+
+### Tech Used
+
+Server: Firebase Auth, Firebase Storage, Firebase Firestore
+
+Client: Flutter
