@@ -406,7 +406,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const CommentUi(),
+                        builder: (context) => CommentUi(post: post),
                       ),
                     );
                   },
@@ -473,7 +473,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const CommentUi(),
+                        builder: (context) => CommentUi(post: post),
                       ),
                     );
                   },

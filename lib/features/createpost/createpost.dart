@@ -88,7 +88,7 @@ class _CreatePostState extends State<CreatePost> {
 
     if (result == 'success' && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Đăng bài thành công!"), backgroundColor: Colors.green),
+        const SnackBar(content: Text("Post created successfully!"), backgroundColor: Colors.green),
       );
       setState(() {
         _commentController.clear();
@@ -183,7 +183,7 @@ class _CreatePostState extends State<CreatePost> {
                         validator: (value) {
                           // Chỉ báo lỗi nếu cả text và ảnh đều rỗng
                           if ((value == null || value.trim().isEmpty) && _imageFile == null) {
-                            return "Bài viết phải có nội dung hoặc hình ảnh";
+                            return "The post must have content or an image";
                           }
                           return null;
                         },

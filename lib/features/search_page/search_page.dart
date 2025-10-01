@@ -35,7 +35,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
     if (_searchController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Vui lòng nhập từ khóa tìm kiếm"),
+          content: Text("Please enter a search keyword"),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -205,7 +205,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Tìm kiếm người dùng...",
+                hintText: "Searching for users...",
                 prefixIcon: Icon(BoxIcons.bx_search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -297,16 +297,16 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   children: [
                     Icon(Icons.search, size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 16),
-                    Text('Tìm kiếm người dùng',
+                    Text('Searching for users',
                         style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
-                    Text('Nhập tên hoặc username để tìm kiếm', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+                    Text('Enter name or username to search', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
                   ],
                 ),
               )
                   : _searchType != "user"
                   ? const Center(
-                  child: Text('Tìm kiếm bài viết sẽ được thêm sau', style: TextStyle(color: Colors.grey, fontSize: 16)))
+                  child: Text('Post search feature coming soon', style: TextStyle(color: Colors.grey, fontSize: 16)))
                   : isSearching
                   ? const Center(
                 child: Column(
@@ -314,7 +314,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Đang tìm kiếm...', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                    Text('Searching, please wait...', style: TextStyle(color: Colors.grey, fontSize: 14)),
                   ],
                 ),
               )
@@ -325,10 +325,10 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   children: [
                     const Icon(Icons.person_search, size: 80, color: Colors.grey),
                     const SizedBox(height: 16),
-                    const Text('Không tìm thấy kết quả',
+                    const Text('No results found',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 8),
-                    Text('Không có user nào với từ khóa "$_keyword"',
+                    Text('No users found with this keyword "$_keyword"',
                         style: const TextStyle(fontSize: 14, color: Colors.grey), textAlign: TextAlign.center),
                   ],
                 ),
@@ -339,7 +339,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text('Tìm thấy ${searchResults.length} kết quả',
+                    child: Text('${searchResults.length} results found',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[300])),
                   ),
                   Expanded(

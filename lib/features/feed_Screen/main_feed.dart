@@ -1,6 +1,5 @@
-import 'package:blogapp/features/createpost/createpost.dart';
+
 import 'package:blogapp/features/feed_Screen/post_card.dart';
-import 'package:blogapp/resource/color.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../../models/user_model.dart';

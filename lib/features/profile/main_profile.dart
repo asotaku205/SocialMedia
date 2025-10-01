@@ -54,14 +54,14 @@ class _MainProfileState extends State<MainProfile> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text(
-          "${currentUser?.userName ?? "Username"}",
+          "Profile",
           style: TextStyle(
             color: Colors.white,
             fontSize: 25,
             fontWeight: FontWeight.bold,
           ),
+          textAlign: TextAlign.end,
         ),
-        centerTitle: true,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

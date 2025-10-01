@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/user_model.dart';
 import '../../../services/friend_services.dart';
-import '../../../models/friend_model.dart';
 
 class FriendRequestCard extends StatelessWidget {
   final UserModel sender;
