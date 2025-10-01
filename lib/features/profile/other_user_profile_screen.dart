@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
-import '../../services/auth_service.dart';
 import '../feed_Screen/post_card.dart';
 import '../../models/post_model.dart';
 

@@ -4,11 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 // Import các màn hình trong app
-import 'features/auth/screens/login_page.dart';
-import 'features/profile/main_profile.dart';
-import 'features/createpost/createpost.dart';
-import 'features/profile/setting.dart';
-import 'features/feed_Screen/main_feed.dart';
+// import 'features/auth/screens/login_page.dart';
+// import 'features/profile/main_profile.dart';
+// import 'features/createpost/createpost.dart';
+// import 'features/profile/setting.dart';
+// import 'features/feed_Screen/main_feed.dart';
 import 'features/auth/auth_wrapper.dart';
 
 void main() async {

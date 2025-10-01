@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../profile/main_profile.dart';
-import '../feed_Screen/post_card.dart';
 
 class CommentUi extends StatefulWidget {
   const CommentUi({super.key});

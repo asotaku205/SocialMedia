@@ -1,10 +1,7 @@
 import 'package:blogapp/features/createpost/createpost.dart';
 import 'package:blogapp/features/search_page/search_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '../../../models/user_model.dart';
-import '../../../services/auth_service.dart';
 import '../../profile/setting.dart';
 import '../../feed_Screen/main_feed.dart';
 import '../../profile/main_profile.dart';
