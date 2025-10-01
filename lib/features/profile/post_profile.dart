@@ -9,7 +9,8 @@ import 'package:blogapp/features/feed_Screen/comment_ui.dart';
 import 'package:readmore/readmore.dart';
 
 class PostProfile extends StatefulWidget {
-  const PostProfile({super.key});
+  final String? userId;
+  const PostProfile({super.key,this.userId});
 
   @override
   State<PostProfile> createState() => _PostProfileState();
@@ -44,12 +45,10 @@ class _PostProfileState extends State<PostProfile>
 
   // Build toàn bộ list post từ stream
   Widget buildListPost() {
-    final String? idUser =
-        AuthService.currentUser?.uid; // lấy uid tại thời điểm render
-
+    final String? targetUserId = widget.userId ?? AuthService.currentUser?.uid; // lấy uid tại thời điểm render
     return StreamBuilder<List<PostModel>>(
       stream:
-          PostService.getPostsStream(), // nếu có thể, thay bằng getUserPostsStream(idUser)
+          PostService.getPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -60,9 +59,9 @@ class _PostProfileState extends State<PostProfile>
         final allPosts = snapshot.data ?? [];
 
         // Lọc posts của user hiện tại trước khi build ListView
-        final userPosts = idUser == null
+        final userPosts = targetUserId == null
             ? <PostModel>[] //neu user null tra ve list rong
-            : allPosts.where((p) => p.authorId == idUser).toList();
+            : allPosts.where((p) => p.authorId == targetUserId).toList();
         //tim tat ca user co id = authorId bai viet
         if (userPosts.isEmpty) {
           return const Center(
@@ -317,6 +316,9 @@ class _PostProfileState extends State<PostProfile>
   }
 
   void _showMoreOptions(PostModel post) {
+    final String? currentUserId = AuthService.currentUser?.uid;
+    final bool isOwner = currentUserId != null && currentUserId == post.authorId;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A1A1A),
@@ -388,38 +390,49 @@ class _PostProfileState extends State<PostProfile>
                 ),
               ),
             ),
-            InkWell(
-              onTap: () async{
-                Navigator.pop(context);
-                final delPost = PostService.deletePost(post.id);
-                if(delPost == "success"){
-                  SnackBar(content: Text("Delete success"));
-                }
-                else{
-                  SnackBar(content: Text("Error"));
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: Row(
-                  children: [
-                    Icon(BoxIcons.bx_trash, color: Colors.white, size: 22),
-                    const SizedBox(width: 16),
-                    const Text(
-                      'Delete',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+            // Chỉ hiển thị nút Delete nếu là chủ bài viết
+            if (isOwner)
+              InkWell(
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    final delPost = await PostService.deletePost(post.id);
+                    if (delPost == "success") {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Delete success")),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Error deleting post")),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error: $e")),
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(BoxIcons.bx_trash, color: Colors.red, size: 22),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Delete',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

@@ -33,6 +33,7 @@ class _MainProfileState extends State<MainProfile> {
           currentUser = user;
           isLoading = false;
         });
+        await AuthService.syncPostCount(currentUser!.uid);
       } else {
         setState(() => isLoading = false);
       }
@@ -80,7 +81,7 @@ class _MainProfileState extends State<MainProfile> {
                                 width: 100,
                                 height: 100,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[900],
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(50),
                                 ),
                                 child: ClipRRect(
@@ -94,7 +95,7 @@ class _MainProfileState extends State<MainProfile> {
                                         )
                                       : const Icon(
                                           Icons.person,
-                                          color: Colors.white,
+                                          color: Colors.black,
                                           size: 50,
                                         ),
                                 ),
@@ -117,7 +118,7 @@ class _MainProfileState extends State<MainProfile> {
                                     Row(
                                       children: [
                                         Column(
-                                          children: const [
+                                          children: [
                                             Text(
                                               "Posts",
                                               style: TextStyle(
@@ -127,7 +128,7 @@ class _MainProfileState extends State<MainProfile> {
                                             ),
                                             SizedBox(height: 4),
                                             Text(
-                                              "0",
+                                              "${currentUser?.postCount ?? 0}",
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 16,

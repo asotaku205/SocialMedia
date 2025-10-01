@@ -84,8 +84,10 @@ class _SettingState extends State<Setting> {
                           backgroundColor: Colors.grey[300],
                           backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty
                               ? NetworkImage(currentUser!.photoURL!)
-                              : const NetworkImage("https://picsum.photos/100/100?random=1"
-                        ),
+                              : null,
+                          child: currentUser!.photoURL!.isEmpty
+                           ? const Icon(Icons.person)
+                        : null,
                         ),
                         const SizedBox(height: 12),
                         Text(

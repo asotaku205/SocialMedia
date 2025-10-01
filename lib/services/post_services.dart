@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io'; // Cần để làm việc với file ảnh
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // Cần cho việc upload file
+
 import '../models/post_model.dart'; // Import model bạn vừa tạo
 import '../models/user_model.dart'; // Import UserModel để lấy thông tin tác giả
 import './auth_service.dart'; // Import AuthService để lấy thông tin user
@@ -35,7 +38,8 @@ class PostService {
 
       // Tạo một object PostModel mới
       PostModel newPost = PostModel(
-        id: '', // Firestore sẽ tự tạo ID
+        id: '',
+        // Firestore sẽ tự tạo ID
         authorId: currentUser.uid,
         authorName: currentUser.displayName,
         authorAvatar: currentUser.photoURL,
@@ -47,6 +51,10 @@ class PostService {
 
       // Thêm bài viết vào collection 'posts'
       await _firestore.collection('posts').add(newPost.toMap());
+
+      // Tự động tăng postCount lên 1
+      await AuthService.incrementPostCount(currentUser.uid);
+
       return 'success';
     } catch (e) {
       print('Lỗi tạo post: $e');
@@ -57,16 +65,168 @@ class PostService {
   // --- 2. READ (ĐỌC DỮ LIỆU) ---
   /// Lấy danh sách tất cả bài viết theo thời gian thực (real-time).
   /// Trả về một Stream, tự động cập nhật UI khi có bài viết mới.
+  static Stream<List<PostModel>> getFriendsPostsStream() async* {
+    try {
+      final String? currentUserId = AuthService.currentUser?.uid;
+      if (currentUserId == null) {
+        print('No current user ID');
+        yield [];
+        return;
+      }
+
+      // Lấy bạn bè từ trường friends trong user document thay vì subcollection
+      DocumentSnapshot userDoc;
+      try {
+        userDoc = await _firestore
+            .collection('users')
+            .doc(currentUserId)
+            .get();
+      } catch (e) {
+        print('Error fetching user document: $e');
+        yield [];
+        return;
+      }
+
+      List<String> friendIds = [];
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        // Lấy danh sách friends từ trường friends array
+        List<dynamic> friends = userData['friends'] ?? [];
+        friendIds = friends.cast<String>();
+      }
+
+      // Thêm chính mình vào danh sách
+      friendIds.add(currentUserId);
+
+      // Loại bỏ duplicates
+      friendIds = friendIds.toSet().toList();
+
+      print('Friend IDs count: ${friendIds.length}');
+      print('Friend IDs: $friendIds');
+
+      if (friendIds.isEmpty) {
+        yield [];
+        return;
+      }
+
+      // Delay để tránh overwhelming Firestore
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Sử dụng approach mới để tránh composite index
+      yield* _getPostsWithoutCompositeIndex(friendIds);
+    } catch (e) {
+      print('Error in getFriendsPostsStream: $e');
+      yield [];
+    }
+  }
+
+  // Method mới để lấy posts mà không cần composite index
+  static Stream<List<PostModel>> _getPostsWithoutCompositeIndex(List<String> friendIds) async* {
+    try {
+      // Lấy tất cả posts trước, sau đó filter và sort trong code
+      yield* _firestore
+          .collection('posts')
+          .snapshots()
+          .handleError((error) {
+            print('Firestore posts stream error: $error');
+            return <QuerySnapshot>[];
+          })
+          .map((snapshot) {
+        List<PostModel> allPosts = [];
+
+        for (var doc in snapshot.docs) {
+          try {
+            Map<String, dynamic> data = doc.data();
+            data['id'] = doc.id;
+
+            // Chỉ lấy posts từ bạn bè
+            String authorId = data['authorId'] ?? '';
+            if (friendIds.contains(authorId)) {
+              PostModel post = PostModel.fromMap(data, doc.id);
+              allPosts.add(post);
+            }
+          } catch (e) {
+            print('Error parsing post: $e');
+          }
+        }
+
+        // Sort theo thời gian tạo (mới nhất lên đầu)
+        allPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+        return allPosts;
+      });
+    } catch (e) {
+      print('Error in _getPostsWithoutCompositeIndex: $e');
+      yield [];
+    }
+  }
+
+  // Fallback method để get all posts (cho debug)
   static Stream<List<PostModel>> getPostsStream() {
     return _firestore
         .collection('posts')
-        .orderBy('createdAt', descending: true) // Sắp xếp bài mới nhất lên đầu
         .snapshots()
+        .handleError((error) {
+          print('Firestore getPostsStream error: $error');
+          return <QuerySnapshot>[];
+        })
         .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => PostModel.fromMap(doc.data(), doc.id))
-              .toList();
-        });
+      List<PostModel> posts = [];
+
+      for (var doc in snapshot.docs) {
+        try {
+          Map<String, dynamic> data = doc.data();
+          data['id'] = doc.id;
+          PostModel post = PostModel.fromMap(data, doc.id);
+          posts.add(post);
+        } catch (e) {
+          print('Error parsing post in getPostsStream: $e');
+        }
+      }
+
+      // Sort theo thời gian tạo
+      posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      return posts;
+    });
+  }
+
+  // Method để kiểm tra và debug friendship data
+  static Future<void> debugFriendshipData(String userId) async {
+    try {
+      print('=== DEBUG FRIENDSHIP DATA ===');
+
+      // Kiểm tra user document
+      DocumentSnapshot userDoc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        List<dynamic> friends = userData['friends'] ?? [];
+        print('Friends in user document: $friends');
+        print('Friends count: ${friends.length}');
+      } else {
+        print('User document does not exist!');
+      }
+
+      // Kiểm tra friends subcollection
+      QuerySnapshot friendsSubcollection = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('friends')
+          .get();
+
+      print('Friends in subcollection: ${friendsSubcollection.docs.length}');
+      for (var doc in friendsSubcollection.docs) {
+        print('Friend subcollection doc: ${doc.id}');
+      }
+
+      print('=== END DEBUG ===');
+    } catch (e) {
+      print('Error in debugFriendshipData: $e');
+    }
   }
 
   // --- 3. UPDATE (CẬP NHẬT) ---
@@ -109,7 +269,24 @@ class PostService {
   /// Hàm xóa một bài viết.
   static Future<String> deletePost(String postId) async {
     try {
+      // Lấy thông tin bài viết trước khi xóa để biết authorId
+      DocumentSnapshot postDoc = await _firestore.collection('posts').doc(postId).get();
+
+      if (!postDoc.exists) {
+        return 'Bài viết không tồn tại';
+      }
+
+      // Lấy authorId từ document
+      String authorId = postDoc.get('authorId') ?? '';
+
+      // Xóa bài viết
       await _firestore.collection('posts').doc(postId).delete();
+
+      // Tự động giảm postCount xuống 1 nếu có authorId
+      if (authorId.isNotEmpty) {
+        await AuthService.decrementPostCount(authorId);
+      }
+
       return 'success';
     } catch (e) {
       return 'Lỗi khi xóa bài viết: $e';

@@ -76,66 +76,58 @@ class _WidgetSearchState extends State<WidgetSearch> {
 
       String searchQuery = query.trim().toLowerCase();
 
-      final displayNameQuery = await firestore
-          .collection('users')
-          .where('displayName', isGreaterThanOrEqualTo: searchQuery)
-          .where('displayName', isLessThan: searchQuery + '\uf8ff')
-          .limit(10)
-          .get();
-
-      final userNameQuery = await firestore
-          .collection('users')
-          .where('userName', isGreaterThanOrEqualTo: searchQuery)
-          .where('userName', isLessThan: searchQuery + '\uf8ff')
-          .limit(10)
-          .get();
-
+      final allUsersQuery = await firestore
+       .collection('users')
+       .limit(100)
+       .get();
       Set<String> addedUserIds = {};
       List<UserModel> results = [];
-
-      for (var doc in displayNameQuery.docs) {
+      for (var doc in allUsersQuery.docs) {
         if (doc.id != currentUserId && !addedUserIds.contains(doc.id)) {
           try {
             UserModel user = UserModel.fromMap(
               doc.data() as Map<String, dynamic>,
               doc.id,
             );
-            results.add(user);
-            addedUserIds.add(doc.id);
+            // Kiểm tra nếu query có trong displayName hoặc userName
+            String displayNameLower = user.displayName.toLowerCase();
+            String userNameLower = user.userName.toLowerCase();
+            if (displayNameLower.contains(searchQuery) ||
+                userNameLower.contains(searchQuery)) {
+              results.add(user);
+              addedUserIds.add(doc.id);
+            }
           } catch (e) {
             print('Error parsing user ${doc.id}: $e');
           }
         }
       }
 
-      for (var doc in userNameQuery.docs) {
-        if (doc.id != currentUserId && !addedUserIds.contains(doc.id)) {
-          try {
-            UserModel user = UserModel.fromMap(
-              doc.data() as Map<String, dynamic>,
-              doc.id,
-            );
-            results.add(user);
-            addedUserIds.add(doc.id);
-          } catch (e) {
-            print('Error parsing user ${doc.id}: $e');
-          }
-        }
-      }
 
+      // Sắp xếp kết quả theo độ ưu tiên
       results.sort((a, b) {
         String aDisplayName = a.displayName.toLowerCase();
         String aUserName = a.userName.toLowerCase();
         String bDisplayName = b.displayName.toLowerCase();
         String bUserName = b.userName.toLowerCase();
 
+        // Ưu tiên exact match
         if (aDisplayName == searchQuery || aUserName == searchQuery) return -1;
         if (bDisplayName == searchQuery || bUserName == searchQuery) return 1;
+
+        // Ưu tiên starts with
         if (aDisplayName.startsWith(searchQuery) && !bDisplayName.startsWith(searchQuery)) return -1;
         if (bDisplayName.startsWith(searchQuery) && !aDisplayName.startsWith(searchQuery)) return 1;
+        if (aUserName.startsWith(searchQuery) && !bUserName.startsWith(searchQuery)) return -1;
+        if (bUserName.startsWith(searchQuery) && !aUserName.startsWith(searchQuery)) return 1;
 
+        // Sắp xếp theo số lượng bạn bè
         return b.friendCount.compareTo(a.friendCount);
       });
+      // Giới hạn kết quả hiển thị
+      if (results.length > 20) {
+        results = results.take(20).toList();
+      }
 
       Map<String, String> statuses = {};
       for (UserModel user in results) {
@@ -161,7 +153,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi tìm kiếm: ${e.toString()}'),
+            content: Text('Error to find: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -170,6 +162,32 @@ class _WidgetSearchState extends State<WidgetSearch> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    // Thêm listener cho real-time search
+    _searchController.addListener(() {
+      if (_searchController.text.length >= 2) {
+        // Delay 500ms để tránh search quá nhiều
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (_searchController.text.length >= 2) {
+            setState(() {
+              _keyword = _searchController.text;
+              _showButtons = true;
+              _searchType = "user";
+            });
+            _searchUsers(_keyword);
+          }
+        });
+      } else if (_searchController.text.isEmpty) {
+        setState(() {
+          _showButtons = false;
+          searchResults.clear();
+          friendshipStatuses.clear();
+        });
+      }
+    });
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

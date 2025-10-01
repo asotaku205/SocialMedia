@@ -9,6 +9,7 @@ import '../../profile/setting.dart';
 import '../../feed_Screen/main_feed.dart';
 import '../../profile/main_profile.dart';
 import 'package:icons_plus/icons_plus.dart';
+import '../../profile/friends_screen.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({super.key});
@@ -71,12 +72,12 @@ class _BottomNavigationState
               label: 'Add',
             ),
             BottomNavigationBarItem(
-              icon: Icon(BoxIcons.bx_user),
-              label: 'Profile',
+              icon: Icon(BoxIcons.bx_group),
+              label: 'Friends',
             ),
             BottomNavigationBarItem(
-              icon: Icon(BoxIcons.bx_cog),
-              label: 'Setting',
+              icon: Icon(BoxIcons.bx_user),
+              label: 'Profile',
             ),
           ],
           //Ẩn label của mỗi item
@@ -92,10 +93,10 @@ class _BottomNavigationState
           FeedScreen(),
           WidgetSearch(),
           CreatePost(),
+          FriendsScreen(),
           MainProfile(
             uid: _auth.currentUser!.uid,
           ),
-          Setting(), // Profile Page
         ],
       ),
     );

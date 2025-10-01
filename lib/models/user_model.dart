@@ -7,6 +7,7 @@ class UserModel {
   final String photoURL;
   final String bio;
   final int friendCount;
+  final int postCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isVerified;
@@ -21,6 +22,7 @@ class UserModel {
     this.photoURL = '',
     this.bio = '',
     this.friendCount = 0,
+    this.postCount = 0,
     this.createdAt,
     this.updatedAt,
     this.isVerified = false,
@@ -37,7 +39,8 @@ class UserModel {
       userName: map['userName'] ?? '',
       photoURL: map['photoURL'] ?? '',
       bio: map['bio'] ?? '',
-      friendCount: map['friendCount'] ?? 0, // Sửa đúng kiểu int
+      friendCount: map['friendCount'] ?? 0,
+      postCount: map['postCount'] ?? 0,
       createdAt: map['createdAt'] is Timestamp ? map['createdAt'].toDate() : null,
       updatedAt: map['updatedAt'] is Timestamp ? map['updatedAt'].toDate() : null,
       isVerified: map['isVerified'] ?? false,
@@ -55,6 +58,7 @@ class UserModel {
       'photoURL': photoURL,
       'bio': bio,
       'friendCount': friendCount,
+      'postCount': postCount,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
       'isVerified': isVerified,
@@ -72,6 +76,7 @@ class UserModel {
     String? photoURL,
     String? bio,
     int? friendCount,
+    int? postCount,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isVerified,
@@ -86,6 +91,7 @@ class UserModel {
       photoURL: photoURL ?? this.photoURL,
       bio: bio ?? this.bio,
       friendCount: friendCount ?? this.friendCount,
+      postCount: postCount ?? this.postCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isVerified: isVerified ?? this.isVerified,

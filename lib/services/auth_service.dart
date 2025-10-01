@@ -287,4 +287,70 @@ class AuthService {
     }
   }
 
+  // Method để update số lượng bài post
+  static Future<String> updatePostCount(String userId, int newPostCount) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'postCount': newPostCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return 'success';
+    } catch (e) {
+      print('Error updating post count: $e');
+      return 'Failed to update post count: $e';
+    }
+  }
+
+  // Method để tăng số bài post lên 1
+  static Future<String> incrementPostCount(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'postCount': FieldValue.increment(1),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return 'success';
+    } catch (e) {
+      print('Error incrementing post count: $e');
+      return 'Failed to increment post count: $e';
+    }
+  }
+
+  // Method để giảm số bài post xuống 1
+  static Future<String> decrementPostCount(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'postCount': FieldValue.increment(-1),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return 'success';
+    } catch (e) {
+      print('Error decrementing post count: $e');
+      return 'Failed to decrement post count: $e';
+    }
+  }
+
+  // Method để đồng bộ postCount với số bài viết thực tế
+  static Future<String> syncPostCount(String userId) async {
+    try {
+      // Đếm số bài viết thực tế của user
+      final postsQuery = await _firestore
+          .collection('posts')
+          .where('authorId', isEqualTo: userId)
+          .get();
+
+      final actualPostCount = postsQuery.docs.length;
+
+      // Cập nhật postCount trong user document
+      await _firestore.collection('users').doc(userId).update({
+        'postCount': actualPostCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      print('Synced post count for user $userId: $actualPostCount posts');
+      return 'success';
+    } catch (e) {
+      print('Error syncing post count: $e');
+      return 'Failed to sync post count: $e';
+    }
+  }
 }

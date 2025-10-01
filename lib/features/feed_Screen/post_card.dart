@@ -1,3 +1,4 @@
+import 'package:blogapp/features/profile/other_user_profile_screen.dart';
 import 'package:blogapp/models/post_model.dart';
 import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
@@ -22,6 +23,34 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   late AnimationController _likeAnimationController;
   late Animation<double> _likeAnimation;
 
+  // Pagination variables
+  final ScrollController _scrollController = ScrollController();
+  List<PostModel> _allPosts = [];
+  List<PostModel> _displayedPosts = [];
+  static const int _postsPerPage = 10;
+  bool _isLoadingMore = false;
+
+  void _navigateToProfile(String postAuthorId) {
+    final String? currentUserId = AuthService.currentUser?.uid;
+    if (currentUserId == postAuthorId) {
+      // Đây là bài viết của chính mình -> vào MainProfile
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MainProfile(),
+        ),
+      );
+    } else {
+      // Đây là bài viết của người khác -> vào OtherUserProfileScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OtherUserProfileScreen(userId: postAuthorId),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,12 +65,55 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         curve: Curves.elasticOut,
       ),
     );
+
+    // Setup scroll listener for pagination
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _likeAnimationController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMorePosts();
+    }
+  }
+
+  void _loadMorePosts() {
+    if (_isLoadingMore || _displayedPosts.length >= _allPosts.length) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate loading delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          int currentLength = _displayedPosts.length;
+          int newLength = (currentLength + _postsPerPage).clamp(0, _allPosts.length);
+          _displayedPosts = _allPosts.take(newLength).toList();
+          _isLoadingMore = false;
+        });
+      }
+    });
+  }
+
+  void _updatePostsList(List<PostModel> allPosts) {
+    _allPosts = allPosts;
+    if (_displayedPosts.isEmpty) {
+      // First load
+      _displayedPosts = _allPosts.take(_postsPerPage).toList();
+    } else {
+      // Update existing posts but keep pagination
+      int currentDisplayCount = _displayedPosts.length;
+      _displayedPosts = _allPosts.take(currentDisplayCount).toList();
+    }
   }
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
@@ -123,29 +195,88 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     );
   }
 
-  /// StreamBuilder lắng nghe dữ liệu post từ Firestore
+  /// StreamBuilder lắng nghe dữ liệu post từ bạn bè
   Widget buidListPost() {
-    return StreamBuilder(
-      stream: PostService.getPostsStream(), // lấy stream post
+    return StreamBuilder<List<PostModel>>(
+      stream: PostService.getFriendsPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator()); // đang load
         }
+
         if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error, size: 40)); // có lỗi
+          print('StreamBuilder error: ${snapshot.error}');
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 60, color: Colors.grey),
+                const SizedBox(height: 16),
+                const Text(
+                  "Có lỗi xảy ra khi tải bài viết",
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {}); // Trigger rebuild để retry
+                  },
+                  child: const Text("Thử lại"),
+                ),
+              ],
+            ),
+          );
         }
+
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text("No posts yet")); // không có post
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.people_outline, size: 60, color: Colors.grey),
+                SizedBox(height: 16),
+                Text(
+                  "Chưa có bài viết từ bạn bè",
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Hãy kết bạn để xem bài viết của họ!",
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
+            ),
+          );
         }
 
         final posts = snapshot.data!;
-        // Duyệt danh sách post và build UI cho từng cái
-        return ListView.builder(
-          itemCount: posts.length,
-          itemBuilder: (context, index) {
-            final post = posts[index];
-            return buidUiPost(post);
+        // Cập nhật danh sách bài viết cho pagination
+        _updatePostsList(posts);
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            setState(() {}); // Trigger rebuild để refresh
+            await Future.delayed(const Duration(milliseconds: 500));
           },
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: _displayedPosts.length + (_isLoadingMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == _displayedPosts.length) {
+                // Hiện loading indicator ở cuối danh sách khi đang load thêm
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              final post = _displayedPosts[index];
+              return buidUiPost(post);
+            },
+          ),
         );
       },
     );
@@ -182,15 +313,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               children: [
                 // Avatar + Tên + Thời gian
                 GestureDetector(
-                  onTap: () {
-                    // Điều hướng sang trang profile
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MainProfile(),
-                      ),
-                    );
-                  },
+                  onTap: () => _navigateToProfile(post.authorId),
                   child: Row(
                     children: [
                       CircleAvatar(

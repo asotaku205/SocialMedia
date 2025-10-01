@@ -3,6 +3,12 @@ import 'package:blogapp/features/feed_Screen/post_card.dart';
 import 'package:blogapp/resource/color.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import '../../models/user_model.dart';
+import '../../services/friend_services.dart';
+import '../../services/auth_service.dart';
+import '../feed_Screen/post_card.dart';
+import '../../models/post_model.dart';
+
 
 class FeedScreen extends StatefulWidget {
 

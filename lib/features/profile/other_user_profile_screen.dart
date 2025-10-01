@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
 import '../../services/auth_service.dart';
-import '../feed_Screen/post_card.dart';
-import '../../models/post_model.dart';
 import 'friends_screen.dart';
 import 'post_profile.dart';
 class OtherUserProfileScreen extends StatefulWidget {
@@ -22,7 +20,6 @@ class OtherUserProfileScreen extends StatefulWidget {
 
 class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
   UserModel? currentUser;
-  List<PostModel> userPosts = [];
   bool isLoading = true;
   String friendshipStatus = 'none'; // none, pending, friends, sent
   bool isProcessingRequest = false;
@@ -44,7 +41,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           currentUser = user;
         });
         await _checkFriendshipStatus();
-        await _loadUserPosts();
+        // Đồng bộ postCount với dữ liệu thực tế
+        await AuthService.syncPostCount(widget.userId);
       }
       setState(() {
         isLoading = false;
@@ -71,20 +69,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
       print('Error checking friendship status: $e');
     }
   }
-
-  Future<void> _loadUserPosts() async {
-    try {
-      final posts = await FriendService.getUserPosts(widget.userId);
-      if (mounted) {
-        setState(() {
-          userPosts = posts;
-        });
-      }
-    } catch (e) {
-      print('Error loading user posts: $e');
-    }
-  }
-
   // Trả về String? (URL) hoặc null nếu không có avatar
   Future<String?> getUserAvatarUrl() async {
     try {
@@ -373,18 +357,18 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                   Row(
                                     children: [
                                       Column(
-                                        children: const [
-                                          Text(
+                                        children: [
+                                          const Text(
                                             "Posts",
                                             style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 14,
                                             ),
                                           ),
-                                          SizedBox(height: 4),
+                                          const SizedBox(height: 4),
                                           Text(
-                                            "0",
-                                            style: TextStyle(
+                                            '${currentUser?.postCount ?? 0}', // Sử dụng postCount từ Firebase
+                                            style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
@@ -457,48 +441,17 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   ),
 
                   // Posts Section
-                  if (userPosts.isNotEmpty)
+
                     Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(1.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Bài viết',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
                           const SizedBox(height: 10),
-                          PostProfile(),
+                          PostProfile(userId: widget.userId),
                         ],
                       ),
                     )
-                  else
-                    const Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.post_add_outlined,
-                              size: 64,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Chưa có bài viết nào',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
