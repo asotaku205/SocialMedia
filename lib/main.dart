@@ -10,6 +10,7 @@ import 'firebase_options.dart';
 // import 'features/profile/setting.dart';
 // import 'features/feed_Screen/main_feed.dart';
 import 'features/auth/auth_wrapper.dart';
+import 'features/chat/home_chat.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -137,7 +138,7 @@ class MyApp extends StatelessWidget {
       ),
 
       // Màn hình khởi đầu
-      home: const AuthWrapper(),
+      home: const HomeChat(),
     );
   }
 }

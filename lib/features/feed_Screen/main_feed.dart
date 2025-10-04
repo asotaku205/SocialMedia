@@ -2,6 +2,7 @@
 import 'package:blogapp/features/feed_Screen/post_card.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import '../chat/home_chat.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
 import '../../services/auth_service.dart';
@@ -39,7 +40,12 @@ class _FeedScreenState extends State<FeedScreen> {
 
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeChat()),
+              );
+            },
             icon: const Icon(BoxIcons.bxs_chat),
           ),
         ],
