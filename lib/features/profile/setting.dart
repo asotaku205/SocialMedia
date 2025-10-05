@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth/screens/login_page.dart';
 import 'edit_profile.dart';
 import '../../../services/auth_service.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -52,6 +53,11 @@ class _SettingState extends State<Setting> {
   }
   logout() async {
     await AuthService.logout();
+    if (mounted) return
+      Navigator.pop(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );;
   }
 
   @override

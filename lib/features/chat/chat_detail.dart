@@ -1,158 +1,229 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ChatMessage{
-  String messageContent;
-  String messageType;
-  ChatMessage({required this.messageContent, required this.messageType});
-}
-class ChatDetail extends StatefulWidget {
+import '../../models/message_model.dart';
+import '../../services/chat_service.dart';
 
-  const ChatDetail({super.key});
+class ChatDetail extends StatefulWidget {
+  final String otherUserId;
+  final String otherUserName;
+  final String? otherUserAvatar;
+  final VoidCallback? onMessageSent; // Thêm callback
+
+  const ChatDetail({
+    super.key,
+    required this.otherUserId,
+    required this.otherUserName,
+    this.otherUserAvatar,
+    this.onMessageSent, // Thêm vào constructor
+  });
 
   @override
   State<ChatDetail> createState() => _ChatDetailState();
 }
 
 class _ChatDetailState extends State<ChatDetail> {
+  final _currentUser = FirebaseAuth.instance.currentUser;
+  final TextEditingController _messageController = TextEditingController();
 
-  List<ChatMessage> messages = [
-    ChatMessage(messageContent: "E chào đại ca", messageType: "receiver"),
-    ChatMessage(messageContent: "Đại ca bỏ rơi chúng em à", messageType: "receiver"),
-    ChatMessage(messageContent: "t nghĩ rồi giang hồ đứt gánh ,t ko gánh nổi chúng m", messageType: "sender"),
-    ChatMessage(messageContent: "ơ kìa đại ca", messageType: "receiver"),
-    ChatMessage(messageContent: "thôi đi đi", messageType: "sender"),
-  ];
+  Future<void> _sendMessage() async {
+    final content = _messageController.text.trim();
+    if (content.isEmpty) return;
+
+    try {
+      await ChatService.sendMessage(
+        '', // chatId will be generated in the service
+        widget.otherUserId, // receiverId
+        content, // message content
+        'text', // messageType
+      );
+
+      _messageController.clear();
+
+      // Gọi callback nếu có
+      widget.onMessageSent?.call();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi gửi tin nhắn: $e')));
+    }
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-        appBar:  AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage("https://picsum.photos/200"),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Kriss Benwat",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      "Online",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.videocam, color: Colors.white),
-              onPressed: () {},
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+             backgroundImage: (widget.otherUserAvatar != null && widget.otherUserAvatar!.isNotEmpty)
+                      ? NetworkImage(widget.otherUserAvatar!)
+                      : null,
+                  child: (widget.otherUserAvatar == null || widget.otherUserAvatar!.isEmpty)
+                      ? Text(
+                          widget.otherUserName.isNotEmpty
+                              ? widget.otherUserName[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
             ),
-            IconButton(
-              icon: Icon(Icons.call, color: Colors.white),
-              onPressed: () {},
-            ),
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.white),
-              onSelected: (value) {
-                // Xử lý menu actions
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(value: 'view_profile', child: Text('View Profile')),
-                PopupMenuItem(value: 'media', child: Text('Media')),
-                PopupMenuItem(value: 'clear_chat', child: Text('Clear Chat')),
-                PopupMenuItem(value: 'block', child: Text('Block')),
-              ],
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.otherUserName,
+                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Text("Online", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                ],
+              ),
             ),
           ],
         ),
-      body: Stack(
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: Colors.white),
+            onSelected: (value) {
+              // Xử lý menu actions
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 'view_profile', child: Text('View Profile')),
+              PopupMenuItem(value: 'media', child: Text('Media')),
+              PopupMenuItem(value: 'clear_chat', child: Text('Clear Chat')),
+              PopupMenuItem(value: 'block', child: Text('Block')),
+            ],
+          ),
+        ],
+      ),
+      body: Column(
         children: [
-          ListView.builder(
-            itemCount: messages.length,
-            shrinkWrap: true,
-            padding: EdgeInsets.only(top: 10,bottom: 10),
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index){
-              return Container(
-                padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
-                child: Align(
-                  alignment: (messages[index].messageType == "receiver"?Alignment.topLeft:Alignment.topRight),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: (messages[index].messageType  == "receiver"?Colors.grey:Colors.blue),
+          Expanded(
+            child: StreamBuilder<List<MessageModel>>(
+              stream: ChatService.getMessages(widget.otherUserId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator(color: Colors.white));
+                }
+
+                if (snapshot.hasError) {
+                  print('Stream error: ${snapshot.error}');
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error, color: Colors.red, size: 48),
+                        SizedBox(height: 16),
+                        Text('Lỗi tải tin nhắn', style: TextStyle(color: Colors.red, fontSize: 16)),
+                        Text(
+                          '${snapshot.error}',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    padding: EdgeInsets.all(16),
-                    child: Text(messages[index].messageContent, style: TextStyle(fontSize: 15),),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.message_outlined, size: 64, color: Colors.grey),
+                        SizedBox(height: 16),
+                        Text('Chưa có tin nhắn nào', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                        SizedBox(height: 8),
+                        Text('Hãy bắt đầu cuộc trò chuyện!', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                      ],
+                    ),
+                  );
+                }
+
+                final messages = snapshot.data!;
+                print('Loaded ${messages.length} messages'); // Debug log
+
+                return ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: messages.length,
+                  reverse: true,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    final isMe = message.senderId == _currentUser?.uid;
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isMe ? Colors.blue : Colors.grey[800],
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Text(message.content, style: TextStyle(color: Colors.white, fontSize: 16)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              border: Border(top: BorderSide(color: Colors.grey[700]!, width: 0.5)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(25)),
+                    child: TextField(
+                      controller: _messageController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Aa",
+                        hintStyle: TextStyle(color: Colors.grey[400]),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              padding: EdgeInsets.only(left: 10,bottom: 10,top: 10),
-              height: 60,
-              width: double.infinity,
-              color: Colors.black,
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: (){
-                    },
-                    child: Container(
-                      height: 30,
-                      width: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Icon(Icons.add, color: Colors.white, size: 20, ),
-                    ),
+                SizedBox(width: 12),
+                GestureDetector(
+                  onTap: _sendMessage,
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+                    child: Icon(Icons.send, color: Colors.white, size: 20),
                   ),
-                  SizedBox(width: 15,),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                          hintText: "Write message...",
-                          hintStyle: TextStyle(color: Colors.white),
-                          border: InputBorder.none
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 15,),
-                  FloatingActionButton(
-                    onPressed: (){},
-                    child: Icon(Icons.send,color: Colors.white,size: 18,),
-                    backgroundColor: Colors.grey,
-                    elevation: 0,
-                  ),
-                ],
-
-              ),
+                ),
+              ],
             ),
           ),
         ],

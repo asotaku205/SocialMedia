@@ -138,7 +138,7 @@ class MyApp extends StatelessWidget {
       ),
 
       // Màn hình khởi đầu
-      home: const HomeChat(),
+      home: const AuthWrapper(),
     );
   }
 }

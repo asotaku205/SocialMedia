@@ -199,6 +199,7 @@ class AuthService {
     try {
       // signOut(): xóa authentication state, user sẽ thành null
       await _auth.signOut();
+
       print('User logged out successfully');
     } catch (e) {
       print('Error during logout: $e');
