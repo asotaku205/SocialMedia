@@ -160,7 +160,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:pointycastle/export.dart';
+import 'package:pointycastle/export.dart'; 
 
 class EncryptionService {
   // ==================== RSA KEY GENERATION ====================
@@ -180,7 +180,6 @@ class EncryptionService {
           secureRandom,
         ),
       );
-    
     final pair = keyGen.generateKeyPair();
     final publicKey = pair.publicKey as RSAPublicKey;
     final privateKey = pair.privateKey as RSAPrivateKey;

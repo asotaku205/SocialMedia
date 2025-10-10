@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
@@ -119,8 +120,8 @@ class _BoxProfileState extends State<BoxProfile> {
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(color: Colors.orange),
                         ),
-                        child: const Text(
-                          'Đã gửi',
+                        child: Text(
+                          'Friend.Request Sent'.tr(),
                           style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       )
@@ -132,8 +133,8 @@ class _BoxProfileState extends State<BoxProfile> {
                           borderRadius: BorderRadius.circular(15),
                           border: Border.all(color: Colors.green),
                         ),
-                        child: const Text(
-                          'Chấp nhận',
+                        child: Text(
+                          'Friend.Accept'.tr(),
                           style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                       )
@@ -157,7 +158,7 @@ class _BoxProfileState extends State<BoxProfile> {
 
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Đã gửi lời mời kết bạn tới ${widget.user.displayName}'),
+                                  content: Text('${'Friend.Request Sent to'.tr()} ${widget.user.displayName}'),
                                   backgroundColor: Colors.green,
                                 ),
                               );
@@ -173,13 +174,13 @@ class _BoxProfileState extends State<BoxProfile> {
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Lỗi khi gửi lời mời: ${e.toString()}'),
+                                content: Text('${"General.Error".tr()}: ${e.toString()}'),
                                 backgroundColor: Colors.red,
                               ),
                             );
                           }
                         },
-                        child: const Text("Kết bạn"),
+                        child: Text('Friend.Add Friend'.tr()),
                       ),
               ],
             ),

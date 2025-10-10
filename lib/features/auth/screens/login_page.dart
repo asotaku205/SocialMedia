@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
@@ -43,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Chào mừng trở lại, ${user.displayName}!'),
+              content: Text('Authentication.Wellcome, ${user.displayName}!'.tr()),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -57,8 +58,8 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Email hoặc mật khẩu không đúng'),
+            SnackBar(
+              content: Text('Authentication.Wrong email or password'.tr()),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
@@ -69,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xảy ra lỗi: ${e.toString()}'),
+            content: Text('Authentication.Error: ${e.toString()}'.tr()),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -107,11 +108,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const FadeSlide(
-                  delay: Duration(milliseconds: 200),
+                FadeSlide(
+                  delay: const Duration(milliseconds: 200),
                   child: Text(
-                    'Welcome back!',
-                    style: TextStyle(
+                    'Authentication.Wellcome'.tr(),
+                    style: const TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white, // chữ trắng
@@ -141,8 +142,8 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => const ForgotPasswordPage(),
                         ),
                       ),
-                      child: const Text(
-                        'Forgot Password?',
+                      child:Text(
+                        'Authentication.Forgot Password'.tr(),
                         style: TextStyle(color: Colors.white), // chữ trắng
                       ),
                     ),
@@ -171,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text('Login'),
+                        :  Text('Authentication.Login'.tr()),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -180,8 +181,8 @@ class _LoginPageState extends State<LoginPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        "Don't have an account?",
+                       Text(
+                        "Authentication.Dont have an account?".tr(),
                         style: TextStyle(color: Colors.white), // chữ trắng
                       ),
                       TextButton(
@@ -190,8 +191,8 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialPageRoute(
                               builder: (context) => const RegisterPage()),
                         ),
-                        child: const Text(
-                          'Register now',
+                        child: Text(
+                          'Authentication.Register'.tr(),
                           style: TextStyle(color: Colors.white), // chữ trắng
                         ),
                       ),

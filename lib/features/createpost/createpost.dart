@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "dart:io";
 import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/models/user_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -88,7 +89,7 @@ class _CreatePostState extends State<CreatePost> {
 
     if (result == 'success' && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Post created successfully!"), backgroundColor: Colors.green),
+        SnackBar(content: Text("Posts.Post created successfully".tr()), backgroundColor: Colors.green),
       );
       setState(() {
         _commentController.clear();
@@ -96,7 +97,7 @@ class _CreatePostState extends State<CreatePost> {
       });
     } else if (mounted) {
        ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result), backgroundColor: Colors.red),
+        SnackBar(content: Text('General.Error'.tr()), backgroundColor: Colors.red),
       );
     }
   }
@@ -108,9 +109,9 @@ class _CreatePostState extends State<CreatePost> {
         elevation: 0,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text(
-          "Create Post",
-          style: TextStyle(
+        title: Text(
+          "Posts.Create Post".tr(),
+          style: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 25,
             letterSpacing: -0.5,
@@ -159,12 +160,12 @@ class _CreatePostState extends State<CreatePost> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _currentUser?.displayName ?? "Loading...",
+                                _currentUser?.displayName ?? "General.Loading".tr(),
                                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              const Text("Share your thoughts...", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text("Posts.Share your thoughts".tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                         ),
@@ -182,16 +183,16 @@ class _CreatePostState extends State<CreatePost> {
                       ),
                       child: TextFormField(
                         controller: _commentController,
-                        decoration: const InputDecoration(
-                          hintText: "What's on your mind?",
-                          hintStyle: TextStyle(color: Colors.grey, fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: "Posts.What's on your mind?".tr(),
+                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.all(20),
+                          contentPadding: const EdgeInsets.all(20),
                         ),
                         validator: (value) {
                           // Chỉ báo lỗi nếu cả text và ảnh đều rỗng
                           if ((value == null || value.trim().isEmpty) && _imageFile == null) {
-                            return "The post must have content or an image";
+                            return "Posts.The post must have content or an image".tr();
                           }
                           return null;
                         },
@@ -229,9 +230,9 @@ class _CreatePostState extends State<CreatePost> {
                                     child: const Icon(BoxIcons.bx_image_add, size: 32, color: Colors.white),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text("Add Photo", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                                  Text("Posts.Add Photo".tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                                   const SizedBox(height: 4),
-                                  const Text("Tap to choose from gallery", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                  Text("Posts.Tap to choose from gallery".tr(), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                 ],
                               ),
                             )
@@ -286,10 +287,10 @@ class _CreatePostState extends State<CreatePost> {
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.send_rounded, color: Colors.white, size: 18),
-                      SizedBox(width: 8),
-                      Text("Share Post", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                    children: [
+                      const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
+                      Text("Posts.Share Post".tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
                     ],
                   ),
           ),

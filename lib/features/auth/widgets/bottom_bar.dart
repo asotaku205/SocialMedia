@@ -7,6 +7,7 @@ import '../../feed_Screen/main_feed.dart';
 import '../../profile/main_profile.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../../profile/friends_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({super.key});
@@ -58,23 +59,23 @@ class _BottomNavigationState
           items: [
             BottomNavigationBarItem(
               icon: Icon(BoxIcons.bx_home),
-              label: 'Home',
+              label: 'Navigation.Home'.tr(),
             ),
             BottomNavigationBarItem(
               icon: Icon(BoxIcons.bx_search),
-              label: 'Search',
+              label: 'Search.Search'.tr(),
             ),
             BottomNavigationBarItem(
               icon: Icon(BoxIcons.bx_plus,),
-              label: 'Add',
+              label: 'Navigation.Add'.tr(),
             ),
             BottomNavigationBarItem(
               icon: Icon(BoxIcons.bx_group),
-              label: 'Friends',
+              label: 'Friend.Friends'.tr(),
             ),
             BottomNavigationBarItem(
               icon: Icon(BoxIcons.bx_user),
-              label: 'Profile',
+              label: 'Profile.Profile'.tr(),
             ),
           ],
           //Ẩn label của mỗi item

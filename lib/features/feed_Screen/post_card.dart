@@ -5,6 +5,7 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:easy_localization/easy_localization.dart';
 import '../../resource/navigation.dart';
 import '../profile/main_profile.dart';
 import 'comment_ui.dart';
@@ -128,7 +129,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             // Nút save/unsave
             _buildOptionItem(
               icon: BoxIcons.bx_bookmark,
-              title: isBookmarked ? 'Unsave' : 'Save Post',
+              title: isBookmarked ? 'Feed.Unsave'.tr() : 'Feed.Save Post'.tr(),
               onTap: () {
                 setState(() {
                   isBookmarked = !isBookmarked;
@@ -139,7 +140,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             // Nút copy link
             _buildOptionItem(
               icon: BoxIcons.bx_link,
-              title: 'Copy Link',
+              title: 'Feed.Copy Link'.tr(),
               onTap: () => Navigator.pop(context),
             ),
             // Chỉ hiển thị nút Delete nếu là chủ bài viết
@@ -150,12 +151,12 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   try {
                     final delPost = await PostService.deletePost(post.id);
                     if (delPost == "success") {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete success")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Feed.Delete success".tr())));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error deleting post")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Feed.Error deleting post".tr())));
                     }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${"General.Error".tr()}: $e")));
                   }
                 },
                 child: Container(
@@ -164,9 +165,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     children: [
                       Icon(BoxIcons.bx_trash, color: Colors.red, size: 22),
                       const SizedBox(width: 16),
-                      const Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+                      Text(
+                        'Feed.Delete'.tr(),
+                        style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -214,7 +215,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   /// StreamBuilder lắng nghe dữ liệu post từ bạn bè
   Widget buidListPost() {
     return StreamBuilder<List<PostModel>>(
-      
+
       stream: PostService.getFriendsPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -229,16 +230,16 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               children: [
                 const Icon(Icons.error_outline, size: 60, color: Colors.grey),
                 const SizedBox(height: 16),
-                const Text(
-                  "Có lỗi xảy ra khi tải bài viết",
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                Text(
+                  "Feed.Error loading posts".tr(),
+                  style: const TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () {
                     setState(() {}); // Trigger rebuild để retry
                   },
-                  child: const Text("Thử lại"),
+                  child: Text("Feed.Retry".tr()),
                 ),
               ],
             ),
@@ -246,29 +247,29 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.people_outline, size: 60, color: Colors.grey),
                 SizedBox(height: 16),
                 Text(
-                  "Chưa có bài viết từ bạn bè",
+                  "Feed.No posts from friends".tr(),
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 SizedBox(height: 8),
                 Text(
-                  "Hãy kết bạn để xem bài viết của họ!",
+                  "Feed.Add friends to see posts".tr(),
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
               ],
             ),
           );
         }
-        
+
 
         final posts = snapshot.data!;
-        
+
         // Cập nhật danh sách bài viết cho pagination
         _updatePostsList(posts);
 
@@ -367,7 +368,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ),
                           ),
                           Text(
-                            time,
+                            timeago.format(
+                              post.createdAt,
+                              locale: context.locale.languageCode, // Đa ngôn ngữ theo locale hiện tại
+                            ),
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[500],
@@ -402,8 +406,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 post.content,
                 trimLines: 6,
                 trimMode: TrimMode.Line,
-                trimCollapsedText: " More",
-                trimExpandedText: "  Hide",
+                trimCollapsedText: " ${'Feed.More'.tr()}",
+                trimExpandedText: "  ${'Feed.Hide'.tr()}",
                 moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                 lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                 style: const TextStyle(fontSize: 20, color: Colors.white),
@@ -429,7 +433,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             Row(
               children: [
                 Text(
-                  '$likeCount Like',
+                  '$likeCount ${'Feed.Like'.tr()}',
                   style: TextStyle(
                     color: Colors.grey[400],
                     fontSize: 13,
@@ -448,7 +452,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     );
                   },
                   child: Text(
-                    '$commentCount Comment',
+                    '$commentCount ${'Feed.Comment'.tr()}',
                     style: TextStyle(
                       color: Colors.grey[400],
                       fontSize: 13,
@@ -471,9 +475,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                     if (uid == null) {
                       // Nếu chưa login thì báo lỗi
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                         SnackBar(
                           content: Text(
-                            'Bạn cần đăng nhập để thực hiện thao tác này.',
+                            'General.Action required'.tr(),
                           ),
                         ),
                       );

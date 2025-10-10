@@ -5,6 +5,7 @@ import '../../../services/auth_service.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../auth/screens/forgot_password_page.dart';
 import '../../../models/user_model.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class Setting extends StatefulWidget {
   final String? uid;
@@ -64,9 +65,9 @@ class _SettingState extends State<Setting> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Setting',
-          style: TextStyle(
+        title: Text(
+          'Settings.Settings'.tr(),
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.white,
             fontSize: 25,
@@ -74,7 +75,7 @@ class _SettingState extends State<Setting> {
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _getUser,
               child: ListView(
@@ -88,19 +89,28 @@ class _SettingState extends State<Setting> {
                         CircleAvatar(
                           radius: 50,
                           backgroundColor: Colors.grey[300],
-                          backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty
-                              ? NetworkImage(currentUser!.photoURL!)
+                          backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL.isNotEmpty
+                              ? NetworkImage(currentUser!.photoURL)
                               : null,
-                          child: currentUser!.photoURL!.isEmpty
-                           ? const Icon(Icons.person)
-                        : null,
+                          child: currentUser!.photoURL.isEmpty
+                           ? Text(
+                                  currentUser?.userName.isNotEmpty == true
+                                      ? currentUser!.userName[0].toUpperCase()
+                                      : '?',
+                              style: const TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            )
+                            : null,
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          currentUser?.displayName?.isNotEmpty == true
-                              ? currentUser!.displayName!
-                              : currentUser?.userName?.isNotEmpty == true
-                                  ? currentUser!.userName!
+                          currentUser?.displayName.isNotEmpty == true
+                              ? currentUser!.displayName
+                              : currentUser?.userName.isNotEmpty == true
+                                  ? currentUser!.userName
                                   : "Username",
                           style: const TextStyle(
                               fontSize: 24,
@@ -110,16 +120,16 @@ class _SettingState extends State<Setting> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          currentUser?.email?.isNotEmpty == true
-                              ? currentUser!.email!
+                          currentUser?.email.isNotEmpty == true
+                              ? currentUser!.email
                               : "Email",
                           style: const TextStyle(fontSize: 16, color: Colors.grey),
                         ),
-                        if (currentUser?.bio?.isNotEmpty == true)
+                        if (currentUser?.bio.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              currentUser!.bio!,
+                              currentUser!.bio,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey,
@@ -136,7 +146,7 @@ class _SettingState extends State<Setting> {
                   // Edit Profile
                   ListTile(
                     leading: const Icon(BoxIcons.bx_user),
-                    title: const Text('Edit Profile', style: TextStyle(fontSize: 16, color: Colors.white)),
+                    title: Text('Profile.Edit Profile'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
                     onTap: () async {
                       final result = await Navigator.push(
@@ -158,7 +168,7 @@ class _SettingState extends State<Setting> {
                   // Change Password
                   ListTile(
                     leading: const Icon(BoxIcons.bx_lock),
-                    title: const Text('Change Password', style: TextStyle(fontSize: 16, color: Colors.white)),
+                    title: Text('Authentication.Reset Password'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
                     onTap: () {
                       Navigator.push(context,
@@ -171,8 +181,19 @@ class _SettingState extends State<Setting> {
                     tileColor: const Color(0xFF1F1F1F),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
-                  const SizedBox(height: 30),
-
+                  const SizedBox(height: 10),
+                  ListTile(
+                    leading: const Icon(Icons.language),
+                    title: Text('Settings.Language'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+                    onTap: () {
+                      _showLanguageDialog(context);
+                    },
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    tileColor: const Color(0xFF1F1F1F),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                  ),
+                  const SizedBox(height: 10),
                   // Log Out Button
                   Center(
                     child: Container(
@@ -195,9 +216,9 @@ class _SettingState extends State<Setting> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          'Log Out',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        child: Text(
+                          'Settings.Logout'.tr(),
+                          style: const TextStyle(fontSize: 16, color: Colors.white),
                         ),
                       ),
                     ),
@@ -205,6 +226,66 @@ class _SettingState extends State<Setting> {
                 ],
               ),
             ),
+    );
+  }
+
+  // THÊM FUNCTION MỚI CHO LANGUAGE DIALOG
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: Text('Settings.Change Language'.tr(), style: const TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.language, color: Colors.white),
+                title: Text('Settings.English'.tr(), style: const TextStyle(color: Colors.white)),
+                trailing: context.locale.languageCode == 'en'
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () async {
+                  await context.setLocale(const Locale('en'));
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Settings.Change Language'.tr()),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.language, color: Colors.white),
+                title: Text('Settings.Vietnamese'.tr(), style: const TextStyle(color: Colors.white)),
+                trailing: context.locale.languageCode == 'vi'
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () async {
+                  await context.setLocale(const Locale('vi'));
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Settings.Change Language'.tr()),
+                      backgroundColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('General.Cancel'.tr(), style: const TextStyle(color: Colors.grey)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

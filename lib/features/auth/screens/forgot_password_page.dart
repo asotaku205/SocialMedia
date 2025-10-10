@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
@@ -37,8 +38,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (result == 'success') {
         // Hiển thị thành công
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Reset link has been sent.'),
+           SnackBar(
+            content: Text('Authentication.Reset Link'.tr()),
             backgroundColor: Colors.green,
           ),
         );
@@ -47,7 +48,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         // Hiển thị lỗi
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $result'),
+            content: Text('${'Authentication.Error'.tr()} $result'),
             backgroundColor: Colors.red,
           ),
         );
@@ -56,7 +57,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${'Authentication.Error'.tr()} $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -107,10 +108,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const FadeSlide(
+                         FadeSlide(
                           delay: Duration(milliseconds: 200),
                           child: Text(
-                            'Enter your email',
+                            "Authentication.Reset Password".tr(),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -120,10 +121,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const FadeSlide(
+                        FadeSlide(
                           delay: Duration(milliseconds: 300),
                           child: Text(
-                            'We will send a link to reset your password',
+                            'Authentication.Reset desc'.tr(),
                             style: TextStyle(fontSize: 16, color: Colors.grey),
                             textAlign: TextAlign.center,
                           ),
@@ -154,8 +155,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       strokeWidth: 2.0,
                                     ),
                                   )
-                                : const Text(
-                                    'Send Reset Link',
+                                :Text(
+                                    'Authentication.Send Reset Link'.tr(),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,

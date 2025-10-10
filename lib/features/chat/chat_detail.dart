@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -43,7 +44,7 @@ class _ChatDetailState extends State<ChatDetail> {
       // Gọi callback nếu có
       widget.onMessageSent?.call();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lỗi gửi tin nhắn: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${"Authentication.Error".tr()} $e')));
     }
   }
 
@@ -92,7 +93,10 @@ class _ChatDetailState extends State<ChatDetail> {
                     widget.otherUserName,
                     style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
                   ),
-                  Text("Online", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                  Text(
+                    "Chat.Online".tr(),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12)
+                  ),
                 ],
               ),
             ),
@@ -105,7 +109,7 @@ class _ChatDetailState extends State<ChatDetail> {
               // Xử lý menu actions
             },
             itemBuilder: (context) => [
-              PopupMenuItem(value: 'view_profile', child: Text('View Profile')),
+              PopupMenuItem(value: 'view_profile', child: Text('Friend.View Profile'.tr())),
               PopupMenuItem(value: 'media', child: Text('Media')),
               PopupMenuItem(value: 'clear_chat', child: Text('Clear Chat')),
               PopupMenuItem(value: 'block', child: Text('Block')),
@@ -149,9 +153,9 @@ class _ChatDetailState extends State<ChatDetail> {
                       children: [
                         Icon(Icons.message_outlined, size: 64, color: Colors.grey),
                         SizedBox(height: 16),
-                        Text('Chưa có tin nhắn nào', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                        Text('Chat.No messages yet', style: TextStyle(color: Colors.grey, fontSize: 16)).tr(),
                         SizedBox(height: 8),
-                        Text('Hãy bắt đầu cuộc trò chuyện!', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                        Text('Chat.Start Chat', style: TextStyle(color: Colors.grey, fontSize: 14)).tr(),
                       ],
                     ),
                   );
@@ -205,7 +209,7 @@ class _ChatDetailState extends State<ChatDetail> {
                       controller: _messageController,
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: "Aa",
+                        hintText: "Chat.Type a message".tr(),
                         hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,

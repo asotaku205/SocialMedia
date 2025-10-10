@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
 import '../../services/auth_service.dart';
@@ -102,7 +103,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             setState(() {
               friendshipStatus = 'sent';
             });
-            _showSnackBar('Đã gửi lời mời kết bạn', Colors.green);
+            _showSnackBar('Friend.Request Sent'.tr(), Colors.green);
           } else {
             _showSnackBar(result, Colors.red);
           }
@@ -114,7 +115,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             setState(() {
               friendshipStatus = 'none';
             });
-            _showSnackBar('Đã hủy lời mời kết bạn', Colors.orange);
+            _showSnackBar('Friend.Declined Request'.tr(), Colors.orange);
           } else {
             _showSnackBar(result, Colors.red);
           }
@@ -128,7 +129,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               currentUser = currentUser!.copyWith(friendCount: currentUser!.friendCount + 1);
             }
           });
-          _showSnackBar('Đã chấp nhận lời mời kết bạn', Colors.green);
+          _showSnackBar('Friend.Accepted'.tr(), Colors.green);
           break;
 
         case 'friends':
@@ -139,11 +140,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
               currentUser = currentUser!.copyWith(friendCount: currentUser!.friendCount - 1);
             }
           });
-          _showSnackBar('Đã hủy kết bạn', Colors.red);
+          _showSnackBar('Friend.Unfriend Success'.tr(), Colors.red);
           break;
       }
     } catch (e) {
-      _showSnackBar('Lỗi: ${e.toString()}', Colors.red);
+      _showSnackBar('General.Error: ${e.toString()}'.tr(), Colors.red);
     } finally {
       if (mounted) {
         setState(() {
@@ -183,7 +184,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           child: ElevatedButton.icon(
             onPressed: _handleFriendAction,
             icon: const Icon(Icons.person_add),
-            label: const Text('Kết bạn'),
+            label: Text('Friend.Add Friend'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               foregroundColor: Colors.white,
@@ -198,7 +199,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           child: OutlinedButton.icon(
             onPressed: _handleFriendAction,
             icon: const Icon(Icons.pending),
-            label: const Text('Hủy lời mời'),
+            label: Text('Friend.Cancel Request'.tr()),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.orange,
               side: const BorderSide(color: Colors.orange),
@@ -213,7 +214,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           child: ElevatedButton.icon(
             onPressed: _handleFriendAction,
             icon: const Icon(Icons.check),
-            label: const Text('Chấp nhận kết bạn'),
+            label: Text('Friend.Accept'.tr()),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -229,8 +230,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
             children: [
               const Icon(Icons.check_circle, color: Colors.green),
               const SizedBox(width: 8),
-              const Text(
-                'Bạn bè',
+              Text(
+                'Friend.Friends'.tr(),
                 style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -240,7 +241,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   foregroundColor: Colors.red,
                   side: const BorderSide(color: Colors.red),
                 ),
-                child: const Text('Hủy kết bạn'),
+                child:  Text('Friend.Unfriend'.tr()),
               ),
             ],
           ),
@@ -262,7 +263,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              _showSnackBar('Tính năng báo cáo sẽ được thêm sau', Colors.blue);
+              _showSnackBar('General.Coming Soon'.tr(), Colors.blue);
             },
             icon: const Icon(Icons.more_vert),
           ),
@@ -319,16 +320,16 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                     radius: 40,
                                     backgroundColor: Colors.white,
                                     child: currentUser?.photoURL != null &&
-                                            currentUser!.photoURL!.isNotEmpty
+                                            currentUser!.photoURL.isNotEmpty
                                         ? Image.network(
-                                            currentUser!.photoURL!,
+                                            currentUser!.photoURL,
                                           )
                                         : Text(
                                             currentUser?.displayName != null &&
                                                     currentUser!
-                                                        .displayName!
+                                                        .displayName
                                                         .isNotEmpty
-                                                ? currentUser!.displayName![0]
+                                                ? currentUser!.displayName[0]
                                                       .toUpperCase()
                                                 : '?',
                                             style: TextStyle(
@@ -359,8 +360,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                     children: [
                                       Column(
                                         children: [
-                                          const Text(
-                                            "Posts",
+                                          Text(
+                                            "Posts.Posts".tr(),
                                             style: TextStyle(
                                               color: Colors.grey,
                                               fontSize: 14,
@@ -390,8 +391,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                         },
                                         child: Column(
                                           children: [
-                                            const Text(
-                                              "Friends",
+                                             Text(
+                                              "Friend.Friends".tr(),
                                               style: TextStyle(
                                                 color: Colors.grey,
                                                 fontSize: 14,

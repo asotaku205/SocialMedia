@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class EmailTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -13,15 +14,15 @@ class EmailTextField extends StatelessWidget {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter your email';
+          return 'Authentication.Please enter your email'.tr();
         }
         if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim())) {
-          return 'Please enter a valid email address';
+          return 'Authentication.Please enter a valid email address'.tr();
         }
         return null;
       },
-      decoration: const InputDecoration(
-        labelText: 'Email',
+      decoration: InputDecoration(
+        labelText: 'Authentication.Email'.tr(),
         labelStyle: TextStyle(color: Colors.white70),
         prefixIcon: Icon(Icons.email_outlined, color: Colors.white70),
         enabledBorder: OutlineInputBorder(

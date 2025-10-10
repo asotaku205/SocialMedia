@@ -1,5 +1,6 @@
 import 'package:blogapp/features/profile/post_profile.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 import 'friends_screen.dart';
@@ -54,8 +55,8 @@ class _MainProfileState extends State<MainProfile> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text(
-          "Profile",
-          style: TextStyle(
+          "Profile.Profile".tr(),
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 25,
             fontWeight: FontWeight.bold,
@@ -82,16 +83,16 @@ class _MainProfileState extends State<MainProfile> {
                                     backgroundColor: Colors.white,
                                     child:
                                         currentUser?.photoURL != null &&
-                                            currentUser!.photoURL!.isNotEmpty
+                                            currentUser!.photoURL.isNotEmpty
                                         ? Image.network(
-                                            currentUser!.photoURL!,
+                                            currentUser!.photoURL,
                                           )
                                         : Text(
                                             currentUser?.displayName != null &&
                                                     currentUser!
-                                                        .displayName!
+                                                        .displayName
                                                         .isNotEmpty
-                                                ? currentUser!.displayName![0]
+                                                ? currentUser!.displayName[0]
                                                       .toUpperCase()
                                                 : '?',
                                             style: TextStyle(
@@ -121,16 +122,16 @@ class _MainProfileState extends State<MainProfile> {
                                           Column(
                                             children: [
                                               Text(
-                                                "Posts",
-                                                style: TextStyle(
+                                                "Posts.Posts".tr(),
+                                                style: const TextStyle(
                                                   color: Colors.grey,
                                                   fontSize: 14,
                                                 ),
                                               ),
-                                              SizedBox(height: 4),
+                                              const SizedBox(height: 4),
                                               Text(
                                                 "${currentUser?.postCount ?? 0}",
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
@@ -151,9 +152,9 @@ class _MainProfileState extends State<MainProfile> {
                                             },
                                             child: Column(
                                               children: [
-                                                const Text(
-                                                  "Friends",
-                                                  style: TextStyle(
+                                                Text(
+                                                  "Friend.Friends".tr(),
+                                                  style: const TextStyle(
                                                     color: Colors.grey,
                                                     fontSize: 14,
                                                   ),
@@ -211,7 +212,7 @@ class _MainProfileState extends State<MainProfile> {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const Text("Edit Profile"),
+                              child: Text("Profile.Edit Profile".tr()),
                             ),
                             const SizedBox(height: 20),
                             const Divider(color: Colors.grey),

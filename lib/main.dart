@@ -2,15 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-
-// Import các màn hình trong app
-// import 'features/auth/screens/login_page.dart';
-// import 'features/profile/main_profile.dart';
-// import 'features/createpost/createpost.dart';
-// import 'features/profile/setting.dart';
-// import 'features/feed_Screen/main_feed.dart';
 import 'features/auth/auth_wrapper.dart';
 import 'features/chat/home_chat.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,9 +14,21 @@ void main() async {
     options:
         DefaultFirebaseOptions.currentPlatform,
   );
-
+  await EasyLocalization.ensureInitialized();
   // Chạy app
-  runApp(const MyApp());
+  runApp(
+    EasyLocalization(
+
+      supportedLocales: const [
+        Locale('en'),
+        Locale('vi'),
+      ],
+      startLocale: const Locale('vi'),
+      path:
+          'assets/translations', // Đường dẫn đến thư mục chứa file dịch
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -136,7 +142,9 @@ class MyApp extends StatelessWidget {
               ),
             ),
       ),
-
+      localizationsDelegates: context.localizationDelegates,
+      locale: context.locale ,
+      supportedLocales: context.supportedLocales,
       // Màn hình khởi đầu
       home: const AuthWrapper(),
     );

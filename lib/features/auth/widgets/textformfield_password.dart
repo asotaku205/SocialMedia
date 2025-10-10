@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PasswordTextField extends StatefulWidget {
   final TextEditingController controller;
-  final String labelText;
+  final String? labelText;
 
   const PasswordTextField({
     super.key,
     required this.controller,
-    this.labelText = 'Password', // Đã đổi thành 'Password'
+    this.labelText,
   });
 
   @override
@@ -29,8 +30,17 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
       controller: widget.controller,
       obscureText: _isObscured,
       autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Authentication.Please enter password'.tr();
+        }
+        if (value.length < 6) {
+          return 'Authentication.Password must be at least 6 characters'.tr();
+        }
+        return null;
+      },
       decoration: InputDecoration(
-        labelText: widget.labelText,
+        labelText: widget.labelText ?? 'Authentication.Password'.tr(),
         prefixIcon: const Icon(Icons.lock_outline),
         suffixIcon: IconButton(
           icon: Icon(

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../widgets/fade_slide.dart';
 import '../widgets/textformfield_email.dart';
@@ -35,8 +36,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mật khẩu và xác nhận mật khẩu không khớp!'),
+         SnackBar(
+          content: Text('Authentication.Confirm Password does not match'.tr()),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
         ),
@@ -63,8 +64,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (result == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đăng ký thành công! Vui lòng đăng nhập.'),
+          SnackBar(
+            content: Text('Authentication.Register Success'.tr()),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
@@ -96,7 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Đã xảy ra lỗi: ${e.toString()}'),
+            content: Text('${'Authentication.Error'.tr()} ${e.toString()}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 3),
           ),
@@ -138,10 +139,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const FadeSlide(
+                 FadeSlide(
                   delay: Duration(milliseconds: 200),
                   child: Text(
-                    'Create a new account',
+                    'Authentication.Create an account'.tr(),
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
@@ -170,7 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         delay: const Duration(milliseconds: 500),
                         child: PasswordTextField(
                           controller: _confirmPasswordController,
-                          labelText: 'Confirm Password',
+                          labelText: 'Authentication.Confirm Password'.tr(),
                         ),
                       ),
                     ],
@@ -199,7 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text('Register'),
+                        : Text('Authentication.Register'.tr()),
                   ),
                 ),
               ],

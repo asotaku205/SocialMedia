@@ -1,4 +1,5 @@
 import 'package:blogapp/services/auth_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/services/chat_service.dart';
@@ -53,7 +54,7 @@ class _HomeChatState extends State<HomeChat> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('Authentication.Error: ${e.toString()}').tr(),
             backgroundColor: Colors.red,
           ),
         );
@@ -114,22 +115,13 @@ class _HomeChatState extends State<HomeChat> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: false,
-         leading: GestureDetector(
-          onTap: () {
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavigation()), (route) => false);
-          },
-          child: Image.asset(
-            'assets/logo/logoAppRemovebg.webp',
-            fit: BoxFit.cover,
-          ),
-        ),
         title: Text(
-          "Chats",
+          "Chat.Chats",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
-        ),
+        ).tr(),
       ),
       body: ListView(
         children: [
@@ -137,7 +129,7 @@ class _HomeChatState extends State<HomeChat> {
             padding: EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Enter search keyword...",
+                hintText: "Search.Please enter keyword".tr(),
                 prefixIcon: Icon(BoxIcons.bx_search),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
@@ -151,13 +143,13 @@ class _HomeChatState extends State<HomeChat> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  "Tin nhắn",
+                  "Chat.Messages",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
+                ).tr(),
               ),
               IconButton(
                 onPressed: () {},
@@ -168,21 +160,21 @@ class _HomeChatState extends State<HomeChat> {
           isLoadingFriends
               ? const Center(child: CircularProgressIndicator())
               : friends.isEmpty
-              ? const Center(
+              ?  Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.people_outline, size: 80, color: Colors.grey),
                 SizedBox(height: 16),
                 Text(
-                  'Chưa có bạn bè nào',
+                  'Chat.You have no friends yet.',
                   style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
+                ).tr(),
                 SizedBox(height: 8),
                 Text(
-                  'Hãy tìm kiếm và kết bạn với mọi người!',
+                  'Friend.Lets find some!',
                   style: TextStyle(color: Colors.grey),
-                ),
+                ).tr(),
               ],
             ),
           )

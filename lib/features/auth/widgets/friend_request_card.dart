@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../models/user_model.dart';
 import '../../../services/friend_services.dart';
@@ -17,7 +18,7 @@ class FriendRequestCard extends StatelessWidget {
   Future<void> _acceptRequest(BuildContext context) async {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
               SizedBox(
@@ -26,7 +27,7 @@ class FriendRequestCard extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 16),
-              Text('Đang chấp nhận lời mời...'),
+              Text('Friend.Accept status'.tr()),
             ],
           ),
         ),
@@ -36,7 +37,7 @@ class FriendRequestCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã chấp nhận lời mời kết bạn từ ${sender.displayName}'),
+          content: Text('${"Friend.Accepted".tr()} ${sender.displayName}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -47,7 +48,7 @@ class FriendRequestCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi: ${e.toString()}'),
+          content: Text('${"Authentication.Error".tr()} ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -57,7 +58,7 @@ class FriendRequestCard extends StatelessWidget {
   Future<void> _declineRequest(BuildContext context) async {
     try {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: Row(
             children: [
               SizedBox(
@@ -66,7 +67,7 @@ class FriendRequestCard extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 16),
-              Text('Đang từ chối lời mời...'),
+              Text('Friend.Decline status'.tr()),
             ],
           ),
         ),
@@ -75,7 +76,7 @@ class FriendRequestCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã từ chối lời mời kết bạn từ ${sender.displayName}'),
+          content: Text('${"Friend.Declined".tr()} ${sender.displayName}'),
           backgroundColor: Colors.orange,
         ),
       );
@@ -86,7 +87,7 @@ class FriendRequestCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi: ${e.toString()}'),
+          content: Text('${"Authentication.Error".tr()} ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -116,25 +117,23 @@ class FriendRequestCard extends StatelessWidget {
                     children: [
                       Text(sender.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 2),
-                      Text('Lời mời kết bạn', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                      Text('Friend.Friend Requests', style: TextStyle(color: Colors.grey[700], fontSize: 13)).tr(),
                     ],
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => _acceptRequest(context),
-                  child: const Text('Chấp nhận'),
+                  child: Text('Friend.Accept').tr(),
                   style: TextButton.styleFrom(foregroundColor: Colors.green),
                 ),
                 TextButton(
                   onPressed: () => _declineRequest(context),
-                  child: const Text('Từ chối'),
+                  child: Text('Friend.Decline').tr(),
                   style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
             ),
-
-
           ],
         ),
       ),

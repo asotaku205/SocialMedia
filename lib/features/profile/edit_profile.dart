@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import "package:blogapp/features/createpost/upload_image.dart";
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 
 // EditProfile - Widget StatefulWidget để chỉnh sửa thông tin profile
 class EditProfile extends StatefulWidget {
@@ -45,10 +46,10 @@ class _EditProfileState extends State<EditProfile> {
 
         // Hiển thị thông báo đã chọn ảnh thành công
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã chọn ảnh thành công'),
+          SnackBar(
+            content: Text('Profile.Avatar updated successfully'.tr()),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
         );
       }
@@ -57,7 +58,7 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi chọn ảnh: $e'),
+            content: Text('Profile.Error uploading avatar'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -112,19 +113,19 @@ class _EditProfileState extends State<EditProfile> {
 
         // Hiển thị progress cho user
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                SizedBox(width: 16),
-                Text('Đang upload ảnh...'),
+                const SizedBox(width: 16),
+                Text('Profile.Upload Avatar'.tr()),
               ],
             ),
-            duration: Duration(seconds: 10),
+            duration: const Duration(seconds: 10),
           ),
         );
 
@@ -162,8 +163,8 @@ class _EditProfileState extends State<EditProfile> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cập nhật profile thành công!'),
+            SnackBar(
+              content: Text('Profile.Profile updated successfully'.tr()),
               backgroundColor: Colors.green,
             ),
           );
@@ -174,7 +175,7 @@ class _EditProfileState extends State<EditProfile> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi: $result'),
+              content: Text('${'General.Error'.tr()}: $result'),
               backgroundColor: Colors.red,
             ),
           );
@@ -186,7 +187,7 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi cập nhật profile: $e'),
+            content: Text('Profile.Error uploading avatar'.tr()),
             backgroundColor: Colors.red,
           ),
         );
@@ -204,8 +205,8 @@ class _EditProfileState extends State<EditProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Profile',
-        style: TextStyle(
+        title: Text('Profile.Edit Profile'.tr(),
+        style: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 25,
           )
@@ -217,7 +218,7 @@ class _EditProfileState extends State<EditProfile> {
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : Container(
               child: ListView(
                 children: [
@@ -252,7 +253,7 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          currentUser?.displayName ?? 'Loading...',
+                          currentUser?.displayName ?? 'General.Loading'.tr(),
                           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
                         ),
                       ],
@@ -265,10 +266,10 @@ class _EditProfileState extends State<EditProfile> {
                     padding: const EdgeInsets.all(10),
                     child: TextFormField(
                       controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Name',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.person),
+                      decoration: InputDecoration(
+                        labelText: 'Profile.First Name'.tr(),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.person),
                       ),
                     ),
                   ),
@@ -279,10 +280,10 @@ class _EditProfileState extends State<EditProfile> {
                     padding: const EdgeInsets.all(10),
                     child: TextFormField(
                       controller: bioController,
-                      decoration: const InputDecoration(
-                        labelText: 'Bio',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.info),
+                      decoration: InputDecoration(
+                        labelText: 'Profile.Bio'.tr(),
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.info),
                       ),
                       maxLines: 3,
                     ),
@@ -304,7 +305,7 @@ class _EditProfileState extends State<EditProfile> {
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save Changes'),
+                          : Text('Profile.Save'.tr()),
                     ),
                   ),
                 ],

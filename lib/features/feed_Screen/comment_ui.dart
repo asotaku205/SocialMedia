@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../profile/main_profile.dart';
 import 'package:blogapp/models/post_model.dart';
 import '../../features/auth/widgets/bottom_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 class CommentUi extends StatefulWidget {
   //truyen doi tuong bai viet v day
   final PostModel post; 
@@ -23,7 +24,7 @@ class _CommentUiState extends State<CommentUi> {
         backgroundColor: Colors.black,
         centerTitle: false,
       title: Text(
-          "Comments",
+          "Feed.Comment".tr(),
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -44,8 +45,8 @@ class _CommentUiState extends State<CommentUi> {
                 const SizedBox(height: 20),
 
                 // ================== TIÊU ĐỀ BÌNH LUẬN ==================
-                const Text(
-                  "Bình luận",
+                 Text(
+                  "${"Feed.Comment".tr()} (${comments.length})",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -152,8 +153,8 @@ class _CommentUiState extends State<CommentUi> {
                       child: TextField(
                         controller: _controller,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          hintText: "Viết bình luận...",
+                        decoration: InputDecoration(
+                          hintText: "Feed.Comment hint".tr(),
                           hintStyle: TextStyle(color: Colors.grey),
                           border: InputBorder.none,
 
@@ -182,5 +183,3 @@ class _CommentUiState extends State<CommentUi> {
     );
   }
 }
-
-

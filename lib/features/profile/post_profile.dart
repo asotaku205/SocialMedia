@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:readmore/readmore.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../resource/navigation.dart';
 
@@ -59,10 +60,10 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
             : allPosts.where((p) => p.authorId == targetUserId).toList();
         //tim tat ca user co id = authorId bai viet
         if (userPosts.isEmpty) {
-          return const Center(
+          return Center(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text("No posts yet", style: TextStyle(color: Colors.grey)),
+              child: Text("Feed.No posts from friends".tr(), style: TextStyle(color: Colors.grey)),
             ),
           );
         }
@@ -157,8 +158,8 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                 post.content,
                 trimLines: 6,
                 trimMode: TrimMode.Line,
-                trimCollapsedText: " More",
-                trimExpandedText: "  Hide",
+                trimCollapsedText: " ${'Feed.More'.tr()}",
+                trimExpandedText: "  ${'Feed.Hide'.tr()}",
                 moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                 lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
                 style: const TextStyle(fontSize: 20, color: Colors.white),
@@ -198,7 +199,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
             Row(
               children: [
                 Text(
-                  '$likeCount Like',
+                  '$likeCount ${'Feed.Like'.tr()}',
                   style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(width: 16),
@@ -207,7 +208,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                     Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
                   },
                   child: Text(
-                    '$commentCount Comment',
+                    '$commentCount ${'Feed.Comment'.tr()}',
                     style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -225,7 +226,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                     if (uid == null) {
                       ScaffoldMessenger.of(
                         context,
-                      ).showSnackBar(const SnackBar(content: Text('Bạn cần đăng nhập để thực hiện thao tác này.')));
+                      ).showSnackBar(SnackBar(content: Text('General.Action required'.tr())));
                       return;
                     }
                     _likeAnimationController.forward().then((_) {
@@ -315,8 +316,8 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   children: [
                     Icon(BoxIcons.bx_bookmark, color: Colors.white, size: 22),
                     const SizedBox(width: 16),
-                    const Text(
-                      'Save Post',
+                    Text(
+                      'Feed.Save Post'.tr(),
                       style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],

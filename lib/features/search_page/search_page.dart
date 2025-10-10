@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
 import '../profile/other_user_profile_screen.dart';
@@ -34,10 +35,10 @@ class _WidgetSearchState extends State<WidgetSearch> {
   void _onSearch() {
     if (_searchController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter a search keyword"),
+        SnackBar(
+          content: Text("Search.Please enter keyword".tr()),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     } else {
@@ -191,9 +192,9 @@ class _WidgetSearchState extends State<WidgetSearch> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Search",
-          style: TextStyle(
+        title: Text(
+          "Search.Search".tr(),
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
           ),
@@ -205,8 +206,8 @@ class _WidgetSearchState extends State<WidgetSearch> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: "Searching for users...",
-                prefixIcon: Icon(BoxIcons.bx_search),
+                hintText: "Search.Searching for users".tr(),
+                prefixIcon: const Icon(BoxIcons.bx_search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -241,7 +242,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Profile",
+                        "Profile.Profile".tr(),
                         style: TextStyle(
                           color: _searchType == "user" ? Colors.white : Colors.grey,
                           fontWeight: _searchType == "user" ? FontWeight.bold : FontWeight.normal,
@@ -267,7 +268,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Post",
+                        "Posts.Posts".tr(),
                         style: TextStyle(
                           color: _searchType == "post" ? Colors.white : Colors.grey,
                           fontWeight: _searchType == "post" ? FontWeight.bold : FontWeight.normal,
@@ -297,24 +298,24 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   children: [
                     Icon(Icons.search, size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 16),
-                    Text('Searching for users',
+                    Text('Search.Searching for users'.tr(),
                         style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
-                    Text('Enter name or username to search', style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+                    Text('Search.Enter name or username'.tr(), style: TextStyle(fontSize: 14, color: Colors.grey[500])),
                   ],
                 ),
               )
                   : _searchType != "user"
-                  ? const Center(
-                  child: Text('Post search feature coming soon', style: TextStyle(color: Colors.grey, fontSize: 16)))
+                  ? Center(
+                  child: Text('Search.Post search coming soon'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 16)))
                   : isSearching
-                  ? const Center(
+                  ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Searching, please wait...', style: TextStyle(color: Colors.grey, fontSize: 14)),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text('Search.Searching please wait'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 14)),
                   ],
                 ),
               )
@@ -325,10 +326,10 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   children: [
                     const Icon(Icons.person_search, size: 80, color: Colors.grey),
                     const SizedBox(height: 16),
-                    const Text('No results found',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    Text('Search.No results found'.tr(),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
                     const SizedBox(height: 8),
-                    Text('No users found with this keyword "$_keyword"',
+                    Text('${'Search.No users found with keyword'.tr()} "$_keyword"',
                         style: const TextStyle(fontSize: 14, color: Colors.grey), textAlign: TextAlign.center),
                   ],
                 ),
@@ -339,7 +340,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text('${searchResults.length} results found',
+                    child: Text('${searchResults.length} ${'Search.results found'.tr()}',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[300])),
                   ),
                   Expanded(

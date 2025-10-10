@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'chat_detail.dart';
 import 'package:blogapp/services/chat_service.dart';
@@ -26,7 +27,7 @@ class _ChatListState extends State<ChatList> {
       return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (messageDate == today.subtract(Duration(days: 1))) {
       // Hôm qua
-      return 'Hôm qua';
+      return 'Chat.Yesterday'.tr();
     } else {
       // Ngày khác - hiển thị ngày/tháng
       return '${dateTime.day}/${dateTime.month}';
@@ -102,7 +103,7 @@ class _ChatListState extends State<ChatList> {
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                                   return Text(
-                                    'Chưa có tin nhắn nào',
+                                    'Chat.No messages yet'.tr(),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey.shade600,
@@ -116,7 +117,7 @@ class _ChatListState extends State<ChatList> {
                                 final isMe = latestMessage.senderId == currentUserId;
 
                                 return Text(
-                                  isMe ? 'Bạn: ${latestMessage.content}' : latestMessage.content,
+                                  isMe ? '${'Chat.You'.tr()} ${latestMessage.content}' : latestMessage.content,
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.grey.shade600,

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../models/user_model.dart';
 import '../../../services/friend_services.dart';
@@ -29,14 +30,14 @@ class FriendCard extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Xác nhận hủy kết bạn'),
+          title: Text('Friend.Unfriend'.tr()),
           content: Text(
-            'Bạn có chắc chắn muốn hủy kết bạn với ${friend.displayName}?',
+            '${'Friend.Unfriend desc'.tr()} ${friend.displayName}',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Hủy'),
+              child: Text('Friend.Cancel'.tr()),
             ),
             TextButton(
               onPressed: () async {
@@ -46,7 +47,7 @@ class FriendCard extends StatelessWidget {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.red,
               ),
-              child: const Text('Hủy kết bạn'),
+              child: Text('Friend.Unfriend'.tr()),
             ),
           ],
         );
@@ -58,7 +59,7 @@ class FriendCard extends StatelessWidget {
     try {
       // Show loading
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: Row(
             children: [
               SizedBox(
@@ -67,7 +68,7 @@ class FriendCard extends StatelessWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
               SizedBox(width: 16),
-              Text('Đang hủy kết bạn...'),
+              Text('Friend.Unfriend status'.tr()),
             ],
           ),
         ),
@@ -80,7 +81,7 @@ class FriendCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã hủy kết bạn với ${friend.displayName}'),
+          content: Text('${'Friend.Unfriend Success'.tr()} ${friend.displayName}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -93,7 +94,7 @@ class FriendCard extends StatelessWidget {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Lỗi: ${e.toString()}'),
+          content: Text('${'Authentication.Error'.tr()} ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -167,23 +168,23 @@ class FriendCard extends StatelessWidget {
             }
           },
           itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<String>(
+             PopupMenuItem<String>(
               value: 'profile',
               child: Row(
                 children: [
                   Icon(Icons.person),
                   SizedBox(width: 8),
-                  Text('Xem hồ sơ'),
+                  Text('Friend.View Profile'.tr()),
                 ],
               ),
             ),
-            const PopupMenuItem<String>(
+             PopupMenuItem<String>(
               value: 'unfriend',
               child: Row(
                 children: [
                   Icon(Icons.person_remove, color: Colors.red),
                   SizedBox(width: 8),
-                  Text('Hủy kết bạn', style: TextStyle(color: Colors.red)),
+                  Text('Friend.Unfriend'.tr(), style: TextStyle(color: Colors.red)),
                 ],
               ),
             ),

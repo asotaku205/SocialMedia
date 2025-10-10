@@ -1,6 +1,7 @@
 import 'package:blogapp/models/post_model.dart';
 import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -196,8 +197,8 @@ class _SinglePostCardState extends State<SinglePostCard>
               post.content,
               trimLines: 6,
               trimMode: TrimMode.Line,
-              trimCollapsedText: " More",
-              trimExpandedText: "  Hide",
+              trimCollapsedText: " ${'Feed.More'.tr()}",
+              trimExpandedText: "  ${'Feed.Hide'.tr()}",
               moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
               lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
               style: const TextStyle(fontSize: 20, color: Colors.white),

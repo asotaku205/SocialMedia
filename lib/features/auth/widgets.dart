@@ -72,15 +72,3 @@ Widget gradientButton({
     child: Text(text, style: const TextStyle(fontSize: 18)),
   );
 }
-
-Widget footerSignature() {
-  return const Text(
-    '— Designed by Huy • Thiện • Hải —',
-    style: TextStyle(
-      color: Colors.white,
-      fontSize: 18,
-      fontStyle: FontStyle.italic,
-    ),
-    textAlign: TextAlign.center,
-  );
-}

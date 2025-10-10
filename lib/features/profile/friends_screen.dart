@@ -4,6 +4,7 @@ import '../../models/user_model.dart';
 import '../auth/widgets/friend_card.dart';
 import '../auth/widgets/friend_request_card.dart';
 import '../search_page/search_page.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -65,7 +66,7 @@ class _FriendsScreenState extends State<FriendsScreen>
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi tải danh sách bạn bè: ${e.toString()}'),
+            content: Text('${"General.Error".tr()}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -96,7 +97,7 @@ class _FriendsScreenState extends State<FriendsScreen>
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lỗi khi tải lời mời kết bạn: ${e.toString()}'),
+            content: Text('${"General.Error".tr()}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -108,7 +109,7 @@ class _FriendsScreenState extends State<FriendsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bạn bè'),
+        title: Text('Friend.Friends'.tr()),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -118,7 +119,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                 children: [
                   const Icon(Icons.people),
                   const SizedBox(width: 8),
-                  Text('Bạn bè (${friends.length})'),
+                  Text('${('Friend.Friends'.tr())} (${friends.length})'),
                 ],
               ),
             ),
@@ -128,7 +129,7 @@ class _FriendsScreenState extends State<FriendsScreen>
                 children: [
                   const Icon(Icons.person_add),
                   const SizedBox(width: 8),
-                  Text('Lời mời (${pendingRequests.length})'),
+                  Text('${('Friend.Friend Requests'.tr())} (${pendingRequests.length})'),
                 ],
               ),
             ),
@@ -140,22 +141,22 @@ class _FriendsScreenState extends State<FriendsScreen>
         children: [
           // Tab 1: Danh sách bạn bè
           isLoadingFriends
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator())
               : friends.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.people_outline, size: 80, color: Colors.grey),
-                          SizedBox(height: 16),
+                          const Icon(Icons.people_outline, size: 80, color: Colors.grey),
+                          const SizedBox(height: 16),
                           Text(
-                            'Chưa có bạn bè nào',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            'Friend.You have no friends yet.'.tr(),
+                            style: const TextStyle(fontSize: 18, color: Colors.grey),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            'Hãy tìm kiếm và kết bạn với mọi người!',
-                            style: TextStyle(color: Colors.grey),
+                            'Friend.Lets find some!'.tr(),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -176,22 +177,22 @@ class _FriendsScreenState extends State<FriendsScreen>
 
           // Tab 2: Lời mời kết bạn
           isLoadingRequests
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(child: CircularProgressIndicator())
               : pendingRequests.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
-                          SizedBox(height: 16),
+                          const Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
+                          const SizedBox(height: 16),
                           Text(
-                            'Không có lời mời nào',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            'Friend.No new requests'.tr(),
+                            style: const TextStyle(fontSize: 18, color: Colors.grey),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(
-                            'Các lời mời kết bạn sẽ hiển thị ở đây',
-                            style: TextStyle(color: Colors.grey),
+                            'Friend.Friend request desc'.tr(),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -226,7 +227,7 @@ class _FriendsScreenState extends State<FriendsScreen>
           });
         },
         child: const Icon(Icons.person_search),
-        tooltip: 'Tìm kiếm bạn bè',
+        tooltip: 'Friend.Search by email'.tr(),
       ),
     );
   }
