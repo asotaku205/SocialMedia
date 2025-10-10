@@ -141,7 +141,15 @@ class _CreatePostState extends State<CreatePost> {
                           child: _currentUser == null
                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                               : (_currentUser!.photoURL.isEmpty
-                                  ?Icon(Icons.person)
+                                  ? Text(
+                                      _currentUser!.displayName.isNotEmpty
+                                          ? _currentUser!.displayName[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
                                   : null),
                         ),
                         const SizedBox(width: 12),

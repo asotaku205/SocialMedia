@@ -9,12 +9,13 @@ import 'package:readmore/readmore.dart';
 
 class SinglePostCard extends StatefulWidget {
   final PostModel post;
-    const SinglePostCard({Key? key, required this.post}) : super(key: key);
+  const SinglePostCard({Key? key, required this.post}) : super(key: key);
   @override
   State<SinglePostCard> createState() => _SinglePostCardState();
 }
 
-class _SinglePostCardState extends State<SinglePostCard> with TickerProviderStateMixin {
+class _SinglePostCardState extends State<SinglePostCard>
+    with TickerProviderStateMixin {
   bool isBookmarked = false; // Cờ lưu trạng thái bookmark post
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
@@ -95,6 +96,7 @@ class _SinglePostCardState extends State<SinglePostCard> with TickerProviderStat
       ),
     );
   }
+
   /// UI cho từng post
   Widget buidUiPost(PostModel post) {
     final time = timeago.format(post.createdAt); // thời gian đăng dạng "2h ago"
@@ -144,7 +146,15 @@ class _SinglePostCardState extends State<SinglePostCard> with TickerProviderStat
                             ? NetworkImage(post.authorAvatar)
                             : null,
                         child: post.authorAvatar.isEmpty
-                            ? const Icon(Icons.person)
+                            ? Text(
+                                post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
                             : null,
                       ),
                       const SizedBox(width: 10),

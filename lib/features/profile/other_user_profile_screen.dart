@@ -315,29 +315,28 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                     ),
                                     borderRadius: BorderRadius.circular(50),
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: avatarUrl != null //check dk neu avatarUrl ko bang null
+                                  child: CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.white,
+                                    child: currentUser?.photoURL != null &&
+                                            currentUser!.photoURL!.isNotEmpty
                                         ? Image.network(
-                                            //nhay vao day neu true
-                                            avatarUrl,
-                                            fit: BoxFit.cover,
-                                            width: 100,
-                                            height: 100,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return const Icon(
-                                                Icons.person,
-                                                color: Colors.black,
-                                                size: 50,
-                                              );
-                                            },
+                                            currentUser!.photoURL!,
                                           )
-                                        : const Icon(
-                                            //nhay vao day neu false
-                                            Icons.person,
-                                            color: Colors.black,
-                                            size: 50,
-                                          ),
+                                        : Text(
+                                            currentUser?.displayName != null &&
+                                                    currentUser!
+                                                        .displayName!
+                                                        .isNotEmpty
+                                                ? currentUser!.displayName![0]
+                                                      .toUpperCase()
+                                                : '?',
+                                            style: TextStyle(
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),//check dk neu avatarUrl ko bang null
                                   ),
                                 );
                               },

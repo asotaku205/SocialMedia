@@ -76,7 +76,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       if (mounted) {
         setState(() {
           int currentLength = _displayedPosts.length;
-          int newLength = (currentLength + _postsPerPage).clamp(0, _allPosts.length);
+          int newLength = (currentLength + _postsPerPage).clamp(
+            0,
+            _allPosts.length,
+          );
           _displayedPosts = _allPosts.take(newLength).toList();
           _isLoadingMore = false;
         });
@@ -97,7 +100,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   }
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
-  void _showMoreOptions() {
+  void _showMoreOptions(PostModel post) {
+    final String? currentUserId = AuthService.currentUser?.uid;
+    final String postAuthorId = post.authorId;
+    final bool isOwner = currentUserId != null && currentUserId == postAuthorId;
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A1A1A),
@@ -136,6 +142,36 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               title: 'Copy Link',
               onTap: () => Navigator.pop(context),
             ),
+            // Chỉ hiển thị nút Delete nếu là chủ bài viết
+            if (isOwner)
+              InkWell(
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    final delPost = await PostService.deletePost(post.id);
+                    if (delPost == "success") {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete success")));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error deleting post")));
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Row(
+                    children: [
+                      Icon(BoxIcons.bx_trash, color: Colors.red, size: 22),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -178,6 +214,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
   /// StreamBuilder lắng nghe dữ liệu post từ bạn bè
   Widget buidListPost() {
     return StreamBuilder<List<PostModel>>(
+      
       stream: PostService.getFriendsPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -228,8 +265,10 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             ),
           );
         }
+        
 
         final posts = snapshot.data!;
+        
         // Cập nhật danh sách bài viết cho pagination
         _updatePostsList(posts);
 
@@ -272,7 +311,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     // Lấy thông tin like/comment từ post
     int likeCount = post.likes;
     int commentCount = post.comments;
-    bool isLiked = currentUserId != null && post.likedBy.contains(currentUserId);
+    bool isLiked =
+        currentUserId != null && post.likedBy.contains(currentUserId);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
@@ -293,7 +333,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               children: [
                 // Avatar + Tên + Thời gian
                 GestureDetector(
-                  onTap: () => NavigationUtils.navigateToProfile(context, post.authorId),
+                  onTap: () =>
+                      NavigationUtils.navigateToProfile(context, post.authorId),
                   child: Row(
                     children: [
                       CircleAvatar(
@@ -302,7 +343,15 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ? NetworkImage(post.authorAvatar)
                             : null,
                         child: post.authorAvatar.isEmpty
-                            ? const Icon(Icons.person)
+                            ? Text(
+                                post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
                             : null,
                       ),
                       const SizedBox(width: 10),
@@ -331,7 +380,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 ),
                 // Nút 3 chấm
                 GestureDetector(
-                  onTap: _showMoreOptions,
+                  onTap: () => _showMoreOptions(post),
                   child: const Icon(Icons.more_horiz, color: Colors.grey),
                 ),
               ],
@@ -340,15 +389,14 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             const SizedBox(height: 12),
 
             // ---------------- Nội dung bài viết ----------------
-
             GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CommentUi(post: post),
-                    ),
-                  );
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CommentUi(post: post),
+                  ),
+                );
               },
               child: ReadMoreText(
                 post.content,
@@ -424,7 +472,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       // Nếu chưa login thì báo lỗi
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Bạn cần đăng nhập để thực hiện thao tác này.'),
+                          content: Text(
+                            'Bạn cần đăng nhập để thực hiện thao tác này.',
+                          ),
                         ),
                       );
                       return;

@@ -8,7 +8,7 @@ import '../../services/friend_services.dart';
 import '../../services/auth_service.dart';
 import '../feed_Screen/post_card.dart';
 import '../../models/post_model.dart';
-
+import '../auth/widgets/bottom_bar.dart';
 
 class FeedScreen extends StatefulWidget {
 
@@ -24,17 +24,13 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
-        title: ClipRRect(
-          borderRadius: BorderRadius.circular(
-            8,
-          ), // bo nhẹ cho logo
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavigation()), (route) => false);
+          },
           child: Image.asset(
             'assets/logo/logoAppRemovebg.webp',
-            height:
-                45,
-            fit: BoxFit
-                .contain, // giữ nguyên tỉ lệ không méo
-            filterQuality: FilterQuality.high,
+            fit: BoxFit.cover,
           ),
         ),
 

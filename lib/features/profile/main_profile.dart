@@ -67,100 +67,70 @@ class _MainProfileState extends State<MainProfile> {
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child:
-                // Header
-                Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child:
-                                      currentUser?.photoURL != null &&
-                                          currentUser!.photoURL!.isNotEmpty
-                                      ? Image.network(
-                                          currentUser!.photoURL!,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : const Icon(
-                                          Icons.person,
-                                          color: Colors.black,
-                                          size: 50,
+                  // Header
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                   CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.white,
+                                    child:
+                                        currentUser?.photoURL != null &&
+                                            currentUser!.photoURL!.isNotEmpty
+                                        ? Image.network(
+                                            currentUser!.photoURL!,
+                                          )
+                                        : Text(
+                                            currentUser?.displayName != null &&
+                                                    currentUser!
+                                                        .displayName!
+                                                        .isNotEmpty
+                                                ? currentUser!.displayName![0]
+                                                      .toUpperCase()
+                                                : '?',
+                                            style: TextStyle(
+                                              fontSize: 40,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                  ),
+                                SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
-                                ),
-                              ),
-
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
-                                      style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
                                       ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              "Posts",
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              "${currentUser?.postCount ?? 0}",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 40),
-                                        GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const FriendsScreen(),
-                                              ),
-                                            );
-                                          },
-                                          child: Column(
+                                      const SizedBox(height: 10),
+                                      Row(
+                                        children: [
+                                          Column(
                                             children: [
-                                              const Text(
-                                                "Friends",
+                                              Text(
+                                                "Posts",
                                                 style: TextStyle(
                                                   color: Colors.grey,
                                                   fontSize: 14,
                                                 ),
                                               ),
-                                              const SizedBox(height: 4),
+                                              SizedBox(height: 4),
                                               Text(
-                                                '${currentUser?.friendCount ?? 0}',
-                                                style: const TextStyle(
+                                                "${currentUser?.postCount ?? 0}",
+                                                style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
@@ -168,58 +138,89 @@ class _MainProfileState extends State<MainProfile> {
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                          const SizedBox(width: 40),
+                                          GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const FriendsScreen(),
+                                                ),
+                                              );
+                                            },
+                                            child: Column(
+                                              children: [
+                                                const Text(
+                                                  "Friends",
+                                                  style: TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  '${currentUser?.friendCount ?? 0}',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            // Container chứa bio/mô tả người dùng
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                '${currentUser?.bio ?? "This is the user bio."}',
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.white70,
                                 ),
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-                          // Container chứa bio/mô tả người dùng
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              '${currentUser?.bio ?? "This is the user bio."}',
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: Colors.white70,
-                              ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const Setting(),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const Setting(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                side: const BorderSide(
+                                  color: Colors.white,
+                                  width: 1,
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              foregroundColor: Colors.white,
-                              side: const BorderSide(
-                                color: Colors.white,
-                                width: 1,
+                                minimumSize: const Size(double.infinity, 40),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
-                              minimumSize: const Size(double.infinity, 40),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
+                              child: const Text("Edit Profile"),
                             ),
-                            child: const Text("Edit Profile"),
-                          ),
-                          const SizedBox(height: 20),
-                          const Divider(color: Colors.grey),
-                        ],
+                            const SizedBox(height: 20),
+                            const Divider(color: Colors.grey),
+                          ],
+                        ),
                       ),
-                    ),
-                    PostProfile(),
-                  ],
-                ),
+                      PostProfile(),
+                    ],
+                  ),
             ),
     );
   }

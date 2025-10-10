@@ -5,6 +5,7 @@ import 'package:blogapp/services/chat_service.dart';
 import 'chat_list.dart';
 import 'package:blogapp/models/user_model.dart';
 import 'package:blogapp/services/friend_services.dart';
+import '../../features/auth/widgets/bottom_bar.dart';
 
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
@@ -113,13 +114,20 @@ class _HomeChatState extends State<HomeChat> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         centerTitle: false,
-        title: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+         leading: GestureDetector(
+          onTap: () {
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavigation()), (route) => false);
+          },
           child: Image.asset(
             'assets/logo/logoAppRemovebg.webp',
-            height: 45,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
+            fit: BoxFit.cover,
+          ),
+        ),
+        title: Text(
+          "Chats",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

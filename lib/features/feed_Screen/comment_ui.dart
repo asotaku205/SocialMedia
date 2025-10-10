@@ -2,7 +2,7 @@ import 'package:blogapp/features/feed_Screen/single_post.dart';
 import 'package:flutter/material.dart';
 import '../profile/main_profile.dart';
 import 'package:blogapp/models/post_model.dart';
-
+import '../../features/auth/widgets/bottom_bar.dart';
 class CommentUi extends StatefulWidget {
   //truyen doi tuong bai viet v day
   final PostModel post; 
@@ -21,14 +21,12 @@ class _CommentUiState extends State<CommentUi> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        centerTitle: true,
-        title: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            'assets/logo/logoAppRemovebg.webp',
-            height: 50,
-            fit: BoxFit.contain,
-            filterQuality: FilterQuality.high,
+        centerTitle: false,
+      title: Text(
+          "Comments",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       

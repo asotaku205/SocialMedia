@@ -107,9 +107,20 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   child: Row(
                     children: [
                       CircleAvatar(
+
                         radius: 20,
                         backgroundImage: post.authorAvatar.isNotEmpty ? NetworkImage(post.authorAvatar) : null,
-                        child: post.authorAvatar.isEmpty ? const Icon(Icons.person) : null,
+                      child: post.authorAvatar.isEmpty ? Text(
+                                post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 10),
                       Column(
