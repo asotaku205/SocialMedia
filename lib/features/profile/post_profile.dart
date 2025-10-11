@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
 
 import '../../resource/navigation.dart';
+import '../../widgets/full_screen_image.dart';
 
 class PostProfile extends StatefulWidget {
   final String? userId;
@@ -170,26 +171,35 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
             // Image (nếu có) với errorBuilder
             if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  post.imageUrls.first,
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: MediaQuery.of(context).size.height * 0.3,
-                    color: Colors.grey[900],
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.broken_image, color: Colors.white70),
-                  ),
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return SizedBox(
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImage(
+                        imageUrl: post.imageUrls.first,
+                        heroTag: 'profile_post_image_${post.id}',
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'profile_post_image_${post.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      post.imageUrls.first,
+                      width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.3,
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  },
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: MediaQuery.of(context).size.height * 0.3,
+                        color: Colors.grey[900],
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.broken_image, color: Colors.white70),
+                      ),
+                    ),
+                  ),
                 ),
               ),
 

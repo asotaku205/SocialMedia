@@ -7,6 +7,7 @@ import '../feed_Screen/post_card.dart';
 import '../../models/post_model.dart';
 import 'friends_screen.dart';
 import 'post_profile.dart';
+import '../../utils/image_utils.dart';
 class OtherUserProfileScreen extends StatefulWidget {
   final String userId;
   final String? username;
@@ -307,37 +308,37 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 String? avatarUrl = snapshot.data;
                                 //gan URL tu snapshot cho bien avatarURL
 
-                                return Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Colors.white, Colors.white],
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [Colors.white, Colors.white],
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  child: CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Colors.white,
-                                    child: currentUser?.photoURL != null &&
-                                            currentUser!.photoURL.isNotEmpty
-                                        ? Image.network(
-                                            currentUser!.photoURL,
-                                          )
-                                        : Text(
-                                            currentUser?.displayName != null &&
-                                                    currentUser!
-                                                        .displayName
-                                                        .isNotEmpty
-                                                ? currentUser!.displayName[0]
-                                                      .toUpperCase()
-                                                : '?',
-                                            style: TextStyle(
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
-                                            ),
-                                          ),//check dk neu avatarUrl ko bang null
+                                    child: ImageUtils.buildAvatar(
+                                      imageUrl: currentUser?.photoURL,
+                                      radius: 50, // Tăng radius để vừa với container
+                                      child: currentUser?.photoURL == null ||
+                                              currentUser!.photoURL.isEmpty
+                                          ? Text(
+                                              currentUser?.displayName != null &&
+                                                      currentUser!
+                                                          .displayName
+                                                          .isNotEmpty
+                                                  ? currentUser!.displayName[0]
+                                                        .toUpperCase()
+                                                  : '?',
+                                              style: const TextStyle(
+                                                fontSize: 40,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
                                   ),
                                 );
                               },

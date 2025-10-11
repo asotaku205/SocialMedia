@@ -7,6 +7,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/features/profile/main_profile.dart';
 import 'package:readmore/readmore.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
+import '../../widgets/full_screen_image.dart';
 
 class SinglePostCard extends StatefulWidget {
   final PostModel post;
@@ -209,13 +210,27 @@ class _SinglePostCardState extends State<SinglePostCard>
 
             // ---------------- Ảnh trong post ----------------
             if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  post.imageUrls.first,
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  fit: BoxFit.cover,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImage(
+                        imageUrl: post.imageUrls.first,
+                        heroTag: 'comment_post_image_${post.id}',
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'comment_post_image_${post.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      post.imageUrls.first,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
 

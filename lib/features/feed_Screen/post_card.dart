@@ -11,6 +11,7 @@ import 'comment_ui.dart';
 import 'package:readmore/readmore.dart';
 import 'package:blogapp/utils/image_utils.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
+import '../../widgets/full_screen_image.dart';
 
 class PostCard extends StatefulWidget {
   const PostCard({super.key});
@@ -417,13 +418,29 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             const SizedBox(height: 12),
             // ---------------- Ảnh trong post ----------------
             if (post.imageUrls.isNotEmpty && post.imageUrls.first.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  post.imageUrls.first,
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  fit: BoxFit.cover,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullScreenImage(
+                        imageUrl: post.imageUrls.first,
+                        heroTag: 'post_image_${post.id}',
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'post_image_${post.id}',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      post.imageUrls.first,
+                      width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
 

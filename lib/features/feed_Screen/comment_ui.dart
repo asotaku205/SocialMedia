@@ -8,6 +8,7 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
 import 'package:blogapp/utils/image_utils.dart';
+import '../../widgets/full_screen_image.dart';
 
 class CommentUi extends StatefulWidget {
   //truyen doi tuong bai viet v day
@@ -157,6 +158,7 @@ class _CommentUiState extends State<CommentUi> {
   }
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -261,24 +263,23 @@ class _CommentUiState extends State<CommentUi> {
               ),
               child: Row(
                 children: [
-                  // Avatar người dùng hiện tại
-                  ImageUtils.buildAvatar(
-                    imageUrl: AuthService.currentUser?.photoURL,
-                    radius: 16,
-                    child: AuthService.currentUser?.photoURL == null || 
-                           AuthService.currentUser!.photoURL!.isEmpty
-                        ? Text(
-                            AuthService.currentUser?.displayName?.isNotEmpty == true
-                                ? AuthService.currentUser!.displayName![0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
-                            ),
-                          )
-                        : null,
-                  ),
+            // Avatar người dùng hiện tại
+            ImageUtils.buildAvatar(
+              imageUrl: AuthService.currentUser?.photoURL ?? '',
+              radius: 18,
+              child: (AuthService.currentUser?.photoURL ?? '').isEmpty
+                  ? Text(
+                      (AuthService.currentUser?.displayName?.isNotEmpty ?? false)
+                          ? AuthService.currentUser!.displayName![0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                      ),
+                    )
+                  : null,
+            ),
                   const SizedBox(width: 10),
 
                   // Ô nhập comment
