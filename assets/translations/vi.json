@@ -99,6 +99,7 @@
   "General": {
     "Coming Soon": "Sắp ra mắt",
     "Cancel": "Hủy",
+    "Delete": "Xóa",
     "OK": "OK",
     "Yes": "Có",
     "No": "Không",
@@ -152,5 +153,12 @@
     "Like": "Thích",
     "Comment": "Bình luận",
     "Comment hint": "Viết bình luận..."
+  },
+  "Comment": {
+    "Comment posted successfully": "Đăng bình luận thành công!",
+    "Comment deleted successfully": "Xóa bình luận thành công!",
+    "Delete comment": "Xóa bình luận",
+    "Are you sure you want to delete this comment?": "Bạn có chắc chắn muốn xóa bình luận này?",
+    "No comments yet": "Chưa có bình luận nào. Hãy là người đầu tiên bình luận!"
   }
 }

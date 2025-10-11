@@ -385,7 +385,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                              const FriendsScreen(),
+                                              FriendsScreen(userId: widget.userId),
                                             ),
                                           );
                                         },

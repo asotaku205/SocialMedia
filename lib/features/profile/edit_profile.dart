@@ -3,8 +3,9 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import "package:blogapp/features/createpost/upload_image.dart";
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'dart:typed_data';
 
 // EditProfile - Widget StatefulWidget để chỉnh sửa thông tin profile
 class EditProfile extends StatefulWidget {
@@ -18,7 +19,7 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   bool isLoading = false;
   UserModel? currentUser;
-  File? image;
+  XFile? image;
   final UploadImageService _uploadService = UploadImageService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController bioController = TextEditingController();
@@ -38,7 +39,7 @@ class _EditProfileState extends State<EditProfile> {
   }
   Future<void> _pickImage() async {
     try {
-      File? pickedImage = await _uploadService.uploadFromGallery();
+      XFile? pickedImage = await _uploadService.uploadFromGallery();
       if (pickedImage != null) {
         setState(() {
           image = pickedImage; // Lưu ảnh đã chọn vào biến image
@@ -230,12 +231,28 @@ class _EditProfileState extends State<EditProfile> {
                         GestureDetector(
                           child: Stack(
                             children: [
-                              CircleAvatar(
-                                radius: 50,
-                              backgroundImage:image != null ? FileImage(image!) : (currentUser?.photoURL != null && currentUser!.photoURL!.isNotEmpty)
-                                    ? NetworkImage(currentUser!.photoURL!)
-                                    : const NetworkImage("https://picsum.photos/100/100?random=1"),
-                              ),
+                              image != null
+                                  ? FutureBuilder<Uint8List>(
+                                      future: image!.readAsBytes(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData) {
+                                          return CircleAvatar(
+                                            radius: 50,
+                                            backgroundImage: MemoryImage(snapshot.data!),
+                                          );
+                                        }
+                                        return const CircleAvatar(
+                                          radius: 50,
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      },
+                                    )
+                                  : CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: (currentUser?.photoURL != null && currentUser!.photoURL.isNotEmpty)
+                                          ? NetworkImage(currentUser!.photoURL)
+                                          : const NetworkImage("https://picsum.photos/100/100?random=1"),
+                                    ),
                               const Positioned(
                                 bottom: 0,
                                 right: 0,

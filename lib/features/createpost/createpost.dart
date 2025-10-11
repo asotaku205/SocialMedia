@@ -2,7 +2,8 @@ import "package:blogapp/features/createpost/upload_image.dart";
 import "package:blogapp/services/auth_service.dart";
 import "package:blogapp/services/post_services.dart";
 import "package:flutter/material.dart";
-import "dart:io";
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -18,7 +19,7 @@ class _CreatePostState extends State<CreatePost> {
   final _formKey = GlobalKey<FormState>();
   final _commentController = TextEditingController();
   final UploadImageService _uploadService = UploadImageService();
-  File? _imageFile;
+  XFile? _imageFile;
 
   // State để quản lý loading và thông tin user
   bool _isLoading = false;
@@ -240,7 +241,15 @@ class _CreatePostState extends State<CreatePost> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(18),
-                                  child: Image.file(_imageFile!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                                  child: FutureBuilder<Uint8List>(
+                                    future: _imageFile!.readAsBytes(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Image.memory(snapshot.data!, fit: BoxFit.cover, width: double.infinity, height: double.infinity);
+                                      }
+                                      return const Center(child: CircularProgressIndicator());
+                                    },
+                                  ),
                                 ),
                                 Positioned(
                                   top: 12,

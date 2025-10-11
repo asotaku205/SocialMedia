@@ -1,5 +1,4 @@
 // Import thư viện để làm việc với files
-import 'dart:io';
 import 'dart:typed_data';
 // Import package image_picker để chọn ảnh từ gallery hoặc camera
 import 'package:image_picker/image_picker.dart';
@@ -16,8 +15,8 @@ class UploadImageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   /// Method để upload ảnh từ gallery của thiết bị
-  /// Trả về Future<File?> - File nếu chọn ảnh thành công, null nếu hủy
-  Future<File?> uploadFromGallery() async {
+  /// Trả về Future<XFile?> - XFile nếu chọn ảnh thành công, null nếu hủy
+  Future<XFile?> uploadFromGallery() async {
     try {
       print('Starting image picker from gallery...');
 
@@ -32,13 +31,7 @@ class UploadImageService {
       // Kiểm tra xem user có chọn ảnh hay không
       if (pickedFile != null) {
         print('Image picked successfully: ${pickedFile.path}');
-
-        // Kiểm tra file có tồn tại không trước khi tạo File object
-        if (await File(pickedFile.path).exists()) {
-          return File(pickedFile.path);
-        } else {
-          throw Exception('File không tồn tại tại đường dẫn: ${pickedFile.path}');
-        }
+        return pickedFile;
       }
 
       print('No image selected by user');
@@ -51,13 +44,8 @@ class UploadImageService {
 
   /// Method để upload ảnh lên Firebase Storage
   /// Trả về Future<String> - URL của ảnh nếu upload thành công
-  Future<String> uploadImage(File imageFile) async {
+  Future<String> uploadImage(XFile imageFile) async {
     try {
-      // Kiểm tra file có tồn tại không
-      if (!await imageFile.exists()) {
-        throw Exception('File ảnh không tồn tại');
-      }
-
       // Lấy user hiện tại
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
@@ -65,7 +53,11 @@ class UploadImageService {
       }
 
       print('Starting image upload for user: ${user.uid}');
-      print('File size: ${await imageFile.length()} bytes');
+
+      // Đọc file thành bytes để hỗ trợ cả web và mobile
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+      
+      print('File size: ${imageBytes.length} bytes');
 
       // Tạo tên file unique bằng timestamp
       final fileName = 'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -75,10 +67,7 @@ class UploadImageService {
 
       print('Uploading to Firebase Storage path: profile_images/$fileName');
 
-      // Đọc file thành bytes để tránh Platform dependency issues
-      final Uint8List imageBytes = await imageFile.readAsBytes();
-
-      // Upload bytes thay vì File để tránh Platform conflicts
+      // Upload bytes để tương thích với cả web và mobile
       final uploadTask = await storageRef.putData(
         imageBytes,
         SettableMetadata(
@@ -106,7 +95,7 @@ class UploadImageService {
   }
 
   /// Method để upload ảnh từ camera
-  Future<File?> uploadFromCamera() async {
+  Future<XFile?> uploadFromCamera() async {
     try {
       print('Starting image picker from camera...');
 
@@ -119,12 +108,7 @@ class UploadImageService {
 
       if (pickedFile != null) {
         print('Image captured successfully: ${pickedFile.path}');
-
-        if (await File(pickedFile.path).exists()) {
-          return File(pickedFile.path);
-        } else {
-          throw Exception('File không tồn tại sau khi chụp');
-        }
+        return pickedFile;
       }
 
       print('No image captured');

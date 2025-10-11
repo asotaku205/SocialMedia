@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'features/auth/auth_wrapper.dart';
-import 'features/chat/home_chat.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'utils/timeago_setup.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +15,10 @@ void main() async {
         DefaultFirebaseOptions.currentPlatform,
   );
   await EasyLocalization.ensureInitialized();
+  
+  // Initialize timeago locales
+  TimeagoSetup.initialize();
+  
   // Chạy app
   runApp(
     EasyLocalization(

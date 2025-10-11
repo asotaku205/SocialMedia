@@ -36,12 +36,14 @@ service cloud.firestore {
       // Đọc: Tất cả user đã đăng nhập có thể xem comments
       allow read: if request.auth != null;
 
-      // Tạo: User chỉ có thể comment với userId là chính mình
+      // Tạo: User chỉ có thể comment với authorId là chính mình
       allow create: if request.auth != null &&
-                   request.auth.uid == request.resource.data.userId &&
-                   request.resource.data.keys().hasAll(['userId', 'postId', 'content', 'createdAt']);
+                   request.auth.uid == request.resource.data.authorId &&
+                   request.resource.data.keys().hasAll(['authorId', 'postId', 'content', 'createdAt']);
 
       // Sửa/Xóa: Chỉ người comment mới có thể sửa/xóa comment của mình
+      allow update, delete: if request.auth != null &&
+                           request.auth.uid == resource.data.authorId;
       // HOẶC author của post có thể xóa comment trên post của mình
       allow update, delete: if request.auth != null &&
                            (request.auth.uid == resource.data.userId ||

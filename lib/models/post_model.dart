@@ -82,6 +82,8 @@ class PostModel {
       ), // Convert list dynamic -> List<String>
       likes: map['likes'] ?? 0,
       comments: map['comments'] ?? 0,
+      // commentsList để trống, sẽ được load riêng từ CommentService
+      commentsList: const [],
       createdAt: (map['createdAt'] as Timestamp)
           .toDate(), // Timestamp -> DateTime
       updatedAt: (map['updatedAt'] as Timestamp).toDate(),

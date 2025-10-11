@@ -1,11 +1,13 @@
 import 'dart:async';
-import 'dart:io'; // Cần để làm việc với file ảnh
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // Cần cho việc upload file
+import 'package:image_picker/image_picker.dart';
 
 import '../models/post_model.dart'; // Import model bạn vừa tạo
 import '../models/user_model.dart'; // Import UserModel để lấy thông tin tác giả
+import '../models/comment_model.dart'; // Import CommentModel
 import './auth_service.dart'; // Import AuthService để lấy thông tin user
 
 class PostService {
@@ -18,7 +20,7 @@ class PostService {
   /// Nhận vào một object PostModel và trả về true nếu thành công.
   static Future<String> createPost({
     required String content,
-    File? imageFile, // Nhận vào một File ảnh (có thể null)
+    XFile? imageFile, // Nhận vào một XFile ảnh (có thể null)
   }) async {
     try {
       // Lấy thông tin người dùng hiện tại
@@ -295,14 +297,17 @@ class PostService {
 
   // --- HÀM HỖ TRỢ UPLOAD ẢNH ---
   /// Hàm riêng tư để upload ảnh lên Firebase Storage.
-  static Future<String?> _uploadImage(File imageFile, String folderPath) async {
+  static Future<String?> _uploadImage(XFile imageFile, String folderPath) async {
     try {
       // Tạo một tên file độc nhất dựa trên thời gian
       String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference ref = _storage.ref().child('$folderPath/$fileName');
 
-      // Bắt đầu quá trình upload
-      UploadTask uploadTask = ref.putFile(imageFile);
+      // Đọc file thành bytes để tương thích với web
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+
+      // Bắt đầu quá trình upload với bytes
+      UploadTask uploadTask = ref.putData(imageBytes);
       TaskSnapshot snapshot = await uploadTask;
 
       // Lấy URL của ảnh sau khi upload thành công
@@ -310,6 +315,86 @@ class PostService {
     } catch (e) {
       print('Lỗi upload ảnh: $e');
       return null;
+    }
+  }
+
+  // --- COMMENTS METHODS ---
+  /// Cập nhật số lượng comments của một post
+  /// [postId] - ID của post cần cập nhật
+  /// [increment] - Số lượng cần tăng/giảm (dương để tăng, âm để giảm)
+  static Future<String> updateCommentsCount(String postId, int increment) async {
+    try {
+      await _firestore.collection('posts').doc(postId).update({
+        'comments': FieldValue.increment(increment),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      return 'success';
+    } catch (e) {
+      print('Lỗi cập nhật comments count: $e');
+      return 'Lỗi cập nhật số lượng comments: $e';
+    }
+  }
+
+  /// Lấy số lượng comments thực tế từ Firestore để đồng bộ
+  /// [postId] - ID của post
+  static Future<int> getActualCommentsCount(String postId) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('comments')
+          .where('postId', isEqualTo: postId)
+          .get();
+      
+      return snapshot.docs.length;
+    } catch (e) {
+      print('Lỗi lấy actual comments count: $e');
+      return 0;
+    }
+  }
+
+  /// Đồng bộ số lượng comments cho một post cụ thể
+  /// Hữu ích khi số lượng comments bị sai lệch
+  /// [postId] - ID của post cần đồng bộ
+  static Future<String> syncCommentsCount(String postId) async {
+    try {
+      int actualCount = await getActualCommentsCount(postId);
+      
+      await _firestore.collection('posts').doc(postId).update({
+        'comments': actualCount,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      return 'success';
+    } catch (e) {
+      print('Lỗi sync comments count: $e');
+      return 'Lỗi đồng bộ số lượng comments: $e';
+    }
+  }
+
+  /// Lấy danh sách comments của một post (phương thức này trong PostService để dự phòng)
+  /// Tuy nhiên nên dùng CommentService.getCommentsStream() cho real-time
+  static Future<List<CommentModel>> getPostComments(String postId) async {
+    try {
+      QuerySnapshot snapshot = await _firestore
+          .collection('comments')
+          .where('postId', isEqualTo: postId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      List<CommentModel> comments = [];
+      for (var doc in snapshot.docs) {
+        try {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          CommentModel comment = CommentModel.fromMap(data, doc.id);
+          comments.add(comment);
+        } catch (e) {
+          print('Lỗi parse comment trong PostService: $e');
+        }
+      }
+
+      return comments;
+    } catch (e) {
+      print('Lỗi lấy post comments: $e');
+      return [];
     }
   }
 }

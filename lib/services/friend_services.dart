@@ -423,11 +423,20 @@ class FriendService {
       }
 
       String currentUserId = currentUser.uid;
+      return await getUserFriends(currentUserId);
+    } catch (e) {
+      print('Error getting friends: $e');
+      return [];
+    }
+  }
 
-      // Lấy thông tin user hiện tại để có danh sách bạn bè
+  // GET FRIENDS LIST BY USER ID - Lấy danh sách bạn bè của user cụ thể
+  static Future<List<UserModel>> getUserFriends(String userId) async {
+    try {
+      // Lấy thông tin user để có danh sách bạn bè
       DocumentSnapshot userDoc = await _firestore
           .collection('users')
-          .doc(currentUserId)
+          .doc(userId)
           .get();
 
       if (!userDoc.exists) {
@@ -464,7 +473,7 @@ class FriendService {
 
       return friends;
     } catch (e) {
-      print('Error getting friends: $e');
+      print('Error getting user friends: $e');
       return [];
     }
   }
