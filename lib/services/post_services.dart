@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart'; // Cần cho việc upload file
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/post_model.dart'; // Import model bạn vừa tạo
 import '../models/user_model.dart'; // Import UserModel để lấy thông tin tác giả
@@ -299,7 +301,25 @@ class PostService {
   /// Hàm riêng tư để upload ảnh lên Firebase Storage.
   static Future<String?> _uploadImage(XFile imageFile, String folderPath) async {
     try {
-      // Tạo một tên file độc nhất dựa trên thời gian
+      // Trên web, sử dụng base64 fallback ngay để tránh CORS
+      if (kIsWeb) {
+        print('Using base64 fallback for web post image upload');
+        
+        final Uint8List imageBytes = await imageFile.readAsBytes();
+        
+        // Giới hạn kích thước để tránh base64 quá lớn
+        if (imageBytes.length > 2 * 1024 * 1024) { // 2MB cho post images
+          throw Exception('Ảnh quá lớn cho web upload. Vui lòng chọn ảnh nhỏ hơn 2MB');
+        }
+        
+        final String base64String = base64Encode(imageBytes);
+        final String dataUrl = 'data:image/jpeg;base64,$base64String';
+        
+        print('Base64 post image upload completed');
+        return dataUrl;
+      }
+
+      // Mobile approach - Firebase Storage
       String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference ref = _storage.ref().child('$folderPath/$fileName');
 

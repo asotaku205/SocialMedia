@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../models/user_model.dart';
 import '../../../services/friend_services.dart';
+import '../../../utils/image_utils.dart';
 
 class FriendRequestCard extends StatelessWidget {
   final UserModel sender;
@@ -105,10 +106,11 @@ class FriendRequestCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  backgroundImage:
-                      sender.photoURL.isNotEmpty ? NetworkImage(sender.photoURL) : null,
-                  child: sender.photoURL.isEmpty ? const Icon(Icons.person) : null,
+                ImageUtils.buildAvatar(
+                  imageUrl: sender.photoURL,
+                  child: sender.photoURL.isEmpty 
+                      ? const Icon(Icons.person, color: Colors.black) // Thay đổi từ Colors.grey sang Colors.black
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

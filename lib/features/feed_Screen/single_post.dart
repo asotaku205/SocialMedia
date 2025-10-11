@@ -4,9 +4,9 @@ import 'package:blogapp/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:blogapp/features/profile/main_profile.dart';
 import 'package:readmore/readmore.dart';
+import 'package:blogapp/utils/timeago_setup.dart';
 
 class SinglePostCard extends StatefulWidget {
   final PostModel post;
@@ -100,7 +100,7 @@ class _SinglePostCardState extends State<SinglePostCard>
 
   /// UI cho từng post
   Widget buidUiPost(PostModel post) {
-    final time = timeago.format(post.createdAt); // thời gian đăng dạng "2h ago"
+    final time = TimeagoSetup.formatTime(post.createdAt, context.locale.languageCode); // thời gian đăng dạng "2h ago"
 
     // Lấy uid của user hiện tại
     final String? currentUserId = AuthService.currentUser?.uid;

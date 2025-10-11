@@ -1,5 +1,6 @@
 // Import thư viện để làm việc với files
 import 'dart:typed_data';
+import 'dart:convert';
 // Import package image_picker để chọn ảnh từ gallery hoặc camera
 import 'package:image_picker/image_picker.dart';
 // Import Firebase Storage để upload ảnh
@@ -54,20 +55,21 @@ class UploadImageService {
 
       print('Starting image upload for user: ${user.uid}');
 
-      // Đọc file thành bytes để hỗ trợ cả web và mobile
+      // Trên web, sử dụng base64 fallback ngay lập tức để tránh CORS
+      if (kIsWeb) {
+        print('Using base64 fallback for web platform');
+        return await _uploadAsBase64Fallback(imageFile);
+      }
+
+      // Mobile approach - sử dụng Firebase Storage bình thường
       final Uint8List imageBytes = await imageFile.readAsBytes();
-      
       print('File size: ${imageBytes.length} bytes');
 
-      // Tạo tên file unique bằng timestamp
       final fileName = 'profile_${user.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      // Tạo reference đến vị trí lưu file trong Storage
       final storageRef = _storage.ref().child('profile_images/$fileName');
 
       print('Uploading to Firebase Storage path: profile_images/$fileName');
 
-      // Upload bytes để tương thích với cả web và mobile
       final uploadTask = await storageRef.putData(
         imageBytes,
         SettableMetadata(
@@ -76,21 +78,49 @@ class UploadImageService {
             'userId': user.uid,
             'uploadedAt': DateTime.now().toIso8601String(),
             'originalName': fileName,
+            'platform': 'mobile',
           },
         ),
       );
 
-      print('Upload completed successfully');
-
-      // Lấy URL download của file đã upload
+      print('Mobile upload completed successfully');
       final downloadURL = await uploadTask.ref.getDownloadURL();
-
       print('Download URL obtained: $downloadURL');
       return downloadURL;
 
     } catch (e) {
       print('Error uploading image: $e');
       throw Exception('Lỗi khi upload ảnh: ${e.toString()}');
+    }
+  }
+
+  /// Fallback method: Convert ảnh thành base64 và lưu metadata trong Firestore
+  Future<String> _uploadAsBase64Fallback(XFile imageFile) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('User chưa đăng nhập');
+
+      // Đọc ảnh thành bytes và convert sang base64
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+      
+      // Giới hạn kích thước để tránh base64 quá lớn
+      if (imageBytes.length > 1024 * 1024) { // 1MB
+        throw Exception('Ảnh quá lớn cho web upload. Vui lòng chọn ảnh nhỏ hơn 1MB');
+      }
+      
+      final String base64String = base64Encode(imageBytes);
+      
+      // Tạo data URL
+      final String dataUrl = 'data:image/jpeg;base64,$base64String';
+      
+      print('Using base64 fallback for web upload');
+      print('Base64 data length: ${dataUrl.length} characters');
+      
+      return dataUrl;
+      
+    } catch (e) {
+      print('Fallback upload failed: $e');
+      throw Exception('Không thể upload ảnh trên web: ${e.toString()}');
     }
   }
 

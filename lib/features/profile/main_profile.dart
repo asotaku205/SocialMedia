@@ -5,6 +5,7 @@ import '../../../models/user_model.dart';
 import '../../../services/auth_service.dart';
 import 'friends_screen.dart';
 import 'setting.dart';
+import '../../utils/image_utils.dart';
 
 class MainProfile extends StatefulWidget {
   final String? uid;
@@ -78,30 +79,24 @@ class _MainProfileState extends State<MainProfile> {
                           children: [
                             Row(
                               children: [
-                                   CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Colors.white,
-                                    child:
-                                        currentUser?.photoURL != null &&
-                                            currentUser!.photoURL.isNotEmpty
-                                        ? Image.network(
-                                            currentUser!.photoURL,
-                                          )
-                                        : Text(
-                                            currentUser?.displayName != null &&
-                                                    currentUser!
-                                                        .displayName
-                                                        .isNotEmpty
-                                                ? currentUser!.displayName[0]
-                                                      .toUpperCase()
-                                                : '?',
-                                            style: TextStyle(
-                                              fontSize: 40,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
-                                            ),
+                                ImageUtils.buildAvatar(
+                                  imageUrl: currentUser?.photoURL,
+                                  radius: 40,
+                                  child: currentUser?.photoURL == null || 
+                                         currentUser!.photoURL.isEmpty
+                                      ? Text(
+                                          currentUser?.displayName != null &&
+                                                  currentUser!.displayName.isNotEmpty
+                                              ? currentUser!.displayName[0].toUpperCase()
+                                              : '?',
+                                          style: const TextStyle(
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                                           ),
-                                  ),
+                                        )
+                                      : null,
+                                ),
                                 SizedBox(width: 16),
                                 Expanded(
                                   child: Column(

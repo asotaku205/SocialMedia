@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../models/user_model.dart';
 import '../../services/friend_services.dart';
 import '../profile/other_user_profile_screen.dart';
+import '../../utils/image_utils.dart';
 
 class BoxProfile extends StatefulWidget {
   final UserModel user;
@@ -70,9 +71,9 @@ class _BoxProfileState extends State<BoxProfile> {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.grey.shade300, width: 2),
                   ),
-                  child: CircleAvatar(
+                  child: ImageUtils.buildAvatar(
+                    imageUrl: widget.user.photoURL,
                     radius: 28,
-                    backgroundImage: widget.user.photoURL.isNotEmpty ? NetworkImage(widget.user.photoURL) : null,
                     child: widget.user.photoURL.isEmpty
                         ? Text(
                             widget.user.displayName.isNotEmpty
@@ -80,7 +81,11 @@ class _BoxProfileState extends State<BoxProfile> {
                                 : widget.user.userName.isNotEmpty
                                 ? widget.user.userName[0].toUpperCase()
                                 : '?',
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 20, 
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                            ),
                           )
                         : null,
                   ),

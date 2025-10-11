@@ -4,12 +4,13 @@ import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:easy_localization/easy_localization.dart';
 import '../../resource/navigation.dart';
 import '../profile/main_profile.dart';
 import 'comment_ui.dart';
 import 'package:readmore/readmore.dart';
+import 'package:blogapp/utils/image_utils.dart';
+import 'package:blogapp/utils/timeago_setup.dart';
 
 class PostCard extends StatefulWidget {
   const PostCard({super.key});
@@ -304,7 +305,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
   /// UI cho từng post
   Widget buidUiPost(PostModel post) {
-    final time = timeago.format(post.createdAt); // thời gian đăng dạng "2h ago"
+    final time = TimeagoSetup.formatTime(post.createdAt, context.locale.languageCode); // thời gian đăng dạng "2h ago"
 
     // Lấy uid của user hiện tại
     final String? currentUserId = AuthService.currentUser?.uid;
@@ -338,11 +339,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       NavigationUtils.navigateToProfile(context, post.authorId),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      ImageUtils.buildAvatar(
+                        imageUrl: post.authorAvatar,
                         radius: 20,
-                        backgroundImage: post.authorAvatar.isNotEmpty
-                            ? NetworkImage(post.authorAvatar)
-                            : null,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
@@ -351,6 +350,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                                 ),
                               )
                             : null,
@@ -368,9 +368,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ),
                           ),
                           Text(
-                            timeago.format(
+                            TimeagoSetup.formatTime(
                               post.createdAt,
-                              locale: context.locale.languageCode, // Đa ngôn ngữ theo locale hiện tại
+                              context.locale.languageCode, // Đa ngôn ngữ theo locale hiện tại
                             ),
                             style: TextStyle(
                               fontSize: 14,

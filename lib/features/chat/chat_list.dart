@@ -5,6 +5,7 @@ import 'package:blogapp/services/chat_service.dart';
 import '../../models/user_model.dart';
 import '../../models/message_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../utils/image_utils.dart';
 
 class ChatList extends StatefulWidget {
   final UserModel friend;
@@ -63,21 +64,20 @@ class _ChatListState extends State<ChatList> {
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.grey.shade300, width: 2),
                       ),
-                      child: CircleAvatar(
+                      child: ImageUtils.buildAvatar(
+                        imageUrl: widget.friend.photoURL,
                         radius: 28,
-                        backgroundImage: widget.friend.photoURL.isNotEmpty
-                            ? NetworkImage(widget.friend.photoURL)
-                            : null,
                         child: widget.friend.photoURL.isEmpty
                             ? Text(
-                          widget.friend.displayName.isNotEmpty
-                              ? widget.friend.displayName[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
+                                widget.friend.displayName.isNotEmpty
+                                    ? widget.friend.displayName[0].toUpperCase()
+                                    : '?',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                                ),
+                              )
                             : null,
                       ),
                     ),

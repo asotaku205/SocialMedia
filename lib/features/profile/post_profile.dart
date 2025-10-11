@@ -5,8 +5,8 @@ import 'package:blogapp/services/post_services.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:readmore/readmore.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:blogapp/utils/timeago_setup.dart';
 
 import '../../resource/navigation.dart';
 
@@ -82,7 +82,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
   // UI cho từng post
   Widget buildUiPost(PostModel post) {
-    final time = timeago.format(post.createdAt);
+    final time = TimeagoSetup.formatTime(post.createdAt, context.locale.languageCode);
     final String? currentUserId = AuthService.currentUser?.uid;
     final int likeCount = post.likes;
     final int commentCount = post.comments;

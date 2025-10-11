@@ -7,6 +7,7 @@ import 'package:blogapp/services/comment_service.dart';
 import 'package:blogapp/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
+import 'package:blogapp/utils/image_utils.dart';
 
 class CommentUi extends StatefulWidget {
   //truyen doi tuong bai viet v day
@@ -261,12 +262,9 @@ class _CommentUiState extends State<CommentUi> {
               child: Row(
                 children: [
                   // Avatar người dùng hiện tại
-                  CircleAvatar(
+                  ImageUtils.buildAvatar(
+                    imageUrl: AuthService.currentUser?.photoURL,
                     radius: 16,
-                    backgroundImage: AuthService.currentUser?.photoURL != null && 
-                                   AuthService.currentUser!.photoURL!.isNotEmpty
-                        ? NetworkImage(AuthService.currentUser!.photoURL!)
-                        : null,
                     child: AuthService.currentUser?.photoURL == null || 
                            AuthService.currentUser!.photoURL!.isEmpty
                         ? Text(
@@ -276,7 +274,7 @@ class _CommentUiState extends State<CommentUi> {
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                             ),
                           )
                         : null,
@@ -350,11 +348,9 @@ class _CommentUiState extends State<CommentUi> {
                 MaterialPageRoute(builder: (context) => const MainProfile()),
               );
             },
-            child: CircleAvatar(
+            child: ImageUtils.buildAvatar(
+              imageUrl: comment.authorAvatar,
               radius: 18,
-              backgroundImage: comment.authorAvatar.isNotEmpty
-                  ? NetworkImage(comment.authorAvatar)
-                  : null,
               child: comment.authorAvatar.isEmpty
                   ? Text(
                       comment.authorName.isNotEmpty
@@ -363,7 +359,7 @@ class _CommentUiState extends State<CommentUi> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                       ),
                     )
                   : null,

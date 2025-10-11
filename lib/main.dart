@@ -14,6 +14,7 @@ void main() async {
     options:
         DefaultFirebaseOptions.currentPlatform,
   );
+  
   await EasyLocalization.ensureInitialized();
   
   // Initialize timeago locales

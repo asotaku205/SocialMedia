@@ -6,6 +6,7 @@ import "package:blogapp/features/createpost/upload_image.dart";
 import 'package:image_picker/image_picker.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:typed_data';
+import '../../utils/image_utils.dart';
 
 // EditProfile - Widget StatefulWidget để chỉnh sửa thông tin profile
 class EditProfile extends StatefulWidget {
@@ -247,11 +248,23 @@ class _EditProfileState extends State<EditProfile> {
                                         );
                                       },
                                     )
-                                  : CircleAvatar(
+                                  : ImageUtils.buildAvatar(
+                                      imageUrl: currentUser?.photoURL,
                                       radius: 50,
-                                      backgroundImage: (currentUser?.photoURL != null && currentUser!.photoURL.isNotEmpty)
-                                          ? NetworkImage(currentUser!.photoURL)
-                                          : const NetworkImage("https://picsum.photos/100/100?random=1"),
+                                      child: currentUser?.photoURL == null || 
+                                             currentUser!.photoURL.isEmpty
+                                          ? Text(
+                                              currentUser?.displayName != null &&
+                                                      currentUser!.displayName.isNotEmpty
+                                                  ? currentUser!.displayName[0].toUpperCase()
+                                                  : '?',
+                                              style: const TextStyle(
+                                                fontSize: 50,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                                              ),
+                                            )
+                                          : null,
                                     ),
                               const Positioned(
                                 bottom: 0,

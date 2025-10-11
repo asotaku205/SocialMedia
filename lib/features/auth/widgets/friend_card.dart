@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../models/user_model.dart';
 import '../../../services/friend_services.dart';
 import '../../profile/other_user_profile_screen.dart';
+import '../../../utils/image_utils.dart';
 
 class FriendCard extends StatelessWidget {
   final UserModel friend;
@@ -105,11 +106,9 @@ class FriendCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
-        leading: CircleAvatar(
+        leading: ImageUtils.buildAvatar(
+          imageUrl: friend.photoURL,
           radius: 25,
-          backgroundImage: friend.photoURL.isNotEmpty
-              ? NetworkImage(friend.photoURL)
-              : null,
           child: friend.photoURL.isEmpty
               ? Text(
                   friend.displayName.isNotEmpty
@@ -118,6 +117,7 @@ class FriendCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                   ),
                 )
               : null,

@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:blogapp/utils/image_utils.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -135,11 +136,9 @@ class _CreatePostState extends State<CreatePost> {
                     Row(
                       children: [
                         // Avatar
-                        CircleAvatar(
+                        ImageUtils.buildAvatar(
+                          imageUrl: _currentUser?.photoURL,
                           radius: 25,
-                           backgroundImage: (_currentUser?.photoURL ?? '').isNotEmpty
-                              ? NetworkImage(_currentUser!.photoURL)
-                              : null,
                           child: _currentUser == null
                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                               : (_currentUser!.photoURL.isEmpty
@@ -150,6 +149,7 @@ class _CreatePostState extends State<CreatePost> {
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
                                       ),
                                     )
                                   : null),
