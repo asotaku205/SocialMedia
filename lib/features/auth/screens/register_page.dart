@@ -110,8 +110,15 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = theme.textTheme.bodyLarge?.color;
+    final isDark = theme.brightness == Brightness.dark;
+    final logoPath = isDark
+        ? 'assets/logo/logoAppRemovebg.webp'
+        : 'assets/logo/logoApp_pure_black.png';
     return Scaffold(
-      backgroundColor: Colors.black, // nền đen đồng bộ theme
+      backgroundColor: colorScheme.background, // nền đồng bộ theme
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -123,7 +130,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    icon: Icon(Icons.arrow_back, color: textColor),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
@@ -133,17 +140,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 250,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage('assets/logo/logoAppRemovebg.webp'),
+                      backgroundImage: AssetImage(logoPath),
                       backgroundColor: Colors.transparent,
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                 FadeSlide(
+                FadeSlide(
                   delay: Duration(milliseconds: 200),
                   child: Text(
                     'Authentication.Create an account'.tr(),
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textColor),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -184,23 +191,23 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: _isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white, width: 1.5),
+                      foregroundColor: textColor,
+                      side: BorderSide(color: textColor ?? Colors.white, width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: textColor,
                               strokeWidth: 2,
                             ),
                           )
-                        : Text('Authentication.Register'.tr()),
+                        : Text('Authentication.Register'.tr(), style: TextStyle(color: textColor)),
                   ),
                 ),
               ],

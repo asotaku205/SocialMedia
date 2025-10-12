@@ -1,4 +1,5 @@
 import 'package:blogapp/features/profile/post_profile.dart';
+import 'package:blogapp/widgets/full_screen_image.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../models/user_model.dart';
@@ -51,14 +52,17 @@ class _MainProfileState extends State<MainProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: colorScheme.background,
         title: Text(
           "Profile.Profile".tr(),
-          style: const TextStyle(
-            color: Colors.white,
+          style: textTheme.titleLarge?.copyWith(
+            color: colorScheme.onBackground,
             fontSize: 25,
             fontWeight: FontWeight.bold,
           ),
@@ -68,155 +72,170 @@ class _MainProfileState extends State<MainProfile> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              child:
-                  // Header
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Row(
-                              children: [
-                                ImageUtils.buildAvatar(
-                                  imageUrl: currentUser?.photoURL,
-                                  radius: 40,
-                                  child: currentUser?.photoURL == null || 
-                                         currentUser!.photoURL.isEmpty
-                                      ? Text(
-                                          currentUser?.displayName != null &&
-                                                  currentUser!.displayName.isNotEmpty
-                                              ? currentUser!.displayName[0].toUpperCase()
-                                              : '?',
-                                          style: const TextStyle(
-                                            fontSize: 40,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                            GestureDetector(
+                                  onTap: () {
+                                    final url = currentUser?.photoURL;
+                                    if (url != null && url.isNotEmpty) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => FullScreenImage(
+                                            imageUrl: url,
+                                            heroTag: 'profile_avatar',
                                           ),
-                                        )
-                                      : null,
-                                ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
-                                        style: const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
                                         ),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Row(
+                                      );
+                                    }
+                                  },
+                                  child: Hero(
+                                    tag: 'profile_avatar',
+                                    child: ImageUtils.buildAvatar(
+                                      imageUrl: currentUser?.photoURL,
+                                      radius: 40,
+                                      child: currentUser?.photoURL == null || 
+                                             currentUser!.photoURL.isEmpty
+                                          ? Text(
+                                              currentUser?.displayName != null &&
+                                                      currentUser!.displayName.isNotEmpty
+                                                  ? currentUser!.displayName[0].toUpperCase()
+                                                  : '?',
+                                              style: textTheme.displayLarge?.copyWith(
+                                                fontSize: 40,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.onPrimary,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onBackground,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Column(
                                         children: [
-                                          Column(
-                                            children: [
-                                              Text(
-                                                "Posts.Posts".tr(),
-                                                style: const TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                "${currentUser?.postCount ?? 0}",
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
+                                          Text(
+                                            "Posts.Posts".tr(),
+                                            style: textTheme.bodySmall?.copyWith(
+                                              color: colorScheme.onSurface.withOpacity(0.7),
+                                              fontSize: 14,
+                                            ),
                                           ),
-                                          const SizedBox(width: 40),
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const FriendsScreen(),
-                                                ),
-                                              );
-                                            },
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  "Friend.Friends".tr(),
-                                                  style: const TextStyle(
-                                                    color: Colors.grey,
-                                                    fontSize: 14,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  '${currentUser?.friendCount ?? 0}',
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            "${currentUser?.postCount ?? 0}",
+                                            style: textTheme.bodyMedium?.copyWith(
+                                              color: colorScheme.onBackground,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ],
                                       ),
+                                      const SizedBox(width: 40),
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const FriendsScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              "Friend.Friends".tr(),
+                                              style: textTheme.bodySmall?.copyWith(
+                                                color: colorScheme.onSurface.withOpacity(0.7),
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              '${currentUser?.friendCount ?? 0}',
+                                              style: textTheme.bodyMedium?.copyWith(
+                                                color: colorScheme.onBackground,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 15),
-                            // Container chứa bio/mô tả người dùng
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                '${currentUser?.bio ?? "This is the user bio."}',
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.white70,
-                                ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const Setting(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                side: const BorderSide(
-                                  color: Colors.white,
-                                  width: 1,
-                                ),
-                                minimumSize: const Size(double.infinity, 40),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                              child: Text("Profile.Edit Profile".tr()),
-                            ),
-                            const SizedBox(height: 20),
-                            const Divider(color: Colors.grey),
                           ],
                         ),
-                      ),
-                      PostProfile(),
-                    ],
+                        const SizedBox(height: 15),
+                        // Container chứa bio/mô tả người dùng
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            '${currentUser?.bio ?? "This is the user bio."}',
+                            style: textTheme.bodyMedium?.copyWith(
+                              fontSize: 15,
+                              color: colorScheme.onBackground.withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const Setting(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: colorScheme.onBackground,
+                            side: BorderSide(
+                              color: colorScheme.onBackground,
+                              width: 1,
+                            ),
+                            minimumSize: const Size(double.infinity, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: Text("Profile.Edit Profile".tr()),
+                        ),
+                        const SizedBox(height: 20),
+                        Divider(color: colorScheme.onSurface.withOpacity(0.2)),
+                      ],
+                    ),
                   ),
+                  PostProfile(),
+                ],
+              ),
             ),
     );
   }

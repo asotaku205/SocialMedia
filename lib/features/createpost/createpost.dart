@@ -106,18 +106,20 @@ class _CreatePostState extends State<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.background,
+        foregroundColor: colorScheme.onBackground,
         title: Text(
           "Posts.Create Post".tr(),
-          style: const TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             fontSize: 25,
             letterSpacing: -0.5,
-            color: Colors.white,
+            color: colorScheme.onBackground,
           ),
         ),
       ),
@@ -146,10 +148,10 @@ class _CreatePostState extends State<CreatePost> {
                                       _currentUser!.displayName.isNotEmpty
                                           ? _currentUser!.displayName[0].toUpperCase()
                                           : '?',
-                                      style: const TextStyle(
+                                      style: theme.textTheme.titleMedium?.copyWith(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                                        color: colorScheme.onSurface,
                                       ),
                                     )
                                   : null),
@@ -162,11 +164,11 @@ class _CreatePostState extends State<CreatePost> {
                             children: [
                               Text(
                                 _currentUser?.displayName ?? "General.Loading".tr(),
-                                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: Colors.white),
+                                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600, fontSize: 16, color: colorScheme.onSurface),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
-                              Text("Posts.Share your thoughts".tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                              Text("Posts.Share your thoughts".tr(), style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7), fontSize: 12)),
                             ],
                           ),
                         ),
@@ -178,15 +180,15 @@ class _CreatePostState extends State<CreatePost> {
                     // Ô nhập text
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                        border: Border.all(color: colorScheme.onSurface.withOpacity(0.5)),
                       ),
                       child: TextFormField(
                         controller: _commentController,
                         decoration: InputDecoration(
                           hintText: "Posts.What's on your mind?".tr(),
-                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 16),
+                          hintStyle: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6), fontSize: 16),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.all(20),
                         ),
@@ -200,7 +202,7 @@ class _CreatePostState extends State<CreatePost> {
                         keyboardType: TextInputType.multiline,
                         minLines: 5,
                         maxLines: null,
-                        style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.white),
+                        style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16, height: 1.5, color: colorScheme.onSurface),
                       ),
                     ),
 
@@ -211,9 +213,9 @@ class _CreatePostState extends State<CreatePost> {
                       duration: const Duration(milliseconds: 300),
                       height: _imageFile != null ? 280 : 200,
                       decoration: BoxDecoration(
-                        color: Colors.grey[900],
+                        color: colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                        border: Border.all(color: colorScheme.onSurface.withOpacity(0.5), width: 1.5),
                       ),
                       child: _imageFile == null
                           ? InkWell(
@@ -225,15 +227,15 @@ class _CreatePostState extends State<CreatePost> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.1),
+                                      color: colorScheme.onSurface.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(50),
                                     ),
-                                    child: const Icon(BoxIcons.bx_image_add, size: 32, color: Colors.white),
+                                    child: Icon(BoxIcons.bx_image_add, size: 32, color: colorScheme.onSurface),
                                   ),
                                   const SizedBox(height: 16),
-                                  Text("Posts.Add Photo".tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                                  Text("Posts.Add Photo".tr(), style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
                                   const SizedBox(height: 4),
-                                  Text("Posts.Tap to choose from gallery".tr(), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                  Text("Posts.Tap to choose from gallery".tr(), style: theme.textTheme.bodySmall?.copyWith(fontSize: 12, color: colorScheme.onSurface.withOpacity(0.7))),
                                 ],
                               ),
                             )
@@ -255,10 +257,10 @@ class _CreatePostState extends State<CreatePost> {
                                   top: 12,
                                   right: 12,
                                   child: Container(
-                                    decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(20)),
+                                    decoration: BoxDecoration(color: colorScheme.background.withOpacity(0.6), borderRadius: BorderRadius.circular(20)),
                                     child: IconButton(
                                       onPressed: _removeImage,
-                                      icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                                      icon: Icon(Icons.close, color: colorScheme.onBackground, size: 18),
                                       padding: const EdgeInsets.all(8),
                                       constraints: const BoxConstraints(),
                                     ),
@@ -279,27 +281,27 @@ class _CreatePostState extends State<CreatePost> {
       // Nút gửi đi
       bottomNavigationBar: Container(
         padding: EdgeInsets.only(left: 20, right: 20, bottom: MediaQuery.of(context).padding.bottom + 20, top: 20),
-        color: Colors.black,
+        color: colorScheme.background,
         child: SizedBox(
           height: 56,
           child: ElevatedButton(
             onPressed: _isLoading ? null : _sharePost, // Vô hiệu hóa nút khi đang loading
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Colors.white, width: 2),
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
+              side: BorderSide(color: colorScheme.onPrimary, width: 2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-              disabledBackgroundColor: Colors.grey[800], // Màu khi nút bị vô hiệu hóa
+              disabledBackgroundColor: colorScheme.surface,
             ),
             child: _isLoading
                 // Hiển thị vòng xoay khi đang loading
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary))
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                      Icon(Icons.send_rounded, color: colorScheme.onPrimary, size: 18),
                       const SizedBox(width: 8),
-                      Text("Posts.Share Post".tr(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                      Text("Posts.Share Post".tr(), style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onPrimary)),
                     ],
                   ),
           ),

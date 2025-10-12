@@ -23,28 +23,24 @@ class EmailTextField extends StatelessWidget {
       },
       decoration: InputDecoration(
         labelText: 'Authentication.Email'.tr(),
-        labelStyle: TextStyle(color: Colors.white70),
-        prefixIcon: Icon(Icons.email_outlined, color: Colors.white70),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white30),
+        prefixIcon: const Icon(Icons.email_outlined),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.blue, width: 2.0),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-        errorBorder: OutlineInputBorder(
+        errorBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.red),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-        focusedErrorBorder: OutlineInputBorder(
+        focusedErrorBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.red, width: 2.0),
           borderRadius: BorderRadius.all(Radius.circular(8.0)),
         ),
-        filled: true,
-        fillColor: Colors.black26,
       ),
-      style: const TextStyle(color: Colors.white),
     );
   }
 }

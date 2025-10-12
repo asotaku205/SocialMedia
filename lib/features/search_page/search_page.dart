@@ -190,15 +190,20 @@ class _WidgetSearchState extends State<WidgetSearch> {
     });
   }
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Search.Search".tr(),
-          style: const TextStyle(
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
             fontSize: 25,
+            color: colorScheme.onBackground,
           ),
         ),
+        backgroundColor: colorScheme.background,
+        foregroundColor: colorScheme.onBackground,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
           child: Padding(
@@ -207,12 +212,15 @@ class _WidgetSearchState extends State<WidgetSearch> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: "Search.Searching for users".tr(),
-                prefixIcon: const Icon(BoxIcons.bx_search),
+                prefixIcon: Icon(BoxIcons.bx_search, color: colorScheme.onSurface),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
+                fillColor: colorScheme.surface,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
               ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
               onSubmitted: (value) {
                 _onSearch();
               },
@@ -243,8 +251,8 @@ class _WidgetSearchState extends State<WidgetSearch> {
                     children: [
                       Text(
                         "Profile.Profile".tr(),
-                        style: TextStyle(
-                          color: _searchType == "user" ? Colors.white : Colors.grey,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: _searchType == "user" ? colorScheme.onBackground : colorScheme.onSurface.withOpacity(0.6),
                           fontWeight: _searchType == "user" ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
@@ -252,7 +260,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                         margin: const EdgeInsets.only(top: 4),
                         height: 2,
                         width: 50,
-                        color: _searchType == "user" ? Colors.white : Colors.transparent,
+                        color: _searchType == "user" ? colorScheme.onBackground : Colors.transparent,
                       ),
                     ],
                   ),
@@ -269,8 +277,8 @@ class _WidgetSearchState extends State<WidgetSearch> {
                     children: [
                       Text(
                         "Posts.Posts".tr(),
-                        style: TextStyle(
-                          color: _searchType == "post" ? Colors.white : Colors.grey,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: _searchType == "post" ? colorScheme.onBackground : colorScheme.onSurface.withOpacity(0.6),
                           fontWeight: _searchType == "post" ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
@@ -278,7 +286,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                         margin: const EdgeInsets.only(top: 4),
                         height: 2,
                         width: 50,
-                        color: _searchType == "post" ? Colors.white : Colors.transparent,
+                        color: _searchType == "post" ? colorScheme.onBackground : Colors.transparent,
                       ),
                     ],
                   ),
@@ -296,26 +304,26 @@ class _WidgetSearchState extends State<WidgetSearch> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.search, size: 80, color: Colors.grey[400]),
+                    Icon(Icons.search, size: 80, color: colorScheme.onSurface.withOpacity(0.3)),
                     const SizedBox(height: 16),
                     Text('Search.Searching for users'.tr(),
-                        style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                        style: theme.textTheme.bodyLarge?.copyWith(fontSize: 18, color: colorScheme.onSurface.withOpacity(0.5), fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
-                    Text('Search.Enter name or username'.tr(), style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+                    Text('Search.Enter name or username'.tr(), style: theme.textTheme.bodySmall?.copyWith(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.4))),
                   ],
                 ),
               )
                   : _searchType != "user"
                   ? Center(
-                  child: Text('Search.Post search coming soon'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 16)))
+                  child: Text('Search.Post search coming soon'.tr(), style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 16)))
                   : isSearching
                   ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    CircularProgressIndicator(color: colorScheme.primary),
                     const SizedBox(height: 16),
-                    Text('Search.Searching please wait'.tr(), style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                    Text('Search.Searching please wait'.tr(), style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.5), fontSize: 14)),
                   ],
                 ),
               )
@@ -324,13 +332,13 @@ class _WidgetSearchState extends State<WidgetSearch> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.person_search, size: 80, color: Colors.grey),
+                    Icon(Icons.person_search, size: 80, color: colorScheme.onSurface.withOpacity(0.3)),
                     const SizedBox(height: 16),
                     Text('Search.No results found'.tr(),
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+                        style: theme.textTheme.bodyLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.bold, color: colorScheme.onSurface.withOpacity(0.5))),
                     const SizedBox(height: 8),
                     Text('${'Search.No users found with keyword'.tr()} "$_keyword"',
-                        style: const TextStyle(fontSize: 14, color: Colors.grey), textAlign: TextAlign.center),
+                        style: theme.textTheme.bodySmall?.copyWith(fontSize: 14, color: colorScheme.onSurface.withOpacity(0.4)), textAlign: TextAlign.center),
                   ],
                 ),
               )
@@ -341,7 +349,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text('${searchResults.length} ${'Search.results found'.tr()}',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[300])),
+                        style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: colorScheme.onSurface.withOpacity(0.7))),
                   ),
                   Expanded(
                     child: ListView.builder(

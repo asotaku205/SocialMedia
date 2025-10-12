@@ -8,6 +8,7 @@ import '../../models/post_model.dart';
 import 'friends_screen.dart';
 import 'post_profile.dart';
 import '../../utils/image_utils.dart';
+import '../../widgets/full_screen_image.dart';
 class OtherUserProfileScreen extends StatefulWidget {
   final String userId;
   final String? username;
@@ -310,34 +311,44 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
 
                                 return ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
-                                  child: Container(
-                                    width: 100,
-                                    height: 100,
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [Colors.white, Colors.white],
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      final url = currentUser?.photoURL;
+                                      if (url != null && url.isNotEmpty) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => FullScreenImage(
+                                              imageUrl: url,
+                                              heroTag: 'other_profile_avatar_${currentUser?.uid}',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Hero(
+                                      tag: 'other_profile_avatar_${currentUser?.uid}',
+                                      child: ImageUtils.buildAvatar(
+                                        imageUrl: currentUser?.photoURL,
+                                        radius: 50, // Tăng radius để vừa với container
+                                        child: currentUser?.photoURL == null ||
+                                                currentUser!.photoURL.isEmpty
+                                            ? Text(
+                                                currentUser?.displayName != null &&
+                                                        currentUser!
+                                                            .displayName
+                                                            .isNotEmpty
+                                                    ? currentUser!.displayName[0]
+                                                          .toUpperCase()
+                                                    : '?',
+                                                style: const TextStyle(
+                                                  fontSize: 40,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              )
+                                            : null,
                                       ),
-                                    ),
-                                    child: ImageUtils.buildAvatar(
-                                      imageUrl: currentUser?.photoURL,
-                                      radius: 50, // Tăng radius để vừa với container
-                                      child: currentUser?.photoURL == null ||
-                                              currentUser!.photoURL.isEmpty
-                                          ? Text(
-                                              currentUser?.displayName != null &&
-                                                      currentUser!
-                                                          .displayName
-                                                          .isNotEmpty
-                                                  ? currentUser!.displayName[0]
-                                                        .toUpperCase()
-                                                  : '?',
-                                              style: const TextStyle(
-                                                fontSize: 40,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                              ),
-                                            )
-                                          : null,
                                     ),
                                   ),
                                 );

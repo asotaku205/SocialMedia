@@ -39,12 +39,23 @@ class ImageUtils {
     String? fallbackUrl,
     Widget? child,
     Color? backgroundColor,
+    BuildContext? context,
   }) {
     final ImageProvider? imageProvider = getAvatarImageProvider(imageUrl, fallbackUrl: fallbackUrl);
-    
+
+    // Lấy màu nền mặc định theo theme nếu chưa truyền backgroundColor
+    Color? resolvedBgColor = backgroundColor;
+    if (resolvedBgColor == null && context != null) {
+      final brightness = Theme.of(context).brightness;
+      resolvedBgColor = brightness == Brightness.dark
+          ? const Color(0xFF23272F) // màu nền avatar dark
+          : const Color(0xFFF0F1F6); // màu nền avatar light
+    }
+    resolvedBgColor ??= Colors.white;
+
     return CircleAvatar(
       radius: radius,
-      backgroundColor: backgroundColor ?? Colors.white, // Nền trắng mặc định
+      backgroundColor: resolvedBgColor,
       backgroundImage: imageProvider,
       child: child,
     );

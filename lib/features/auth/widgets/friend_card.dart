@@ -27,18 +27,21 @@ class FriendCard extends StatelessWidget {
   }
 
   void _showUnfriendDialog(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Friend.Unfriend'.tr()),
+          title: Text('Friend.Unfriend'.tr(), style: textTheme.titleMedium?.copyWith(color: colorScheme.onBackground)),
           content: Text(
             '${'Friend.Unfriend desc'.tr()} ${friend.displayName}',
+            style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Friend.Cancel'.tr()),
+              child: Text('Friend.Cancel'.tr(), style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary)),
             ),
             TextButton(
               onPressed: () async {
@@ -46,9 +49,9 @@ class FriendCard extends StatelessWidget {
                 await _unfriend(context);
               },
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
+                foregroundColor: colorScheme.error,
               ),
-              child: Text('Friend.Unfriend'.tr()),
+              child: Text('Friend.Unfriend'.tr(), style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
             ),
           ],
         );
@@ -57,6 +60,7 @@ class FriendCard extends StatelessWidget {
   }
 
   Future<void> _unfriend(BuildContext context) async {
+    final colorScheme = Theme.of(context).colorScheme;
     try {
       // Show loading
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +70,7 @@ class FriendCard extends StatelessWidget {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
               ),
               SizedBox(width: 16),
               Text('Friend.Unfriend status'.tr()),
@@ -83,7 +87,7 @@ class FriendCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${'Friend.Unfriend Success'.tr()} ${friend.displayName}'),
-          backgroundColor: Colors.green,
+          backgroundColor: colorScheme.secondary,
         ),
       );
 
@@ -96,37 +100,42 @@ class FriendCard extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${'Authentication.Error'.tr()} ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: colorScheme.error,
         ),
       );
     }
   }
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         leading: ImageUtils.buildAvatar(
           imageUrl: friend.photoURL,
           radius: 25,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
           child: friend.photoURL.isEmpty
               ? Text(
                   friend.displayName.isNotEmpty
                       ? friend.displayName[0].toUpperCase()
                       : '?',
-                  style: const TextStyle(
+                  style: textTheme.titleMedium?.copyWith(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                    color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                   ),
                 )
               : null,
+          context: context,
         ),
         title: Text(
           friend.displayName.isNotEmpty ? friend.displayName : friend.userName,
-          style: const TextStyle(
+          style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
             fontSize: 16,
+            color: colorScheme.onBackground,
           ),
         ),
         subtitle: Column(
@@ -135,8 +144,8 @@ class FriendCard extends StatelessWidget {
             if (friend.userName.isNotEmpty)
               Text(
                 '@${friend.userName}',
-                style: TextStyle(
-                  color: Colors.grey[600],
+                style: textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
@@ -145,8 +154,8 @@ class FriendCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   friend.bio,
-                  style: TextStyle(
-                    color: Colors.grey[700],
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
                     fontSize: 13,
                   ),
                   maxLines: 1,
@@ -156,7 +165,7 @@ class FriendCard extends StatelessWidget {
           ],
         ),
         trailing: PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
+          icon: Icon(Icons.more_vert, color: colorScheme.onSurface),
           onSelected: (value) {
             switch (value) {
               case 'profile':
@@ -172,9 +181,9 @@ class FriendCard extends StatelessWidget {
               value: 'profile',
               child: Row(
                 children: [
-                  Icon(Icons.person),
+                  Icon(Icons.person, color: colorScheme.primary),
                   SizedBox(width: 8),
-                  Text('Friend.View Profile'.tr()),
+                  Text('Friend.View Profile'.tr(), style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
                 ],
               ),
             ),
@@ -182,9 +191,9 @@ class FriendCard extends StatelessWidget {
               value: 'unfriend',
               child: Row(
                 children: [
-                  Icon(Icons.person_remove, color: Colors.red),
+                  Icon(Icons.person_remove, color: colorScheme.error),
                   SizedBox(width: 8),
-                  Text('Friend.Unfriend'.tr(), style: TextStyle(color: Colors.red)),
+                  Text('Friend.Unfriend'.tr(), style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
                 ],
               ),
             ),

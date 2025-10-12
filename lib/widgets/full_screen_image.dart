@@ -12,11 +12,12 @@ class FullScreenImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: colorScheme.onBackground),
         elevation: 0,
       ),
       body: Center(
@@ -38,15 +39,15 @@ class FullScreenImage extends StatelessWidget {
                         ? loadingProgress.cumulativeBytesLoaded /
                             loadingProgress.expectedTotalBytes!
                         : null,
-                    color: Colors.white,
+                    color: colorScheme.onBackground,
                   ),
                 );
               },
               errorBuilder: (context, error, stackTrace) {
-                return const Center(
+                return Center(
                   child: Icon(
                     Icons.error,
-                    color: Colors.white,
+                    color: colorScheme.onBackground,
                     size: 50,
                   ),
                 );

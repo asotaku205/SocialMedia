@@ -22,9 +22,11 @@ class _SinglePostCardState extends State<SinglePostCard>
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
   void _showMoreOptions() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: colorScheme.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -39,7 +41,7 @@ class _SinglePostCardState extends State<SinglePostCard>
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey[600],
+                color: colorScheme.secondary.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -73,6 +75,8 @@ class _SinglePostCardState extends State<SinglePostCard>
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -81,14 +85,14 @@ class _SinglePostCardState extends State<SinglePostCard>
           children: [
             Icon(
               icon,
-              color: isDestructive ? Colors.red : Colors.white,
+              color: isDestructive ? Colors.red : textColor,
               size: 22,
             ),
             const SizedBox(width: 16),
             Text(
               title,
               style: TextStyle(
-                color: isDestructive ? Colors.red : Colors.white,
+                color: isDestructive ? Colors.red : textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -112,12 +116,14 @@ class _SinglePostCardState extends State<SinglePostCard>
     bool isLiked =
         currentUserId != null && post.likedBy.contains(currentUserId);
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
-      decoration: const BoxDecoration(
-        color: Colors.black,
+      decoration: BoxDecoration(
+        color: colorScheme.background,
         border: Border(
-          bottom: BorderSide(color: Color(0xFF262626), width: 0.5),
+          bottom: BorderSide(color: colorScheme.surface, width: 0.5),
         ),
       ),
       child: Padding(
@@ -165,8 +171,8 @@ class _SinglePostCardState extends State<SinglePostCard>
                         children: [
                           Text(
                             post.authorName,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: textColor,
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
@@ -175,7 +181,7 @@ class _SinglePostCardState extends State<SinglePostCard>
                             time,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: colorScheme.secondary.withOpacity(0.5),
                             ),
                           ),
                         ],
@@ -186,7 +192,7 @@ class _SinglePostCardState extends State<SinglePostCard>
                 // Nút 3 chấm
                 GestureDetector(
                   onTap: _showMoreOptions,
-                  child: const Icon(Icons.more_horiz, color: Colors.grey),
+                  child: Icon(Icons.more_horiz, color: colorScheme.secondary),
                 ),
               ],
             ),
@@ -200,9 +206,9 @@ class _SinglePostCardState extends State<SinglePostCard>
               trimMode: TrimMode.Line,
               trimCollapsedText: " ${'Feed.More'.tr()}",
               trimExpandedText: "  ${'Feed.Hide'.tr()}",
-              moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-              style: const TextStyle(fontSize: 20, color: Colors.white),
+              moreStyle: TextStyle(color: colorScheme.secondary, fontSize: 15),
+              lessStyle: TextStyle(color: colorScheme.secondary, fontSize: 15),
+              style: TextStyle(fontSize: 20, color: textColor),
               textAlign: TextAlign.start,
             ),
 

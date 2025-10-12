@@ -83,8 +83,15 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final logoPath = isDark
+        ? 'assets/logo/logoAppRemovebg.webp'
+        : 'assets/logo/logoApp_pure_black.png';
     return Scaffold(
-      backgroundColor: Colors.black, // Nền đen đồng bộ theme
+      backgroundColor: colorScheme.background,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -100,9 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                     height: 250,
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundImage: AssetImage(
-                        'assets/logo/logoAppRemovebg.webp',
-                      ),
+                      backgroundImage: AssetImage(logoPath),
                       backgroundColor: Colors.transparent,
                     ),
                   ),
@@ -112,10 +117,10 @@ class _LoginPageState extends State<LoginPage> {
                   delay: const Duration(milliseconds: 200),
                   child: Text(
                     'Authentication.Wellcome'.tr(),
-                    style: const TextStyle(
+                    style: textTheme.headlineMedium?.copyWith(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // chữ trắng
+                      color: colorScheme.onBackground,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -144,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child:Text(
                         'Authentication.Forgot Password'.tr(),
-                        style: TextStyle(color: Colors.white), // chữ trắng
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
                       ),
                     ),
                   ),
@@ -155,24 +160,24 @@ class _LoginPageState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent, // button outline
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white, width: 1.5),
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: colorScheme.onBackground,
+                      side: BorderSide(color: colorScheme.onBackground, width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: colorScheme.primary,
                               strokeWidth: 2,
                             ),
                           )
-                        :  Text('Authentication.Login'.tr()),
+                        :  Text('Authentication.Login'.tr(), style: textTheme.bodyLarge?.copyWith(color: colorScheme.onBackground)),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -183,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                        Text(
                         "Authentication.Dont have an account?".tr(),
-                        style: TextStyle(color: Colors.white), // chữ trắng
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground),
                       ),
                       TextButton(
                         onPressed: () => Navigator.push(
@@ -193,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Text(
                           'Authentication.Register'.tr(),
-                          style: TextStyle(color: Colors.white), // chữ trắng
+                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
                         ),
                       ),
                     ],

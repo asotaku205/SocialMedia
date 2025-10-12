@@ -110,15 +110,17 @@ class _HomeChatState extends State<HomeChat> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: colorScheme.background,
         centerTitle: false,
         title: Text(
           "Chat.Chats",
-          style: TextStyle(
-            color: Colors.white,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onBackground,
             fontWeight: FontWeight.bold,
           ),
         ).tr(),
@@ -130,10 +132,13 @@ class _HomeChatState extends State<HomeChat> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: "Search.Please enter keyword".tr(),
-                prefixIcon: Icon(BoxIcons.bx_search),
+                prefixIcon: Icon(BoxIcons.bx_search, color: colorScheme.onSurface),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 filled: true,
+                fillColor: colorScheme.surface,
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
               ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
               onSubmitted: (value) {},
             ),
           ),
@@ -144,8 +149,8 @@ class _HomeChatState extends State<HomeChat> {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   "Chat.Messages",
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onBackground,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -153,7 +158,7 @@ class _HomeChatState extends State<HomeChat> {
               ),
               IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.edit, color: Colors.white),
+                icon: Icon(Icons.edit, color: colorScheme.onBackground),
               ),
             ],
           ),
@@ -164,16 +169,16 @@ class _HomeChatState extends State<HomeChat> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.people_outline, size: 80, color: Colors.grey),
+                Icon(Icons.people_outline, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
                 SizedBox(height: 16),
                 Text(
                   'Chat.You have no friends yet.',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: theme.textTheme.bodyLarge?.copyWith(fontSize: 18, color: colorScheme.onSurface.withOpacity(0.7)),
                 ).tr(),
                 SizedBox(height: 8),
                 Text(
                   'Friend.Lets find some!',
-                  style: TextStyle(color: Colors.grey),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
                 ).tr(),
               ],
             ),

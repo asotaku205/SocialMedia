@@ -37,6 +37,8 @@ class _ChatListState extends State<ChatList> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return GestureDetector(
         onTap: () {
           Navigator.push(
@@ -62,23 +64,25 @@ class _ChatListState extends State<ChatList> {
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey.shade300, width: 2),
+                        border: Border.all(color: colorScheme.outline.withOpacity(0.3), width: 2),
                       ),
                       child: ImageUtils.buildAvatar(
                         imageUrl: widget.friend.photoURL,
                         radius: 28,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                         child: widget.friend.photoURL.isEmpty
                             ? Text(
                                 widget.friend.displayName.isNotEmpty
                                     ? widget.friend.displayName[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
+                                style: theme.textTheme.titleMedium?.copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                 ),
                               )
                             : null,
+                        context: context,
                       ),
                     ),
                     SizedBox(width: 16),
@@ -92,9 +96,10 @@ class _ChatListState extends State<ChatList> {
                               widget.friend.displayName.isNotEmpty
                                   ? widget.friend.displayName
                                   : widget.friend.userName,
-                              style: TextStyle(
+                              style: theme.textTheme.bodyLarge?.copyWith(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
                               ),
                             ),
                             SizedBox(height: 6),
@@ -104,9 +109,9 @@ class _ChatListState extends State<ChatList> {
                                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                                   return Text(
                                     'Chat.No messages yet'.tr(),
-                                    style: TextStyle(
+                                    style: theme.textTheme.bodyMedium?.copyWith(
                                       fontSize: 13,
-                                      color: Colors.grey.shade600,
+                                      color: colorScheme.onSurface.withOpacity(0.6),
                                       fontWeight: FontWeight.bold
                                     ),
                                   );
@@ -118,9 +123,9 @@ class _ChatListState extends State<ChatList> {
 
                                 return Text(
                                   isMe ? '${'Chat.You'.tr()} ${latestMessage.content}' : latestMessage.content,
-                                  style: TextStyle(
+                                  style: theme.textTheme.bodyMedium?.copyWith(
                                     fontSize: 13,
-                                    color: Colors.grey.shade600,
+                                    color: colorScheme.onSurface.withOpacity(0.6),
                                     fontWeight: FontWeight.bold
                                   ),
                                   maxLines: 1,
@@ -145,10 +150,10 @@ class _ChatListState extends State<ChatList> {
                   final latestMessage = snapshot.data!.first;
                   return Text(
                     _formatTime(latestMessage.timestamp),
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade600,
+                      color: colorScheme.onSurface.withOpacity(0.6),
                     ),
                   );
                 },

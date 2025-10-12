@@ -56,33 +56,36 @@ class _ChatDetailState extends State<ChatDetail> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: colorScheme.background,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
           children: [
             CircleAvatar(
               radius: 20,
-             backgroundImage: (widget.otherUserAvatar != null && widget.otherUserAvatar!.isNotEmpty)
-                      ? NetworkImage(widget.otherUserAvatar!)
-                      : null,
-                  child: (widget.otherUserAvatar == null || widget.otherUserAvatar!.isEmpty)
-                      ? Text(
-                          widget.otherUserName.isNotEmpty
-                              ? widget.otherUserName[0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
+              backgroundImage: (widget.otherUserAvatar != null && widget.otherUserAvatar!.isNotEmpty)
+                  ? NetworkImage(widget.otherUserAvatar!)
+                  : null,
+              child: (widget.otherUserAvatar == null || widget.otherUserAvatar!.isEmpty)
+                  ? Text(
+                      widget.otherUserName.isNotEmpty
+                          ? widget.otherUserName[0].toUpperCase()
+                          : '?',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    )
+                  : null,
             ),
             SizedBox(width: 12),
             Expanded(
@@ -91,11 +94,11 @@ class _ChatDetailState extends State<ChatDetail> {
                 children: [
                   Text(
                     widget.otherUserName,
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Text(
                     "Chat.Online".tr(),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12)
+                    style: TextStyle(color: colorScheme.secondary.withOpacity(0.6), fontSize: 12),
                   ),
                 ],
               ),
@@ -104,7 +107,7 @@ class _ChatDetailState extends State<ChatDetail> {
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: Colors.white),
+            icon: Icon(Icons.more_vert, color: textColor),
             onSelected: (value) {
               // Xử lý menu actions
             },
@@ -124,7 +127,7 @@ class _ChatDetailState extends State<ChatDetail> {
               stream: ChatService.getMessages(widget.otherUserId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator(color: Colors.white));
+                  return Center(child: CircularProgressIndicator(color: textColor));
                 }
 
                 if (snapshot.hasError) {
@@ -138,7 +141,7 @@ class _ChatDetailState extends State<ChatDetail> {
                         Text('Lỗi tải tin nhắn', style: TextStyle(color: Colors.red, fontSize: 16)),
                         Text(
                           '${snapshot.error}',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          style: TextStyle(color: colorScheme.secondary, fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -151,11 +154,11 @@ class _ChatDetailState extends State<ChatDetail> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.message_outlined, size: 64, color: Colors.grey),
+                        Icon(Icons.message_outlined, size: 64, color: colorScheme.secondary),
                         SizedBox(height: 16),
-                        Text('Chat.No messages yet', style: TextStyle(color: Colors.grey, fontSize: 16)).tr(),
+                        Text('Chat.No messages yet', style: TextStyle(color: colorScheme.secondary, fontSize: 16)).tr(),
                         SizedBox(height: 8),
-                        Text('Chat.Start Chat', style: TextStyle(color: Colors.grey, fontSize: 14)).tr(),
+                        Text('Chat.Start Chat', style: TextStyle(color: colorScheme.secondary, fontSize: 14)).tr(),
                       ],
                     ),
                   );
@@ -180,10 +183,10 @@ class _ChatDetailState extends State<ChatDetail> {
                             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
                             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
-                              color: isMe ? Colors.blue : Colors.grey[800],
+                              color: isMe ? Colors.blue : colorScheme.surface,
                               borderRadius: BorderRadius.circular(18),
                             ),
-                            child: Text(message.content, style: TextStyle(color: Colors.white, fontSize: 16)),
+                            child: Text(message.content, style: TextStyle(color: textColor, fontSize: 16)),
                           ),
                         ],
                       ),
@@ -196,21 +199,21 @@ class _ChatDetailState extends State<ChatDetail> {
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[900],
-              border: Border(top: BorderSide(color: Colors.grey[700]!, width: 0.5)),
+              color: colorScheme.surface,
+              border: Border(top: BorderSide(color: colorScheme.secondary.withOpacity(0.7), width: 0.5)),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(25)),
+                    decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(25)),
                     child: TextField(
                       controller: _messageController,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: textColor),
                       decoration: InputDecoration(
                         hintText: "Chat.Type a message".tr(),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
+                        hintStyle: TextStyle(color: colorScheme.secondary.withOpacity(0.4)),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -224,7 +227,7 @@ class _ChatDetailState extends State<ChatDetail> {
                   child: Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                    child: Icon(Icons.send, color: Colors.white, size: 20),
+                    child: Icon(Icons.send, color: textColor, size: 20),
                   ),
                 ),
               ],

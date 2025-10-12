@@ -75,8 +75,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textColor = theme.textTheme.bodyLarge?.color;
+    final isDark = theme.brightness == Brightness.dark;
+    final logoPath = isDark
+        ? 'assets/logo/logoAppRemovebg.webp'
+        : 'assets/logo/logoApp_pure_black.png';
     return Scaffold(
-      backgroundColor: Colors.black, // nền đen
+      backgroundColor: colorScheme.background, // nền đồng bộ theme
       body: Stack(
         children: [
           // Content chính
@@ -101,21 +108,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             height: 250,
                             child: CircleAvatar(
                               radius: 50,
-                              backgroundImage:
-                                  AssetImage('assets/logo/logoAppRemovebg.webp'),
+                              backgroundImage: AssetImage(logoPath),
                               backgroundColor: Colors.transparent,
                             ),
                           ),
                         ),
                         const SizedBox(height: 20),
-                         FadeSlide(
+                        FadeSlide(
                           delay: Duration(milliseconds: 200),
                           child: Text(
                             "Authentication.Reset Password".tr(),
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: textColor,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -125,7 +131,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                           delay: Duration(milliseconds: 300),
                           child: Text(
                             'Authentication.Reset desc'.tr(),
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                            style: TextStyle(fontSize: 16, color: colorScheme.secondary),
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -142,16 +148,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16.0),
                               backgroundColor: Colors.blue,
+                              foregroundColor: textColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                             ),
                             child: _isLoading
-                                ? const SizedBox(
+                                ? SizedBox(
                                     height: 24,
                                     width: 24,
                                     child: CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: textColor,
                                       strokeWidth: 2.0,
                                     ),
                                   )
@@ -160,7 +167,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: textColor,
                                     ),
                                   ),
                           ),
@@ -179,7 +186,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             top: 16,
             left: 8,
             child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: textColor),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),

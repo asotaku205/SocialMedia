@@ -48,11 +48,12 @@ class _BottomNavigationState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       bottomNavigationBar: Container(
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.white,
+          selectedItemColor: isDark ? Colors.white : Colors.black,
           unselectedItemColor: Colors.grey[600],
           currentIndex: currentIndex,
           onTap: navigatePage,

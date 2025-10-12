@@ -43,7 +43,10 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
   // Build toàn bộ list post từ stream
   Widget buildListPost() {
-    final String? targetUserId = widget.userId ?? AuthService.currentUser?.uid; // lấy uid tại thời điểm render
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final String? targetUserId = widget.userId ?? AuthService.currentUser?.uid;
     return StreamBuilder<List<PostModel>>(
       stream: PostService.getPostsStream(),
       builder: (context, snapshot) {
@@ -51,26 +54,26 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Icon(Icons.error, size: 40));
+          return Center(child: Icon(Icons.error, size: 40, color: colorScheme.error));
         }
         final allPosts = snapshot.data ?? [];
-
-        // Lọc posts của user hiện tại trước khi build ListView
         final userPosts = targetUserId == null
-            ? <PostModel>[] //neu user null tra ve list rong
+            ? <PostModel>[]
             : allPosts.where((p) => p.authorId == targetUserId).toList();
-        //tim tat ca user co id = authorId bai viet
         if (userPosts.isEmpty) {
           return Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
-              child: Text("Feed.No posts from friends".tr(), style: TextStyle(color: Colors.grey)),
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Text(
+                "Feed.No posts from friends".tr(),
+                style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6)),
+              ),
             ),
           );
         }
         return ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: userPosts.length,
           itemBuilder: (context, index) {
             final post = userPosts[index];
@@ -83,6 +86,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
   // UI cho từng post
   Widget buildUiPost(PostModel post) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     final time = TimeagoSetup.formatTime(post.createdAt, context.locale.languageCode);
     final String? currentUserId = AuthService.currentUser?.uid;
     final int likeCount = post.likes;
@@ -91,9 +97,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        border: Border(bottom: BorderSide(color: Color(0xFF262626), width: 0.5)),
+      decoration: BoxDecoration(
+        color: colorScheme.background,
+        border: Border(bottom: BorderSide(color: colorScheme.surface, width: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -109,17 +115,17 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   child: Row(
                     children: [
                       CircleAvatar(
-
                         radius: 20,
                         backgroundImage: post.authorAvatar.isNotEmpty ? NetworkImage(post.authorAvatar) : null,
-                      child: post.authorAvatar.isEmpty ? Text(
+                        child: post.authorAvatar.isEmpty
+                            ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
-                                  
+                                style: textTheme.titleMedium?.copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: colorScheme.onPrimary,
                                 ),
                               )
                             : null,
@@ -130,9 +136,19 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                         children: [
                           Text(
                             post.authorName,
-                            style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onBackground,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          Text(time, style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+                          Text(
+                            time,
+                            style: textTheme.bodySmall?.copyWith(
+                              fontSize: 14,
+                              color: colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -140,10 +156,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                 ),
                 GestureDetector(
                   onTap: () {
-                    // show options (save/copy link)
                     _showMoreOptions(post);
                   },
-                  child: const Icon(Icons.more_horiz, color: Colors.grey),
+                  child: Icon(Icons.more_horiz, color: colorScheme.onSurface.withOpacity(0.7)),
                 ),
               ],
             ),
@@ -161,9 +176,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                 trimMode: TrimMode.Line,
                 trimCollapsedText: " ${'Feed.More'.tr()}",
                 trimExpandedText: "  ${'Feed.Hide'.tr()}",
-                moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                style: const TextStyle(fontSize: 20, color: Colors.white),
+                moreStyle: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7), fontSize: 15),
+                lessStyle: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7), fontSize: 15),
+                style: textTheme.bodyLarge?.copyWith(fontSize: 20, color: colorScheme.onBackground),
               ),
             ),
 
@@ -194,9 +209,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         height: MediaQuery.of(context).size.height * 0.3,
-                        color: Colors.grey[900],
+                        color: colorScheme.surface,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.broken_image, color: Colors.white70),
+                        child: Icon(Icons.broken_image, color: colorScheme.onSurface.withOpacity(0.5)),
                       ),
                     ),
                   ),
@@ -210,7 +225,11 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
               children: [
                 Text(
                   '$likeCount ${'Feed.Like'.tr()}',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 GestureDetector(
@@ -219,7 +238,11 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   },
                   child: Text(
                     '$commentCount ${'Feed.Comment'.tr()}',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 13, fontWeight: FontWeight.w500),
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -234,9 +257,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   onTap: () async {
                     final uid = AuthService.currentUser?.uid;
                     if (uid == null) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text('General.Action required'.tr())));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('General.Action required'.tr())),
+                      );
                       return;
                     }
                     _likeAnimationController.forward().then((_) {
@@ -251,7 +274,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                         scale: _likeAnimation.value,
                         child: Icon(
                           isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                          color: isLiked ? Colors.red : Colors.grey[400],
+                          color: isLiked ? colorScheme.error : colorScheme.onSurface.withOpacity(0.7),
                           size: 22,
                         ),
                       );
@@ -265,12 +288,12 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
                   },
-                  child: Icon(BoxIcons.bx_message_rounded, color: Colors.grey[400], size: 22),
+                  child: Icon(BoxIcons.bx_message_rounded, color: colorScheme.onSurface.withOpacity(0.7), size: 22),
                 ),
 
                 const SizedBox(width: 16),
 
-                Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
+                Icon(BoxIcons.bx_send, color: colorScheme.onSurface.withOpacity(0.7), size: 22),
 
                 const Spacer(),
 
@@ -282,7 +305,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   },
                   child: Icon(
                     isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                    color: isBookmarked ? Colors.yellow : Colors.grey[400],
+                    color: isBookmarked ? Colors.yellow : colorScheme.onSurface.withOpacity(0.7),
                     size: 22,
                   ),
                 ),
@@ -298,9 +321,12 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
     final String? currentUserId = AuthService.currentUser?.uid;
     final bool isOwner = currentUserId != null && currentUserId == post.authorId;
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: colorScheme.background,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -311,7 +337,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
               width: 40,
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.grey[600], borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(2)),
             ),
             InkWell(
               onTap: () {
@@ -324,11 +350,11 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
                   children: [
-                    Icon(BoxIcons.bx_bookmark, color: Colors.white, size: 22),
+                    Icon(BoxIcons.bx_bookmark, color: colorScheme.onBackground, size: 22),
                     const SizedBox(width: 16),
                     Text(
                       'Feed.Save Post'.tr(),
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -340,17 +366,16 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
                   children: [
-                    Icon(BoxIcons.bx_link, color: Colors.white, size: 22),
+                    Icon(BoxIcons.bx_link, color: colorScheme.onBackground, size: 22),
                     const SizedBox(width: 16),
-                    const Text(
+                    Text(
                       'Copy Link',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
               ),
             ),
-            // Chỉ hiển thị nút Delete nếu là chủ bài viết
             if (isOwner)
               InkWell(
                 onTap: () async {
@@ -358,9 +383,9 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   try {
                     final delPost = await PostService.deletePost(post.id);
                     if (delPost == "success") {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Delete success")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Delete success")));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error deleting post")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error deleting post")));
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
@@ -370,11 +395,11 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   child: Row(
                     children: [
-                      Icon(BoxIcons.bx_trash, color: Colors.red, size: 22),
+                      Icon(BoxIcons.bx_trash, color: colorScheme.error, size: 22),
                       const SizedBox(width: 16),
-                      const Text(
+                      Text(
                         'Delete',
-                        style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.error, fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),

@@ -1,4 +1,3 @@
-import 'package:blogapp/features/profile/other_user_profile_screen.dart';
 import 'package:blogapp/models/post_model.dart';
 import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
@@ -6,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../resource/navigation.dart';
-import '../profile/main_profile.dart';
 import 'comment_ui.dart';
 import 'package:readmore/readmore.dart';
 import 'package:blogapp/utils/image_utils.dart';
@@ -104,12 +102,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
   /// Hiện bottom sheet khi bấm vào dấu "3 chấm"
   void _showMoreOptions(PostModel post) {
-    final String? currentUserId = AuthService.currentUser?.uid;
-    final String postAuthorId = post.authorId;
-    final bool isOwner = currentUserId != null && currentUserId == postAuthorId;
+  final String? currentUserId = AuthService.currentUser?.uid;
+  final String postAuthorId = post.authorId;
+  final bool isOwner = currentUserId != null && currentUserId == postAuthorId;
+  final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: colorScheme.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -124,7 +123,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
               height: 4,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.grey[600],
+                color: colorScheme.secondary.withOpacity(0.6),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -169,7 +168,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       const SizedBox(width: 16),
                       Text(
                         'Feed.Delete'.tr(),
-                        style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -188,6 +187,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -196,14 +196,14 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
           children: [
             Icon(
               icon,
-              color: isDestructive ? Colors.red : Colors.white,
+              color: isDestructive ? Colors.red : textColor,
               size: 22,
             ),
             const SizedBox(width: 16),
             Text(
               title,
               style: TextStyle(
-                color: isDestructive ? Colors.red : Colors.white,
+                color: isDestructive ? Colors.red : textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -221,7 +221,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
       stream: PostService.getFriendsPostsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator()); // đang load
+          return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)); // đang load
         }
 
         if (snapshot.hasError) {
@@ -230,11 +230,11 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.error_outline, size: 60, color: Colors.grey),
+                Icon(Icons.error_outline, size: 60, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
                 const SizedBox(height: 16),
                 Text(
                   "Feed.Error loading posts".tr(),
-                  style: const TextStyle(color: Colors.grey, fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), fontSize: 16),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
@@ -253,16 +253,16 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.people_outline, size: 60, color: Colors.grey),
+                Icon(Icons.people_outline, size: 60, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
                 SizedBox(height: 16),
                 Text(
                   "Feed.No posts from friends".tr(),
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), fontSize: 16),
                 ),
                 SizedBox(height: 8),
                 Text(
                   "Feed.Add friends to see posts".tr(),
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4), fontSize: 14),
                 ),
               ],
             ),
@@ -306,7 +306,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
   /// UI cho từng post
   Widget buidUiPost(PostModel post) {
-    final time = TimeagoSetup.formatTime(post.createdAt, context.locale.languageCode); // thời gian đăng dạng "2h ago"
+  final colorScheme = Theme.of(context).colorScheme;
+  final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
     // Lấy uid của user hiện tại
     final String? currentUserId = AuthService.currentUser?.uid;
@@ -317,12 +318,13 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
     bool isLiked =
         currentUserId != null && post.likedBy.contains(currentUserId);
 
+  // Removed duplicate textColor variable
     return Container(
       margin: const EdgeInsets.only(bottom: 1),
-      decoration: const BoxDecoration(
-        color: Colors.black,
+      decoration: BoxDecoration(
+        color: colorScheme.background,
         border: Border(
-          bottom: BorderSide(color: Color(0xFF262626), width: 0.5),
+          bottom: BorderSide(color: colorScheme.surface, width: 0.5),
         ),
       ),
       child: Padding(
@@ -343,18 +345,20 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                       ImageUtils.buildAvatar(
                         imageUrl: post.authorAvatar,
                         radius: 20,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Thay đổi từ Colors.grey sang Colors.black
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                 ),
                               )
                             : null,
+                        context: context,
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -362,8 +366,8 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         children: [
                           Text(
                             post.authorName,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: textColor,
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
@@ -375,7 +379,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                             ),
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: colorScheme.secondary.withOpacity(0.5),
                             ),
                           ),
                         ],
@@ -386,7 +390,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 // Nút 3 chấm
                 GestureDetector(
                   onTap: () => _showMoreOptions(post),
-                  child: const Icon(Icons.more_horiz, color: Colors.grey),
+                  child: Icon(Icons.more_horiz, color: colorScheme.secondary),
                 ),
               ],
             ),
@@ -409,9 +413,9 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 trimMode: TrimMode.Line,
                 trimCollapsedText: " ${'Feed.More'.tr()}",
                 trimExpandedText: "  ${'Feed.Hide'.tr()}",
-                moreStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                lessStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                style: const TextStyle(fontSize: 20, color: Colors.white),
+                moreStyle: TextStyle(color: colorScheme.secondary, fontSize: 15),
+                lessStyle: TextStyle(color: colorScheme.secondary, fontSize: 15),
+                style: TextStyle(fontSize: 20, color: textColor),
                 textAlign: TextAlign.start,
               ),
             ),
@@ -452,7 +456,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 Text(
                   '$likeCount ${'Feed.Like'.tr()}',
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: colorScheme.secondary.withOpacity(0.4),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -471,7 +475,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   child: Text(
                     '$commentCount ${'Feed.Comment'.tr()}',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: colorScheme.secondary.withOpacity(0.4),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -517,7 +521,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                         scale: _likeAnimation.value,
                         child: Icon(
                           isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                          color: isLiked ? Colors.red : Colors.grey[400],
+                          color: isLiked ? Colors.red : colorScheme.secondary.withOpacity(0.4),
                           size: 22,
                         ),
                       );
@@ -539,7 +543,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   },
                   child: Icon(
                     BoxIcons.bx_message_rounded,
-                    color: Colors.grey[400],
+                    color: colorScheme.secondary.withOpacity(0.4),
                     size: 22,
                   ),
                 ),
@@ -547,7 +551,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                 const SizedBox(width: 16),
 
                 // SHARE BUTTON
-                Icon(BoxIcons.bx_send, color: Colors.grey[400], size: 22),
+                Icon(BoxIcons.bx_send, color: colorScheme.secondary.withOpacity(0.4), size: 22),
 
                 const Spacer(),
 
@@ -560,7 +564,7 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
                   },
                   child: Icon(
                     isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                    color: isBookmarked ? Colors.yellow : Colors.grey[400],
+                    color: isBookmarked ? Colors.yellow : colorScheme.secondary.withOpacity(0.4),
                     size: 22,
                   ),
                 ),

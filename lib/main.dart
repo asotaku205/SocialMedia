@@ -5,6 +5,8 @@ import 'firebase_options.dart';
 import 'features/auth/auth_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'utils/timeago_setup.dart';
+import 'package:provider/provider.dart';
+import 'resource/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,117 +43,128 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Auth Demo',
-      debugShowCheckedModeBanner: false,
-
-      theme: ThemeData(
-        fontFamily:
-            'SFProDisplay', // set font cho toàn app
-        brightness:
-            Brightness.dark, // Chế độ dark
-        scaffoldBackgroundColor:
-            Colors.black, // Nền app đen
-        primaryColor: Colors.white,
-        colorScheme: ColorScheme.dark(
-          primary: Colors.white,
-          secondary: Colors.white,
-          background: Colors.black,
-        ),
-        // AppBar theme
-        appBarTheme: const AppBarTheme(
-          backgroundColor:
-              Colors.black, // nền đen
-          foregroundColor: Colors
-              .white, // chữ/trở lại/ icon trắng
-          elevation: 0, // loại bỏ shadow nếu muốn
-        ),
-
-        bottomNavigationBarTheme:
-            const BottomNavigationBarThemeData(
-              backgroundColor:
-                  Colors.black,
-              type: BottomNavigationBarType
-                  .fixed, // hiển thị tất cả item
-            ),
-        // Text mặc định màu trắng
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(
-            color: Colors.white,
-          ),
-          bodyMedium: TextStyle(
-            color: Colors.white,
-          ),
-          bodySmall: TextStyle(
-            color: Colors.white,
-          ),
-          titleLarge: TextStyle(
-            color: Colors.white,
-          ),
-          titleMedium: TextStyle(
-            color: Colors.white,
-          ),
-          titleSmall: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-
-        // Input field theme
-        inputDecorationTheme:
-            InputDecorationTheme(
-              filled: true,
-              fillColor: Colors.grey[900],
-              hintStyle: const TextStyle(
-                color: Colors.grey,
+    return ChangeNotifierProvider(
+      create: (_) => ThemeProvider(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'Flutter Auth Demo',
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              fontFamily: 'SFProDisplay',
+              brightness: Brightness.light,
+              scaffoldBackgroundColor: Colors.white,
+              primaryColor: Colors.black,
+              colorScheme: ColorScheme.light(
+                primary: Colors.black,
+                secondary: Colors.black,
+                background: Colors.white,
               ),
-              labelStyle: const TextStyle(
-                color: Colors.white,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                elevation: 0,
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Colors.white,
+              bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+                backgroundColor: Colors.white,
+                type: BottomNavigationBarType.fixed,
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.black),
+                bodyMedium: TextStyle(color: Colors.black),
+                bodySmall: TextStyle(color: Colors.black),
+                titleLarge: TextStyle(color: Colors.black),
+                titleMedium: TextStyle(color: Colors.black),
+                titleSmall: TextStyle(color: Colors.black),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Colors.grey[200],
+                hintStyle: const TextStyle(color: Colors.grey),
+                labelStyle: const TextStyle(color: Colors.black),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black, width: 2),
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius:
-                    BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                  color: Colors.white,
-                  width: 2,
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black, width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
-
-        // Button theme - Outline trắng
-        elevatedButtonTheme:
-            ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors
-                    .transparent, // Nền trong suốt
-                foregroundColor:
-                    Colors.white, // Chữ trắng
-                side: const BorderSide(
-                  color: Colors.white,
-                  width: 1.5,
-                ), // Viền trắng
-                padding:
-                    const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(12),
+            darkTheme: ThemeData(
+              fontFamily: 'SFProDisplay',
+              brightness: Brightness.dark,
+              scaffoldBackgroundColor: Colors.black,
+              primaryColor: Colors.white,
+              colorScheme: ColorScheme.dark(
+                primary: Colors.white,
+                secondary: Colors.white,
+                background: Colors.black,
+              ),
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+                backgroundColor: Colors.black,
+                type: BottomNavigationBarType.fixed,
+              ),
+              textTheme: const TextTheme(
+                bodyLarge: TextStyle(color: Colors.white),
+                bodyMedium: TextStyle(color: Colors.white),
+                bodySmall: TextStyle(color: Colors.white),
+                titleLarge: TextStyle(color: Colors.white),
+                titleMedium: TextStyle(color: Colors.white),
+                titleSmall: TextStyle(color: Colors.white),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Colors.grey[900],
+                hintStyle: const TextStyle(color: Colors.grey),
+                labelStyle: const TextStyle(color: Colors.white),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.white),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.white, width: 2),
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white, width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
+            themeMode: themeProvider.themeMode,
+            localizationsDelegates: context.localizationDelegates,
+            locale: context.locale,
+            supportedLocales: context.supportedLocales,
+            // Màn hình khởi đầu
+            home: const AuthWrapper(),
+          );
+        },
       ),
-      localizationsDelegates: context.localizationDelegates,
-      locale: context.locale ,
-      supportedLocales: context.supportedLocales,
-      // Màn hình khởi đầu
-      home: const AuthWrapper(),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:icons_plus/icons_plus.dart';
 import '../auth/screens/forgot_password_page.dart';
 import '../../../models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'theme_switcher_tile.dart';
 
 class Setting extends StatefulWidget {
   final String? uid;
@@ -63,13 +64,15 @@ class _SettingState extends State<Setting> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Settings.Settings'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: textColor,
             fontSize: 25,
             ),
         ),
@@ -88,7 +91,7 @@ class _SettingState extends State<Setting> {
                         // Avatar đơn giản với CircleAvatar
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: Colors.grey[300],
+                          backgroundColor: colorScheme.secondary.withOpacity(0.2),
                           backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL.isNotEmpty
                               ? NetworkImage(currentUser!.photoURL)
                               : null,
@@ -97,10 +100,10 @@ class _SettingState extends State<Setting> {
                                   currentUser?.userName.isNotEmpty == true
                                       ? currentUser!.userName[0].toUpperCase()
                                       : '?',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: textColor,
                               ),
                             )
                             : null,
@@ -112,10 +115,10 @@ class _SettingState extends State<Setting> {
                               : currentUser?.userName.isNotEmpty == true
                                   ? currentUser!.userName
                                   : "Username",
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white
+                              color: textColor
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -123,16 +126,16 @@ class _SettingState extends State<Setting> {
                           currentUser?.email.isNotEmpty == true
                               ? currentUser!.email
                               : "Email",
-                          style: const TextStyle(fontSize: 16, color: Colors.grey),
+                          style: TextStyle(fontSize: 16, color: colorScheme.secondary),
                         ),
                         if (currentUser?.bio.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
                               currentUser!.bio,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey,
+                                color: colorScheme.secondary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -141,13 +144,13 @@ class _SettingState extends State<Setting> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Divider(color: Colors.grey, thickness: 1),
+                  Divider(color: colorScheme.secondary, thickness: 1),
                   const SizedBox(height: 20,),
                   // Edit Profile
                   ListTile(
-                    leading: const Icon(BoxIcons.bx_user),
-                    title: Text('Profile.Edit Profile'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+                    leading: Icon(BoxIcons.bx_user, color: colorScheme.primary),
+                    title: Text('Profile.Edit Profile'.tr(), style: TextStyle(fontSize: 16, color: textColor)),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.secondary),
                     onTap: () async {
                       final result = await Navigator.push(
                         context,
@@ -160,16 +163,16 @@ class _SettingState extends State<Setting> {
                       }
                     },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    tileColor: const Color(0xFF1F1F1F),
+                    tileColor: Theme.of(context).colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
                   const SizedBox(height: 10),
 
                   // Change Password
                   ListTile(
-                    leading: const Icon(BoxIcons.bx_lock),
-                    title: Text('Authentication.Reset Password'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+                    leading: Icon(BoxIcons.bx_lock, color: colorScheme.primary),
+                    title: Text('Authentication.Reset Password'.tr(), style: TextStyle(fontSize: 16, color: textColor)),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.secondary),
                     onTap: () {
                       Navigator.push(context,
                         MaterialPageRoute(
@@ -178,21 +181,24 @@ class _SettingState extends State<Setting> {
                       );
                     },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    tileColor: const Color(0xFF1F1F1F),
+                    tileColor: Theme.of(context).colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
                   const SizedBox(height: 10),
                   ListTile(
-                    leading: const Icon(Icons.language),
-                    title: Text('Settings.Language'.tr(), style: const TextStyle(fontSize: 16, color: Colors.white)),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.white70),
+                    leading: Icon(Icons.language, color: colorScheme.primary),
+                    title: Text('Settings.Language'.tr(), style: TextStyle(fontSize: 16, color: textColor)),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.secondary),
                     onTap: () {
                       _showLanguageDialog(context);
                     },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    tileColor: const Color(0xFF1F1F1F),
+                    tileColor: Theme.of(context).colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
+                  const SizedBox(height: 10),
+                  // Theme Switcher
+                  ThemeSwitcherTile(),
                   const SizedBox(height: 10),
                   // Log Out Button
                   Center(
@@ -203,7 +209,7 @@ class _SettingState extends State<Setting> {
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.5),
+                            color: colorScheme.primary.withOpacity(0.2),
                             blurRadius: 6,
                             offset: const Offset(0, 3),
                           ),
@@ -218,7 +224,7 @@ class _SettingState extends State<Setting> {
                         ),
                         child: Text(
                           'Settings.Logout'.tr(),
-                          style: const TextStyle(fontSize: 16, color: Colors.white),
+                          style: TextStyle(fontSize: 16, color: textColor),
                         ),
                       ),
                     ),
@@ -234,17 +240,19 @@ class _SettingState extends State<Setting> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        final textColor = Theme.of(context).textTheme.bodyLarge?.color;
         return AlertDialog(
-          backgroundColor: Colors.grey[900],
-          title: Text('Settings.Change Language'.tr(), style: const TextStyle(color: Colors.white)),
+          backgroundColor: colorScheme.background,
+          title: Text('Settings.Change Language'.tr(), style: TextStyle(color: textColor)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.language, color: Colors.white),
-                title: Text('Settings.English'.tr(), style: const TextStyle(color: Colors.white)),
+                leading: Icon(Icons.language, color: textColor),
+                title: Text('Settings.English'.tr(), style: TextStyle(color: textColor)),
                 trailing: context.locale.languageCode == 'en'
-                    ? const Icon(Icons.check, color: Colors.green)
+                    ? Icon(Icons.check, color: Colors.green)
                     : null,
                 onTap: () async {
                   await context.setLocale(const Locale('en'));
@@ -259,10 +267,10 @@ class _SettingState extends State<Setting> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.language, color: Colors.white),
-                title: Text('Settings.Vietnamese'.tr(), style: const TextStyle(color: Colors.white)),
+                leading: Icon(Icons.language, color: textColor),
+                title: Text('Settings.Vietnamese'.tr(), style: TextStyle(color: textColor)),
                 trailing: context.locale.languageCode == 'vi'
-                    ? const Icon(Icons.check, color: Colors.green)
+                    ? Icon(Icons.check, color: Colors.green)
                     : null,
                 onTap: () async {
                   await context.setLocale(const Locale('vi'));
@@ -281,7 +289,7 @@ class _SettingState extends State<Setting> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('General.Cancel'.tr(), style: const TextStyle(color: Colors.grey)),
+              child: Text('General.Cancel'.tr(), style: TextStyle(color: colorScheme.secondary)),
             ),
           ],
         );

@@ -88,10 +88,11 @@ class _FriendsScreenState extends State<FriendsScreen>
         setState(() {
           isLoadingFriends = false;
         });
+        final colorScheme = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${"General.Error".tr()}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -140,10 +141,11 @@ class _FriendsScreenState extends State<FriendsScreen>
         setState(() {
           isLoadingRequests = false;
         });
+        final colorScheme = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${"General.Error".tr()}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: colorScheme.error,
           ),
         );
       }
@@ -227,6 +229,8 @@ class _FriendsScreenState extends State<FriendsScreen>
   }
 
   Widget _buildFriendsTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return isLoadingFriends
         ? Center(child: CircularProgressIndicator())
         : friends.isEmpty
@@ -234,16 +238,16 @@ class _FriendsScreenState extends State<FriendsScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.people_outline, size: 80, color: Colors.grey),
+                    Icon(Icons.people_outline, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
                     const SizedBox(height: 16),
                     Text(
                       'Friend.You have no friends yet.'.tr(),
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
+                      style: textTheme.bodyLarge?.copyWith(fontSize: 18, color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Friend.Lets find some!'.tr(),
-                      style: const TextStyle(color: Colors.grey),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                   ],
                 ),
@@ -264,6 +268,8 @@ class _FriendsScreenState extends State<FriendsScreen>
   }
 
   Widget _buildFriendRequestsTab() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return isLoadingRequests
         ? Center(child: CircularProgressIndicator())
         : pendingRequests.isEmpty
@@ -271,16 +277,16 @@ class _FriendsScreenState extends State<FriendsScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
+                    Icon(Icons.inbox_outlined, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
                     const SizedBox(height: 16),
                     Text(
                       'Friend.No new requests'.tr(),
-                      style: const TextStyle(fontSize: 18, color: Colors.grey),
+                      style: textTheme.bodyLarge?.copyWith(fontSize: 18, color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Friend.Friend request desc'.tr(),
-                      style: const TextStyle(color: Colors.grey),
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                   ],
                 ),

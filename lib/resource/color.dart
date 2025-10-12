@@ -4,23 +4,29 @@ import 'package:flutter/material.dart';
 // File chứa các màu sắc constants được sử dụng trong toàn bộ app
 // Giúp maintain consistency và dễ dàng thay đổi theme
 
-// Màu nền cho mobile - màu đen hoàn toàn (0,0,0,1)
-const mobileBackgroundColor = Color.fromRGBO(0,0,0,1);
 
-// Màu nền cho web - màu xám đậm (18,18,18,1)
-const webBackgroundColor = Color.fromRGBO(18,18,18,1);
+// DARK MODE COLORS
+const mobileBackgroundColor = Color(0xFF181A20); // Đen xám hiện đại
+const webBackgroundColor = Color(0xFF23272F); // Xám đậm hơn cho web
+const mobileSearchColor = Color(0xFF23272F);
+const webSearchColor = Color(0xFF2C313A);
+const primaryColor = Color(0xFF1E1E2C); // Xanh đậm
+const secondaryColor = Color(0xFF8A8D90); // Xám nhạt
+const accentColor = Color(0xFF6C63FF); // Tím xanh nổi bật
+const cardColorDark = Color(0xFF23272F);
+const surfaceDark = Color(0xFF23272F);
+const onPrimaryDark = Colors.white;
+const onBackgroundDark = Colors.white;
 
-// Màu nền cho search bar trên mobile - màu xám đậm (38,38,38,1)
-const mobileSearchColor = Color.fromRGBO(38,38,38,1);
-
-// Màu nền cho search bar trên web - màu xám đậm hơn (42,42,42,1)
-const webSearchColor = Color.fromRGBO(42,42,42,1);
-
-// Màu chính của app - màu xanh đậm (#1E1E2C)
-const primaryColor = Color(0xFF1E1E2C);
-
-// Màu phụ của app - màu xám từ Colors built-in
-const secondaryColor = Colors.grey;
-
-// Màu nhấn (accent) - màu tím xanh (#6C63FF) để highlight các element quan trọng
-const Color accentColor = Color(0xFF6C63FF);
+// LIGHT MODE COLORS
+const mobileBackgroundColorLight = Color(0xFFF5F6FA); // Nền sáng nhẹ
+const webBackgroundColorLight = Color(0xFFFFFFFF); // Trắng tinh khiết
+const mobileSearchColorLight = Color(0xFFE9EAF3); // Xám sáng cho search
+const webSearchColorLight = Color(0xFFF0F1F6);
+const primaryColorLight = Color(0xFF22223B); // Xanh đen đậm cho text/logo
+const secondaryColorLight = Color(0xFF6C757D); // Xám trung tính
+const accentColorLight = Color(0xFF4F8CFF); // Xanh dương nổi bật
+const cardColorLight = Color(0xFFFFFFFF);
+const surfaceLight = Color(0xFFF5F6FA);
+const onPrimaryLight = Color(0xFF22223B);
+const onBackgroundLight = Color(0xFF22223B);

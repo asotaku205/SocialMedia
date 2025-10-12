@@ -107,10 +107,12 @@ class FriendRequestCard extends StatelessWidget {
             Row(
               children: [
                 ImageUtils.buildAvatar(
-                  imageUrl: sender.photoURL,
-                  child: sender.photoURL.isEmpty 
-                      ? const Icon(Icons.person, color: Colors.black) // Thay đổi từ Colors.grey sang Colors.black
-                      : null,
+          imageUrl: sender.photoURL,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+          child: sender.photoURL.isEmpty 
+            ? Icon(Icons.person, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white)
+            : null,
+          context: context,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

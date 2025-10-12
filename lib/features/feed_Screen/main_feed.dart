@@ -21,6 +21,10 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoPath = isDark
+        ? 'assets/logo/logoAppRemovebg.webp'
+        : 'assets/logo/logoApp_pure_black.png';
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -29,11 +33,10 @@ class _FeedScreenState extends State<FeedScreen> {
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavigation()), (route) => false);
           },
           child: Image.asset(
-            'assets/logo/logoAppRemovebg.webp',
+            logoPath,
             fit: BoxFit.cover,
           ),
         ),
-
         actions: [
           IconButton(
             onPressed: () {
