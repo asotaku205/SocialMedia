@@ -10,15 +10,13 @@ import 'post_profile.dart';
 import '../../utils/image_utils.dart';
 import '../../widgets/full_screen_image.dart';
 import '../chat/chat_detail.dart';
+
 class OtherUserProfileScreen extends StatefulWidget {
   final String userId;
   final String? username;
 
-  const OtherUserProfileScreen({
-    Key? key,
-    required this.userId,
-    this.username,
-  }) : super(key: key);
+  const OtherUserProfileScreen({Key? key, required this.userId, this.username})
+    : super(key: key);
 
   @override
   State<OtherUserProfileScreen> createState() => _OtherUserProfileScreenState();
@@ -75,6 +73,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
       print('Error checking friendship status: $e');
     }
   }
+
   // Trả về String? (URL) hoặc null nếu không có avatar
   Future<String?> getUserAvatarUrl() async {
     try {
@@ -129,7 +128,9 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           setState(() {
             friendshipStatus = 'friends';
             if (currentUser != null) {
-              currentUser = currentUser!.copyWith(friendCount: currentUser!.friendCount + 1);
+              currentUser = currentUser!.copyWith(
+                friendCount: currentUser!.friendCount + 1,
+              );
             }
           });
           _showSnackBar('Friend.Accepted'.tr(), Colors.green);
@@ -140,7 +141,9 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           setState(() {
             friendshipStatus = 'none';
             if (currentUser != null) {
-              currentUser = currentUser!.copyWith(friendCount: currentUser!.friendCount - 1);
+              currentUser = currentUser!.copyWith(
+                friendCount: currentUser!.friendCount - 1,
+              );
             }
           });
           _showSnackBar('Friend.Unfriend Success'.tr(), Colors.red);
@@ -174,9 +177,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
       return Container(
         width: double.infinity,
         height: 40,
-        child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
 
@@ -241,9 +242,12 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                       MaterialPageRoute(
                         builder: (context) => ChatDetail(
                           otherUserId: widget.userId,
-                          otherUserName: currentUser?.displayName.isNotEmpty == true
+                          otherUserName:
+                              currentUser?.displayName.isNotEmpty == true
                               ? currentUser!.displayName
-                              : currentUser?.userName ?? widget.username ?? 'User',
+                              : currentUser?.userName ??
+                                    widget.username ??
+                                    'User',
                           otherUserAvatar: currentUser?.photoURL,
                         ),
                       ),
@@ -287,7 +291,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
       appBar: AppBar(
         title: Text(
           '${currentUser?.userName ?? currentUser?.displayName ?? widget.username ?? "Profile"}',
-          style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -314,7 +322,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                             FutureBuilder<String?>(
                               future: getUserAvatarUrl(),
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   // Neu dang trang thai cho se hien ra loading
                                   return Container(
                                     width: 100,
@@ -333,9 +342,6 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                   );
                                 }
 
-                                String? avatarUrl = snapshot.data;
-                                //gan URL tu snapshot cho bien avatarURL
-
                                 return ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: GestureDetector(
@@ -347,33 +353,49 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                           MaterialPageRoute(
                                             builder: (_) => FullScreenImage(
                                               imageUrl: url,
-                                              heroTag: 'other_profile_avatar_${currentUser?.uid}',
+                                              heroTag:
+                                                  'other_profile_avatar_${currentUser?.uid}',
                                             ),
                                           ),
                                         );
                                       }
                                     },
                                     child: Hero(
-                                      tag: 'other_profile_avatar_${currentUser?.uid}',
+                                      tag:
+                                          'other_profile_avatar_${currentUser?.uid}',
                                       child: ImageUtils.buildAvatar(
                                         imageUrl: currentUser?.photoURL,
-                                        radius: 50, // Tăng radius để vừa với container
-                                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                                        radius:
+                                            50, // Tăng radius để vừa với container
+                                        backgroundColor:
+                                            Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black,
                                         context: context,
-                                        child: currentUser?.photoURL == null ||
+                                        child:
+                                            currentUser?.photoURL == null ||
                                                 currentUser!.photoURL.isEmpty
                                             ? Text(
-                                                currentUser?.displayName != null &&
+                                                currentUser?.displayName !=
+                                                            null &&
                                                         currentUser!
                                                             .displayName
                                                             .isNotEmpty
-                                                    ? currentUser!.displayName[0]
+                                                    ? currentUser!
+                                                          .displayName[0]
                                                           .toUpperCase()
                                                     : '?',
                                                 style: TextStyle(
                                                   fontSize: 40,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                                                  color:
+                                                      Theme.of(
+                                                            context,
+                                                          ).brightness ==
+                                                          Brightness.dark
+                                                      ? Colors.black
+                                                      : Colors.white,
                                                 ),
                                               )
                                             : null,
@@ -390,10 +412,12 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                 children: [
                                   Text(
                                     '${currentUser?.displayName ?? currentUser?.userName ?? "Username"}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
                                     ),
                                   ),
                                   const SizedBox(height: 10),
@@ -404,15 +428,20 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                           Text(
                                             "Posts.Posts".tr(),
                                             style: TextStyle(
-                                              color: Colors.grey,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.6),
                                               fontSize: 14,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             '${currentUser?.postCount ?? 0}', // Sử dụng postCount từ Firebase
-                                            style: const TextStyle(
-                                              color: Colors.white,
+                                            style: TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurface,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -426,24 +455,31 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
-                                              FriendsScreen(userId: widget.userId),
+                                                  FriendsScreen(
+                                                    userId: widget.userId,
+                                                  ),
                                             ),
                                           );
                                         },
                                         child: Column(
                                           children: [
-                                             Text(
+                                            Text(
                                               "Friend.Friends".tr(),
                                               style: TextStyle(
-                                                color: Colors.grey,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.6),
                                                 fontSize: 14,
                                               ),
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
                                               '${currentUser?.friendCount ?? 0}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
+                                              style: TextStyle(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface,
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold,
                                               ),
@@ -464,9 +500,11 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             '${currentUser?.bio ?? "This is the user bio."}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
-                              color: Colors.white70,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ),
                         ),
@@ -478,23 +516,19 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                   ),
 
                   // Divider
-                  const Divider(
-                    height: 1,
-                    color: Colors.grey,
-                  ),
+                  const Divider(height: 1, color: Colors.grey),
 
                   // Posts Section
-
-                    Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 10),
-                          PostProfile(userId: widget.userId),
-                        ],
-                      ),
-                    )
+                  Padding(
+                    padding: const EdgeInsets.all(1.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 10),
+                        PostProfile(userId: widget.userId),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

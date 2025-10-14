@@ -1,0 +1,50 @@
+# Flutter specific
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Build outputs (except web)
+build/
+!build/web/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Test
+test/
+coverage/
+
+# Android/iOS (not needed for web)
+android/
+ios/
+linux/
+macos/
+windows/
+
+# Documentation
+*.md
+!README.md
+
+# Firebase local
+.firebase/
+firebase-debug.log
+firestore-debug.log

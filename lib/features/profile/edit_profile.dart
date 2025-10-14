@@ -274,7 +274,11 @@ class _EditProfileState extends State<EditProfile> {
                                 child: CircleAvatar(
                                   radius: 15,
                                   backgroundColor: colorScheme.primary,
-                                  child: const Icon(Icons.camera_alt, size: 15, color: Colors.white),
+                                  child: Icon(
+                                    Icons.camera_alt, 
+                                    size: 15, 
+                                    color: colorScheme.onPrimary,
+                                  ),
                                 ),
                               )
                             ],
