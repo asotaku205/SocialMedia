@@ -120,8 +120,10 @@ class AuthService {
       try {
         await EncryptionService.initializeKeys();
         print('Encryption keys initialized successfully for new user');
+        // Thực hiện migrate nếu là user cũ
+        await EncryptionService.migrateKeysIfNeeded();
       } catch (e) {
-        print('Warning: Could not initialize encryption keys: $e');
+        print('Warning: Could not initialize/migrate encryption keys: $e');
         // KHÔNG return lỗi ở đây - vẫn cho phép đăng ký thành công
         // User có thể khởi tạo keys sau khi đăng nhập
       }
@@ -178,11 +180,12 @@ class AuthService {
 
       // Kiểm tra document có tồn tại không
       if (userDoc.exists) {
-        // Khởi tạo keys mã hóa nếu chưa có
+        // Khởi tạo keys mã hóa nếu chưa có và migrate nếu là user cũ
         try {
           await EncryptionService.initializeKeys();
+          await EncryptionService.migrateKeysIfNeeded();
         } catch (e) {
-          print('Warning: Could not initialize encryption keys: $e');
+          print('Warning: Could not initialize/migrate encryption keys: $e');
         }
 
         // Convert Firestore data thành UserModel

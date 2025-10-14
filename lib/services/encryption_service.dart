@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt hide SecureRandom;
 import 'package:pointycastle/export.dart';
+import 'package:asn1lib/asn1lib.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +20,69 @@ class PrivateKeyNotFoundException implements Exception {
 }
 
 class EncryptionService {
+
+  /// Hàm migrate key cũ (custom) sang chuẩn PEM cho user hiện tại
+  /// Gọi hàm này một lần sau khi cập nhật code để đảm bảo user cũ không bị lỗi mã hóa/giải mã
+  static Future<void> migrateKeysIfNeeded() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    // Đọc private key cũ
+    final privateKeyRaw = await _secureStorage.read(key: _getPrivateKeyKey(userId));
+    final publicKeyRaw = await _secureStorage.read(key: _getPublicKeyKey(userId));
+    if (privateKeyRaw == null || publicKeyRaw == null) return;
+
+    // Nếu đã là PEM thì bỏ qua
+    if (privateKeyRaw.startsWith('-----BEGIN PRIVATE KEY-----') && publicKeyRaw.startsWith('-----BEGIN PUBLIC KEY-----')) {
+      print('🔑 Keys đã ở định dạng PEM, không cần migrate.');
+      return;
+    }
+
+    // Nếu là custom format thì migrate
+    try {
+      // Parse custom private key
+      final parts = privateKeyRaw.split(':');
+      if (parts.length < 6) {
+        print('❌ Private key không đúng định dạng custom, bỏ qua migrate.');
+        return;
+      }
+      final modulus = base64.decode(parts[1]);
+      final exponent = base64.decode(parts[2]);
+      final privateExponent = base64.decode(parts[3]);
+      final p = base64.decode(parts[4]);
+      final q = base64.decode(parts[5]);
+      final modulusInt = _bytesToBigInt(modulus);
+      final exponentInt = _bytesToBigInt(exponent);
+      final privateExponentInt = _bytesToBigInt(privateExponent);
+      final pInt = _bytesToBigInt(p);
+      final qInt = _bytesToBigInt(q);
+      final privKey = RSAPrivateKey(modulusInt, privateExponentInt, pInt, qInt);
+      final pubKey = RSAPublicKey(modulusInt, exponentInt);
+
+      // Encode lại sang PEM
+      final privateKeyPem = _encodePrivateKeyToPem(privKey);
+      final publicKeyPem = _encodePublicKeyToPem(pubKey);
+
+      // Ghi đè lại vào storage
+      await _secureStorage.write(key: _getPrivateKeyKey(userId), value: privateKeyPem);
+      await _secureStorage.write(key: _getPublicKeyKey(userId), value: publicKeyPem);
+
+      // Update Firestore nếu cần
+      await _firestore.collection('users').doc(userId).update({'publicKey': publicKeyPem});
+
+      print('✅ Đã migrate key sang PEM cho user $userId');
+    } catch (e) {
+      print('❌ Lỗi migrate key: $e');
+    }
+  }
+
+  static BigInt _bytesToBigInt(List<int> bytes) {
+    var result = BigInt.zero;
+    for (var byte in bytes) {
+      result = (result << 8) | BigInt.from(byte);
+    }
+    return result;
+  }
   static final _secureStorage = FlutterSecureStorage();
   static final _firestore = FirebaseFirestore.instance;
   static final _auth = FirebaseAuth.instance;
@@ -190,69 +254,61 @@ class EncryptionService {
   }
 
   static String _encodePublicKeyToPem(RSAPublicKey publicKey) {
-    final modulus = base64.encode(_encodeBigInt(publicKey.modulus!));
-    final exponent = base64.encode(_encodeBigInt(publicKey.exponent!));
-    return 'PUBLIC:$modulus:$exponent';
+    final algorithmSeq = ASN1Sequence()
+      ..add(ASN1ObjectIdentifier.fromName('rsaEncryption'))
+      ..add(ASN1Null());
+    final publicKeySeq = ASN1Sequence()
+      ..add(ASN1Integer(publicKey.modulus!))
+      ..add(ASN1Integer(publicKey.exponent!));
+    final publicKeyBitString = ASN1BitString(Uint8List.fromList(publicKeySeq.encodedBytes));
+    final topLevelSeq = ASN1Sequence()
+      ..add(algorithmSeq)
+      ..add(publicKeyBitString);
+    final dataBase64 = base64.encode(topLevelSeq.encodedBytes);
+    return '-----BEGIN PUBLIC KEY-----\n$dataBase64\n-----END PUBLIC KEY-----';
   }
 
   static String _encodePrivateKeyToPem(RSAPrivateKey privateKey) {
-    final modulus = base64.encode(_encodeBigInt(privateKey.modulus!));
-    final exponent = base64.encode(_encodeBigInt(privateKey.exponent!));
-    final privateExponent = base64.encode(
-      _encodeBigInt(privateKey.privateExponent!),
-    );
-    final p = base64.encode(_encodeBigInt(privateKey.p!));
-    final q = base64.encode(_encodeBigInt(privateKey.q!));
-    return 'PRIVATE:$modulus:$exponent:$privateExponent:$p:$q';
+    final privateKeySeq = ASN1Sequence()
+      ..add(ASN1Integer(BigInt.from(0)))
+      ..add(ASN1Integer(privateKey.modulus!))
+      ..add(ASN1Integer(privateKey.publicExponent!))
+      ..add(ASN1Integer(privateKey.privateExponent!))
+      ..add(ASN1Integer(privateKey.p!))
+      ..add(ASN1Integer(privateKey.q!))
+      ..add(ASN1Integer(privateKey.privateExponent! % (privateKey.p! - BigInt.one)))
+      ..add(ASN1Integer(privateKey.privateExponent! % (privateKey.q! - BigInt.one)))
+      ..add(ASN1Integer(privateKey.q!.modInverse(privateKey.p!)));
+    final dataBase64 = base64.encode(privateKeySeq.encodedBytes);
+    return '-----BEGIN PRIVATE KEY-----\n$dataBase64\n-----END PRIVATE KEY-----';
   }
 
   static RSAPublicKey _decodePublicKeyFromPem(String pem) {
-    final parts = pem.split(':');
-    final modulus = _decodeBigInt(base64.decode(parts[1]));
-    final exponent = _decodeBigInt(base64.decode(parts[2]));
-    return RSAPublicKey(modulus, exponent);
+  final lines = pem.split('\n');
+  final base64Str = lines.sublist(1, lines.length - 1).join('');
+  final asn1Parser = ASN1Parser(base64.decode(base64Str));
+  final topLevelSeq = asn1Parser.nextObject() as ASN1Sequence;
+  final publicKeyBitString = topLevelSeq.elements[1] as ASN1BitString;
+  final publicKeyAsn = ASN1Parser(publicKeyBitString.valueBytes());
+  final publicKeySeq = publicKeyAsn.nextObject() as ASN1Sequence;
+  final modulus = (publicKeySeq.elements[0] as ASN1Integer).valueAsBigInteger;
+  final exponent = (publicKeySeq.elements[1] as ASN1Integer).valueAsBigInteger;
+  return RSAPublicKey(modulus, exponent);
   }
 
   static RSAPrivateKey _decodePrivateKeyFromPem(String pem) {
-    try {
-      final parts = pem.split(':');
-      if (parts.length < 6) {
-        throw Exception(
-          'Invalid private key format: expected 6 parts, got ${parts.length}',
-        );
-      }
-
-      final modulus = _decodeBigInt(base64.decode(parts[1]));
-      // parts[2] is public exponent - not needed for RSAPrivateKey constructor
-      final privateExponent = _decodeBigInt(base64.decode(parts[3]));
-      final p = _decodeBigInt(base64.decode(parts[4]));
-      final q = _decodeBigInt(base64.decode(parts[5]));
-
-      return RSAPrivateKey(modulus, privateExponent, p, q);
-    } catch (e) {
-      print('Error decoding private key from PEM: $e');
-      print('PEM format: ${pem.substring(0, min(50, pem.length))}...');
-      rethrow;
-    }
+  final lines = pem.split('\n');
+  final base64Str = lines.sublist(1, lines.length - 1).join('');
+  final asn1Parser = ASN1Parser(base64.decode(base64Str));
+  final seq = asn1Parser.nextObject() as ASN1Sequence;
+  final modulus = (seq.elements[1] as ASN1Integer).valueAsBigInteger;
+  // final publicExponent = (seq.elements[2] as ASN1Integer).valueAsBigInteger; // not used
+  final privateExponent = (seq.elements[3] as ASN1Integer).valueAsBigInteger;
+  final p = (seq.elements[4] as ASN1Integer).valueAsBigInteger;
+  final q = (seq.elements[5] as ASN1Integer).valueAsBigInteger;
+  return RSAPrivateKey(modulus, privateExponent, p, q);
   }
 
-  static Uint8List _encodeBigInt(BigInt number) {
-    final bytes = (number.toRadixString(16).length / 2).ceil();
-    final result = Uint8List(bytes);
-    for (var i = 0; i < bytes; i++) {
-      result[bytes - 1 - i] = (number & BigInt.from(0xff)).toInt();
-      number = number >> 8;
-    }
-    return result;
-  }
-
-  static BigInt _decodeBigInt(List<int> bytes) {
-    var result = BigInt.zero;
-    for (var byte in bytes) {
-      result = (result << 8) | BigInt.from(byte);
-    }
-    return result;
-  }
 
   static SecureRandom _getSecureRandom() {
     final secureRandom = FortunaRandom();
