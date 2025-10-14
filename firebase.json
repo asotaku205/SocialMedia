@@ -20,18 +20,18 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "social-media-f81c5",
-          "appId": "1:160770629814:android:6a037a9f15ded9b6248617",
+          "projectId": "socialmediafase2",
+          "appId": "1:273315284275:android:c3fc3d6b3fdd1d8fd6ea46",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "social-media-f81c5",
+          "projectId": "socialmediafase2",
           "configurations": {
-            "android": "1:160770629814:android:6a037a9f15ded9b6248617",
-            "ios": "1:160770629814:ios:ec0126ff785166e9248617",
-            "web": "1:160770629814:web:5dade9282373b154248617"
+            "android": "1:273315284275:android:c3fc3d6b3fdd1d8fd6ea46",
+            "ios": "1:273315284275:ios:84f75a287aa4bcacd6ea46",
+            "web": "1:273315284275:web:3b68914ed744a60dd6ea46"
           }
         }
       }
