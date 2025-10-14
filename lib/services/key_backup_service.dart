@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'encryption_service.dart';
+import 'secure_storage_service.dart';
 
 /// Service để backup và restore Private Key
 /// 
@@ -15,7 +15,6 @@ import 'encryption_service.dart';
 class KeyBackupService {
   static final _firestore = FirebaseFirestore.instance;
   static final _auth = FirebaseAuth.instance;
-  static final _secureStorage = FlutterSecureStorage();
 
   /// Backup Private Key lên Firebase (mã hóa bằng password)
   /// 
@@ -31,13 +30,20 @@ class KeyBackupService {
 
       print('🔐 Bắt đầu backup Private Key...');
 
+      // Đảm bảo user có keys trước khi backup
+      final hasKeys = await EncryptionService.hasValidKeys();
+      if (!hasKeys) {
+        print('⚠️ User chưa có keys, đang khởi tạo...');
+        await EncryptionService.initializeKeys();
+      }
+
       // Lấy Private Key từ local storage
-      final privateKey = await _secureStorage.read(
+      final privateKey = await SecureStorageService.read(
         key: 'rsa_private_key_$userId',
       );
 
       if (privateKey == null) {
-        throw Exception('Private Key không tồn tại');
+        throw Exception('Private Key không tồn tại sau khi khởi tạo. Vui lòng thử lại.');
       }
 
       // Tạo encryption key từ password (PBKDF2)
@@ -59,6 +65,7 @@ class KeyBackupService {
         'iv': encryptedPrivateKey['iv'],
         'hmac': encryptedPrivateKey['hmac'],
         'checksum': checksum,
+        'backupMethod': 'manual', // 🆕 Phân biệt với auto-backup
         'backedUpAt': FieldValue.serverTimestamp(),
         'version': '1.0',
       });
@@ -120,7 +127,7 @@ class KeyBackupService {
         }
 
         // Lưu Private Key vào local storage
-        await _secureStorage.write(
+        await SecureStorageService.write(
           key: 'rsa_private_key_$userId',
           value: decryptedPrivateKey,
         );

@@ -104,6 +104,13 @@ service cloud.firestore {
                    request.auth.uid == resource.data.userId;
     }
 
+    // ==== KEY BACKUPS COLLECTION (cho encryption keys) ====
+    match /key_backups/{userId} {
+      // Đọc/Ghi: Chỉ user được đọc/ghi backup của chính mình
+      allow read, write: if request.auth != null &&
+                        request.auth.uid == userId;
+    }
+
     // ==== CHATS COLLECTION (nếu có chat feature) ====
     match /chats/{chatId} {
       // Đọc/Ghi: Chỉ participants mới có thể truy cập chat

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/user_model.dart';
 import 'encryption_service.dart';
+import 'secure_storage_service.dart';
 
 // Class AuthService - quản lý tất cả logic xác thực người dùng
 class AuthService {
@@ -120,10 +121,8 @@ class AuthService {
       try {
         await EncryptionService.initializeKeys();
         print('Encryption keys initialized successfully for new user');
-        // Thực hiện migrate nếu là user cũ
-        await EncryptionService.migrateKeysIfNeeded();
       } catch (e) {
-        print('Warning: Could not initialize/migrate encryption keys: $e');
+        print('Warning: Could not initialize encryption keys: $e');
         // KHÔNG return lỗi ở đây - vẫn cho phép đăng ký thành công
         // User có thể khởi tạo keys sau khi đăng nhập
       }
@@ -180,12 +179,14 @@ class AuthService {
 
       // Kiểm tra document có tồn tại không
       if (userDoc.exists) {
-        // Khởi tạo keys mã hóa nếu chưa có và migrate nếu là user cũ
+        // Khởi tạo keys mã hóa nếu chưa có
         try {
           await EncryptionService.initializeKeys();
-          await EncryptionService.migrateKeysIfNeeded();
+          
+          // 🆕 Migration cho user cũ (bật lại - hoạt động trên tất cả platforms)
+          await EncryptionService.migrateOldUserKeys();
         } catch (e) {
-          print('Warning: Could not initialize/migrate encryption keys: $e');
+          print('Warning: Could not initialize encryption keys: $e');
         }
 
         // Convert Firestore data thành UserModel
@@ -219,16 +220,24 @@ class AuthService {
 
   static Future<void> logout() async {
     try {
-      // KHÔNG xóa encryption keys khi logout thông thường
+      final userId = _auth.currentUser?.uid;
+      
+      // KHÔNG xóa encryption keys từ storage khi logout thông thường
       // Khóa sẽ được giữ lại để user có thể xem tin nhắn cũ khi đăng nhập lại
-      // Chỉ xóa khóa khi: reset password, xóa thiết bị tin cậy, etc.
+      // NHƯNG phải clear memory cache để tránh conflict giữa các accounts
+      
+      if (userId != null) {
+        // 🆕 Clear memory cache của user này (quan trọng cho multi-account)
+        SecureStorageService.clearMemoryCacheForUser(userId);
+        print('🗑️ Cleared memory cache for user: $userId');
+      }
       
       // signOut(): xóa authentication state, user sẽ thành null
       await _auth.signOut();
 
-      print('User logged out successfully (encryption keys preserved)');
+      print('✅ User logged out successfully (encryption keys preserved in storage)');
     } catch (e) {
-      print('Error during logout: $e');
+      print('❌ Error during logout: $e');
     }
   }
 
