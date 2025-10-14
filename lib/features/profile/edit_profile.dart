@@ -86,7 +86,7 @@ class _EditProfileState extends State<EditProfile> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading user data: $e'),
+            content: Text('${"General.Error".tr()}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -205,6 +205,8 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile.Edit Profile'.tr(),
@@ -266,13 +268,13 @@ class _EditProfileState extends State<EditProfile> {
                                             )
                                           : null,
                                     ),
-                              const Positioned(
+                              Positioned(
                                 bottom: 0,
                                 right: 0,
                                 child: CircleAvatar(
                                   radius: 15,
-                                  backgroundColor: Colors.grey,
-                                  child: Icon(Icons.camera_alt, size: 15, color: Colors.white),
+                                  backgroundColor: colorScheme.primary,
+                                  child: const Icon(Icons.camera_alt, size: 15, color: Colors.white),
                                 ),
                               )
                             ],

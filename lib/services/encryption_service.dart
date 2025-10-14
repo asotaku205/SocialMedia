@@ -46,6 +46,17 @@ class EncryptionService {
         return;
       }
 
+      // Kiểm tra có backup trên Firebase không
+      print('Checking for existing backup on Firebase...');
+      final backupDoc = await _firestore.collection('key_backups').doc(userId).get();
+      if (backupDoc.exists) {
+        print('⚠️ Found backup on Firebase but no local keys!');
+        print('💡 User needs to restore keys manually from Settings > Backup Private Key');
+        // Không tự động restore vì cần password
+        // User sẽ được nhắc qua BackupReminderDialog
+        return;
+      }
+
       print('Generating new RSA key pair for user $userId...');
       
       // Web không hỗ trợ isolates, phải chạy đồng bộ

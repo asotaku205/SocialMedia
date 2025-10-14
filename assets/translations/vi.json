@@ -68,6 +68,7 @@
   "Chat": {
     "Chats": "Trò chuyện",
     "Messages": "Tin nhắn",
+    "Message": "Nhắn tin",
     "New Chat": "Trò chuyện mới",
     "You":"Bạn:",
     "Start Chat": "Bắt đầu trò chuyện",
@@ -78,7 +79,11 @@
     "Online": "Trực tuyến",
     "Offline": "Ngoại tuyến",
     "Last seen": "Lần cuối truy cập",
-    "at": "vào lúc"
+    "at": "vào lúc",
+    "Media": "Phương tiện",
+    "Clear Chat": "Xóa cuộc trò chuyện",
+    "Block": "Chặn",
+    "Error loading messages": "Lỗi tải tin nhắn"
   },
   "Settings": {
     "Settings": "Cài đặt",
@@ -95,6 +100,41 @@
     "Logout": "Đăng xuất",
     "About": "Giới thiệu",
     "Version": "Phiên bản"
+  },
+  "Backup": {
+    "Backup Private Key": "Sao lưu khóa riêng tư",
+    "Restore Private Key": "Khôi phục khóa riêng tư",
+    "Backup": "Sao lưu",
+    "Restore": "Khôi phục",
+    "Keys Restored": "Đã Khôi Phục Keys",
+    "Keys Restored desc": "Khóa mã hóa của bạn đã được khôi phục. Bây giờ bạn có thể xem tin nhắn cũ.",
+    "Delete Backup": "Xóa bản sao lưu",
+    "Password": "Mật khẩu",
+    "Backup Password": "Mật khẩu sao lưu",
+    "Enter password": "Nhập mật khẩu",
+    "Password must be at least 6 characters": "Mật khẩu phải có ít nhất 6 ký tự",
+    "Why backup title": "Tại sao cần sao lưu?",
+    "Why backup desc": "• Khi xóa app hoặc đổi thiết bị, Private Key sẽ bị mất\n• Mất Private Key = mất TẤT CẢ tin nhắn cũ\n• Backup giúp khôi phục Private Key khi cần",
+    "Backup Status": "Trạng thái sao lưu",
+    "Has backup": "Đã có bản sao lưu",
+    "No backup": "Chưa có bản sao lưu",
+    "Has backup desc": "Private Key của bạn đã được sao lưu an toàn",
+    "No backup desc": "Nên sao lưu ngay để tránh mất dữ liệu",
+    "Password hint": "Nhập mật khẩu để mã hóa bản sao lưu",
+    "Password tip": "💡 Mẹo: Dùng mật khẩu mạnh và dễ nhớ.\nKhông dùng mật khẩu đăng nhập Firebase.",
+    "Backup Success": "Sao lưu thành công!",
+    "Backup Success desc": "✅ Private Key đã được mã hóa và lưu trữ an toàn.\n⚠️ Hãy nhớ mật khẩu này để khôi phục khi cần.",
+    "Restore Success": "Khôi phục thành công!",
+    "Restore Success desc": "✅ Private Key đã được khôi phục.\n💬 Bây giờ bạn có thể xem lại tin nhắn cũ.",
+    "Backup Error": "Lỗi sao lưu",
+    "Restore Error": "Lỗi khôi phục",
+    "Wrong Password": "❌ Mật khẩu không đúng!\n\nVui lòng kiểm tra lại mật khẩu bạn đã dùng khi sao lưu.",
+    "Delete Backup Confirm": "⚠️ Xác nhận xóa bản sao lưu",
+    "Delete Backup Desc": "Bạn có chắc muốn xóa bản sao lưu không?\n\nNếu xóa và sau đó mất Private Key, bạn sẽ KHÔNG THỂ khôi phục tin nhắn cũ!",
+    "Delete Backup Success": "Đã xóa bản sao lưu",
+    "Security Title": "Bảo mật",
+    "Security Info": "🔐 Private Key được mã hóa bằng AES-256\n🔑 Encryption key được derive từ password (PBKDF2)\n☁️ Backup được lưu trên Firebase (đã mã hóa)\n✅ Chỉ bạn có password mới giải mã được",
+    "Protect your messages": "Bảo vệ tin nhắn của bạn"
   },
   "General": {
     "Coming Soon": "Sắp ra mắt",
@@ -152,7 +192,8 @@
     "Hide": "Ẩn bớt",
     "Like": "Thích",
     "Comment": "Bình luận",
-    "Comment hint": "Viết bình luận..."
+    "Comment hint": "Viết bình luận...",
+    "Share": "Chia sẻ"
   },
   "Comment": {
     "Comment posted successfully": "Đăng bình luận thành công!",

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/message_model.dart';
 import '../../services/chat_service.dart';
+import '../../utils/image_utils.dart';
 
 class ChatDetail extends StatefulWidget {
   final String otherUserId;
@@ -26,6 +27,15 @@ class ChatDetail extends StatefulWidget {
 class _ChatDetailState extends State<ChatDetail> {
   final _currentUser = FirebaseAuth.instance.currentUser;
   final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Thêm listener để rebuild khi text thay đổi (cho nút gửi)
+    _messageController.addListener(() {
+      setState(() {});
+    });
+  }
 
   Future<void> _sendMessage() async {
     final content = _messageController.text.trim();
@@ -69,20 +79,19 @@ class _ChatDetailState extends State<ChatDetail> {
         ),
         title: Row(
           children: [
-            CircleAvatar(
+            ImageUtils.buildAvatar(
+              imageUrl: widget.otherUserAvatar,
               radius: 20,
-              backgroundImage: (widget.otherUserAvatar != null && widget.otherUserAvatar!.isNotEmpty)
-                  ? NetworkImage(widget.otherUserAvatar!)
-                  : null,
+              backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
               child: (widget.otherUserAvatar == null || widget.otherUserAvatar!.isEmpty)
                   ? Text(
                       widget.otherUserName.isNotEmpty
                           ? widget.otherUserName[0].toUpperCase()
                           : '?',
                       style: TextStyle(
-                        fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: textColor,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                        fontSize: 16,
                       ),
                     )
                   : null,
@@ -113,9 +122,9 @@ class _ChatDetailState extends State<ChatDetail> {
             },
             itemBuilder: (context) => [
               PopupMenuItem(value: 'view_profile', child: Text('Friend.View Profile'.tr())),
-              PopupMenuItem(value: 'media', child: Text('Media')),
-              PopupMenuItem(value: 'clear_chat', child: Text('Clear Chat')),
-              PopupMenuItem(value: 'block', child: Text('Block')),
+              PopupMenuItem(value: 'media', child: Text('Chat.Media'.tr())),
+              PopupMenuItem(value: 'clear_chat', child: Text('Chat.Clear Chat'.tr())),
+              PopupMenuItem(value: 'block', child: Text('Chat.Block'.tr())),
             ],
           ),
         ],
@@ -138,7 +147,7 @@ class _ChatDetailState extends State<ChatDetail> {
                       children: [
                         Icon(Icons.error, color: Colors.red, size: 48),
                         SizedBox(height: 16),
-                        Text('Lỗi tải tin nhắn', style: TextStyle(color: Colors.red, fontSize: 16)),
+                        Text('Chat.Error loading messages'.tr(), style: TextStyle(color: Colors.red, fontSize: 16)),
                         Text(
                           '${snapshot.error}',
                           style: TextStyle(color: colorScheme.secondary, fontSize: 12),
@@ -197,37 +206,68 @@ class _ChatDetailState extends State<ChatDetail> {
             ),
           ),
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: colorScheme.surface,
-              border: Border(top: BorderSide(color: colorScheme.secondary.withOpacity(0.7), width: 0.5)),
+              color: colorScheme.background,
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(25)),
-                    child: TextField(
+                  Expanded(
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 48, maxHeight: 120),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
                       controller: _messageController,
-                      style: TextStyle(color: textColor),
+                      style: TextStyle(color: textColor, fontSize: 16),
                       decoration: InputDecoration(
                         hintText: "Chat.Type a message".tr(),
-                        hintStyle: TextStyle(color: colorScheme.secondary.withOpacity(0.4)),
+                        hintStyle: TextStyle(
+                          color: colorScheme.secondary.withOpacity(0.5),
+                          fontSize: 16,
+                        ),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.zero,
+                        isDense: true,
                       ),
+                      maxLines: null,
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                 ),
-                SizedBox(width: 12),
-                GestureDetector(
-                  onTap: _sendMessage,
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                    child: Icon(Icons.send, color: textColor, size: 20),
+                const SizedBox(width: 12),
+                Material(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(24),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: _sendMessage,
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      child: Icon(
+                        Icons.send_rounded,
+                        color: colorScheme.onPrimary,
+                        size: 24,
+                      ),
+                    ),
                   ),
                 ),
               ],

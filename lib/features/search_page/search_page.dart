@@ -154,7 +154,7 @@ class _WidgetSearchState extends State<WidgetSearch> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error to find: ${e.toString()}'),
+            content: Text('${"General.Error".tr()}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

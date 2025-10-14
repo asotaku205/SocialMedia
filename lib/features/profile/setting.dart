@@ -7,6 +7,8 @@ import '../auth/screens/forgot_password_page.dart';
 import '../../../models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'theme_switcher_tile.dart';
+import '../auth/screens/key_backup_screen.dart';
+import '../../utils/image_utils.dart';
 
 class Setting extends StatefulWidget {
   final String? uid;
@@ -53,13 +55,16 @@ class _SettingState extends State<Setting> {
       print('Error fetching user data: $e');
     }
   }
+  
   logout() async {
     await AuthService.logout();
-    if (mounted) return
-      Navigator.pop(
-        context,
+    if (mounted) {
+      // Dùng pushAndRemoveUntil để xóa toàn bộ navigation stack
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const LoginPage()),
-      );;
+        (Route<dynamic> route) => false, // Xóa tất cả routes trước đó
+      );
+    }
   }
 
   @override
@@ -88,25 +93,24 @@ class _SettingState extends State<Setting> {
                   Center(
                     child: Column(
                       children: [
-                        // Avatar đơn giản với CircleAvatar
-                        CircleAvatar(
+                        // Avatar với ImageUtils
+                        ImageUtils.buildAvatar(
+                          imageUrl: currentUser?.photoURL,
                           radius: 50,
-                          backgroundColor: colorScheme.secondary.withOpacity(0.2),
-                          backgroundImage: currentUser?.photoURL != null && currentUser!.photoURL.isNotEmpty
-                              ? NetworkImage(currentUser!.photoURL)
-                              : null,
-                          child: currentUser!.photoURL.isEmpty
-                           ? Text(
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                          context: context,
+                          child: (currentUser?.photoURL == null || currentUser!.photoURL.isEmpty)
+                              ? Text(
                                   currentUser?.userName.isNotEmpty == true
                                       ? currentUser!.userName[0].toUpperCase()
                                       : '?',
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
-                              ),
-                            )
-                            : null,
+                                  style: TextStyle(
+                                    fontSize: 40,
+                                    color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         Text(
@@ -185,6 +189,25 @@ class _SettingState extends State<Setting> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                   ),
                   const SizedBox(height: 10),
+                  
+                  // Backup Private Key
+                  ListTile(
+                    leading: Icon(Icons.backup, color: colorScheme.primary),
+                    title: Text('Backup.Backup Private Key'.tr(), style: TextStyle(fontSize: 16, color: textColor)),
+                    subtitle: Text('Backup.Protect your messages'.tr(), style: TextStyle(fontSize: 12, color: colorScheme.secondary)),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.secondary),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const KeyBackupScreen()),
+                      );
+                    },
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    tileColor: Theme.of(context).colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                  ),
+                  const SizedBox(height: 10),
+                  
                   ListTile(
                     leading: Icon(Icons.language, color: colorScheme.primary),
                     title: Text('Settings.Language'.tr(), style: TextStyle(fontSize: 16, color: textColor)),

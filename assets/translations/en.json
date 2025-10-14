@@ -68,6 +68,7 @@
   "Chat": {
     "Chats": "Chats",
     "Messages": "Messages",
+    "Message": "Message",
     "New Chat": "New Chat",
     "You": "You:",
     "Start Chat": "Start Chat",
@@ -78,7 +79,11 @@
     "Online": "Online",
     "Offline": "Offline",
     "Last seen": "Last seen",
-    "at": "at"
+    "at": "at",
+    "Media": "Media",
+    "Clear Chat": "Clear Chat",
+    "Block": "Block",
+    "Error loading messages": "Error loading messages"
   },
   "Settings": {
     "Settings": "Settings",
@@ -95,6 +100,41 @@
     "Logout": "Logout",
     "About": "About",
     "Version": "Version"
+  },
+  "Backup": {
+    "Backup Private Key": "Backup Private Key",
+    "Restore Private Key": "Restore Private Key",
+    "Backup": "Backup",
+    "Restore": "Restore",
+    "Keys Restored": "Keys Restored Successfully",
+    "Keys Restored desc": "Your encryption keys have been restored. You can now view your old messages.",
+    "Delete Backup": "Delete Backup",
+    "Password": "Password",
+    "Backup Password": "Backup Password",
+    "Enter password": "Enter password",
+    "Password must be at least 6 characters": "Password must be at least 6 characters",
+    "Why backup title": "Why backup?",
+    "Why backup desc": "• When deleting app or changing device, Private Key will be lost\n• Lost Private Key = lost ALL old messages\n• Backup helps restore Private Key when needed",
+    "Backup Status": "Backup Status",
+    "Has backup": "Backup available",
+    "No backup": "No backup yet",
+    "Has backup desc": "Your Private Key has been safely backed up",
+    "No backup desc": "You should backup now to avoid data loss",
+    "Password hint": "Enter password to encrypt backup",
+    "Password tip": "💡 Tip: Use a strong but memorable password.\nDon't use your Firebase login password.",
+    "Backup Success": "Backup Successful!",
+    "Backup Success desc": "✅ Private Key has been encrypted and stored safely.\n⚠️ Remember this password to restore when needed.",
+    "Restore Success": "Restore Successful!",
+    "Restore Success desc": "✅ Private Key has been restored.\n💬 You can now view your old messages.",
+    "Backup Error": "Backup Error",
+    "Restore Error": "Restore Error",
+    "Wrong Password": "❌ Wrong password!\n\nPlease check the password you used when backing up.",
+    "Delete Backup Confirm": "⚠️ Confirm Delete Backup",
+    "Delete Backup Desc": "Are you sure you want to delete the backup?\n\nIf you delete it and lose your Private Key later, you will NOT be able to recover old messages!",
+    "Delete Backup Success": "Backup deleted",
+    "Security Title": "Security",
+    "Security Info": "🔐 Private Key encrypted with AES-256\n🔑 Encryption key derived from password (PBKDF2)\n☁️ Backup stored on Firebase (encrypted)\n✅ Only you with the password can decrypt",
+    "Protect your messages": "Protect your messages"
   },
   "General": {
     "Coming Soon": "Coming Soon",
@@ -152,7 +192,8 @@
     "Hide": "Show less",
     "Like": "Like",
     "Comment": "Comment",
-    "Comment hint": "Write a comment..."
+    "Comment hint": "Write a comment...",
+    "Share": "Share"
   },
   "Comment": {
     "Comment posted successfully": "Comment posted successfully!",

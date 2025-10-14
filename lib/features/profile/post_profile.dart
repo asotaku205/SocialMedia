@@ -7,6 +7,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:readmore/readmore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
+import 'package:blogapp/utils/image_utils.dart';
 
 import '../../resource/navigation.dart';
 import '../../widgets/full_screen_image.dart';
@@ -114,18 +115,20 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   onTap: () => NavigationUtils.navigateToProfile(context, post.authorId),
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      ImageUtils.buildAvatar(
+                        imageUrl: post.authorAvatar,
                         radius: 20,
-                        backgroundImage: post.authorAvatar.isNotEmpty ? NetworkImage(post.authorAvatar) : null,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        context: context,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: textTheme.titleMedium?.copyWith(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: colorScheme.onPrimary,
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                 ),
                               )
                             : null,
@@ -220,93 +223,109 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
 
             const SizedBox(height: 12),
 
-            // Like & Comment counts
+            // Action buttons: Like / Comment / Share
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$likeCount ${'Feed.Like'.tr()}',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
-                  },
-                  child: Text(
-                    '$commentCount ${'Feed.Comment'.tr()}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                // LIKE BUTTON (Bên trái)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final uid = AuthService.currentUser?.uid;
+                      if (uid == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('General.Action required'.tr())),
+                        );
+                        return;
+                      }
+                      _likeAnimationController.forward().then((_) {
+                        _likeAnimationController.reverse();
+                      });
+                      await PostService.toggleLike(post.id, uid);
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _likeAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _likeAnimation.value,
+                              child: Icon(
+                                isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
+                                color: isLiked ? colorScheme.error : colorScheme.onSurface.withOpacity(0.6),
+                                size: 24,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$likeCount ${'Feed.Like'.tr()}',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
 
-            const SizedBox(height: 8),
-
-            // Action buttons
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    final uid = AuthService.currentUser?.uid;
-                    if (uid == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('General.Action required'.tr())),
-                      );
-                      return;
-                    }
-                    _likeAnimationController.forward().then((_) {
-                      _likeAnimationController.reverse();
-                    });
-                    await PostService.toggleLike(post.id, uid);
-                  },
-                  child: AnimatedBuilder(
-                    animation: _likeAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _likeAnimation.value,
-                        child: Icon(
-                          isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                          color: isLiked ? colorScheme.error : colorScheme.onSurface.withOpacity(0.7),
-                          size: 22,
-                        ),
-                      );
+                // COMMENT BUTTON (Ở giữa)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
                     },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          BoxIcons.bx_message_rounded,
+                          color: colorScheme.onSurface.withOpacity(0.6),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$commentCount ${'Feed.Comment'.tr()}',
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
-                const SizedBox(width: 16),
-
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => CommentUi(post: post)));
-                  },
-                  child: Icon(BoxIcons.bx_message_rounded, color: colorScheme.onSurface.withOpacity(0.7), size: 22),
-                ),
-
-                const SizedBox(width: 16),
-
-                Icon(BoxIcons.bx_send, color: colorScheme.onSurface.withOpacity(0.7), size: 22),
-
-                const Spacer(),
-
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isBookmarked = !isBookmarked;
-                    });
-                  },
-                  child: Icon(
-                    isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                    color: isBookmarked ? Colors.yellow : colorScheme.onSurface.withOpacity(0.7),
-                    size: 22,
+                // SHARE BUTTON (Bên phải)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // TODO: Implement share functionality
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          BoxIcons.bx_send,
+                          color: colorScheme.onSurface.withOpacity(0.6),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Feed.Share'.tr(),
+                          style: textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -383,12 +402,12 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                   try {
                     final delPost = await PostService.deletePost(post.id);
                     if (delPost == "success") {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Delete success")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Feed.Delete success".tr())));
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error deleting post")));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Feed.Error deleting post".tr())));
                     }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${"General.Error".tr()}: $e")));
                   }
                 },
                 child: Container(
@@ -398,7 +417,7 @@ class _PostProfileState extends State<PostProfile> with TickerProviderStateMixin
                       Icon(BoxIcons.bx_trash, color: colorScheme.error, size: 22),
                       const SizedBox(width: 16),
                       Text(
-                        'Delete',
+                        'General.Delete'.tr(),
                         style: textTheme.bodyMedium?.copyWith(color: colorScheme.error, fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                     ],

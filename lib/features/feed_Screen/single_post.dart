@@ -1,5 +1,4 @@
 import 'package:blogapp/models/post_model.dart';
-import 'package:blogapp/services/post_services.dart';
 import 'package:blogapp/services/auth_service.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:blogapp/features/profile/main_profile.dart';
 import 'package:readmore/readmore.dart';
 import 'package:blogapp/utils/timeago_setup.dart';
+import 'package:blogapp/utils/image_utils.dart';
 import '../../widgets/full_screen_image.dart';
 
 class SinglePostCard extends StatefulWidget {
@@ -48,7 +48,7 @@ class _SinglePostCardState extends State<SinglePostCard>
             // Nút save/unsave
             _buildOptionItem(
               icon: BoxIcons.bx_bookmark,
-              title: isBookmarked ? 'Unsave' : 'Save Post',
+              title: isBookmarked ? 'Feed.Unsave'.tr() : 'Feed.Save Post'.tr(),
               onTap: () {
                 setState(() {
                   isBookmarked = !isBookmarked;
@@ -59,7 +59,7 @@ class _SinglePostCardState extends State<SinglePostCard>
             // Nút copy link
             _buildOptionItem(
               icon: BoxIcons.bx_link,
-              title: 'Copy Link',
+              title: 'Feed.Copy Link'.tr(),
               onTap: () => Navigator.pop(context),
             ),
           ],
@@ -148,19 +148,20 @@ class _SinglePostCardState extends State<SinglePostCard>
                   },
                   child: Row(
                     children: [
-                      CircleAvatar(
+                      ImageUtils.buildAvatar(
+                        imageUrl: post.authorAvatar,
                         radius: 20,
-                        backgroundImage: post.authorAvatar.isNotEmpty
-                            ? NetworkImage(post.authorAvatar)
-                            : null,
+                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                        context: context,
                         child: post.authorAvatar.isEmpty
                             ? Text(
                                 post.authorName.isNotEmpty
                                     ? post.authorName[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                 ),
                               )
                             : null,

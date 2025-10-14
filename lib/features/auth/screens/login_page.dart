@@ -8,6 +8,7 @@ import 'register_page.dart';
 import '../../../services/auth_service.dart';
 import '../../../models/user_model.dart';
 import '../widgets/bottom_bar.dart';
+import '../widgets/backup_reminder_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -50,10 +51,18 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
 
+          // Navigate to main screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const BottomNavigation()),
           );
+
+          // Show backup reminder if needed (after navigation)
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              BackupReminderDialog.showIfNeeded(context);
+            }
+          });
         }
       } else {
         if (mounted) {

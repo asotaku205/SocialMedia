@@ -116,10 +116,14 @@ class AuthService {
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
 
       // Khởi tạo keys mã hóa cho user mới
+      // Wrap trong try-catch để không làm crash app nếu có lỗi
       try {
         await EncryptionService.initializeKeys();
+        print('Encryption keys initialized successfully for new user');
       } catch (e) {
         print('Warning: Could not initialize encryption keys: $e');
+        // KHÔNG return lỗi ở đây - vẫn cho phép đăng ký thành công
+        // User có thể khởi tạo keys sau khi đăng nhập
       }
 
       return 'success';

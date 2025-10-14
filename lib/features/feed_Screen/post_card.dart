@@ -450,122 +450,124 @@ class _PostCardState extends State<PostCard> with TickerProviderStateMixin {
 
             const SizedBox(height: 12),
 
-            // ---------------- Số like + comment ----------------
+            // ---------------- Hàng nút Like / Comment / Share với text ----------------
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$likeCount ${'Feed.Like'.tr()}',
-                  style: TextStyle(
-                    color: colorScheme.secondary.withOpacity(0.4),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Bấm vào comment count để mở màn comment
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentUi(post: post),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    '$commentCount ${'Feed.Comment'.tr()}',
-                    style: TextStyle(
-                      color: colorScheme.secondary.withOpacity(0.4),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                // LIKE BUTTON (Bên trái)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final uid = AuthService.currentUser?.uid;
+                      if (uid == null) {
+                        // Nếu chưa login thì báo lỗi
+                        ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(
+                            content: Text(
+                              'General.Action required'.tr(),
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
+                      // Play animation ngay khi bấm (cho cảm giác mượt)
+                      _likeAnimationController.forward().then((_) {
+                        _likeAnimationController.reverse();
+                      });
+
+                      // Gọi service để toggle like trên Firestore
+                      await PostService.toggleLike(post.id, uid);
+                      // UI sẽ tự update nhờ stream
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        AnimatedBuilder(
+                          animation: _likeAnimation,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _likeAnimation.value,
+                              child: Icon(
+                                isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
+                                color: isLiked ? Colors.red : colorScheme.secondary.withOpacity(0.6),
+                                size: 24,
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$likeCount ${'Feed.Like'.tr()}',
+                          style: TextStyle(
+                            color: colorScheme.secondary.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
 
-            const SizedBox(height: 8),
-
-            // ---------------- Hàng nút Like / Comment / Share / Bookmark ----------------
-            Row(
-              children: [
-                // LIKE BUTTON
-                GestureDetector(
-                  onTap: () async {
-                    final uid = AuthService.currentUser?.uid;
-                    if (uid == null) {
-                      // Nếu chưa login thì báo lỗi
-                      ScaffoldMessenger.of(context).showSnackBar(
-                         SnackBar(
-                          content: Text(
-                            'General.Action required'.tr(),
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-
-                    // Play animation ngay khi bấm (cho cảm giác mượt)
-                    _likeAnimationController.forward().then((_) {
-                      _likeAnimationController.reverse();
-                    });
-
-                    // Gọi service để toggle like trên Firestore
-                    await PostService.toggleLike(post.id, uid);
-                    // UI sẽ tự update nhờ stream
-                  },
-                  child: AnimatedBuilder(
-                    animation: _likeAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _likeAnimation.value,
-                        child: Icon(
-                          isLiked ? BoxIcons.bxs_heart : BoxIcons.bx_heart,
-                          color: isLiked ? Colors.red : colorScheme.secondary.withOpacity(0.4),
-                          size: 22,
+                // COMMENT BUTTON (Ở giữa)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CommentUi(post: post),
                         ),
                       );
                     },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          BoxIcons.bx_message_rounded,
+                          color: colorScheme.secondary.withOpacity(0.6),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$commentCount ${'Feed.Comment'.tr()}',
+                          style: TextStyle(
+                            color: colorScheme.secondary.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
-                const SizedBox(width: 16),
-
-                // COMMENT BUTTON
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CommentUi(post: post),
-                      ),
-                    );
-                  },
-                  child: Icon(
-                    BoxIcons.bx_message_rounded,
-                    color: colorScheme.secondary.withOpacity(0.4),
-                    size: 22,
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // SHARE BUTTON
-                Icon(BoxIcons.bx_send, color: colorScheme.secondary.withOpacity(0.4), size: 22),
-
-                const Spacer(),
-
-                // BOOKMARK BUTTON
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isBookmarked = !isBookmarked;
-                    });
-                  },
-                  child: Icon(
-                    isBookmarked ? BoxIcons.bxs_bookmark : BoxIcons.bx_bookmark,
-                    color: isBookmarked ? Colors.yellow : colorScheme.secondary.withOpacity(0.4),
-                    size: 22,
+                // SHARE BUTTON (Bên phải)
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // TODO: Implement share functionality
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          BoxIcons.bx_send,
+                          color: colorScheme.secondary.withOpacity(0.6),
+                          size: 24,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Feed.Share'.tr(),
+                          style: TextStyle(
+                            color: colorScheme.secondary.withOpacity(0.6),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -1,6 +1,7 @@
 import 'package:blogapp/features/feed_Screen/single_post.dart';
 import 'package:flutter/material.dart';
 import '../profile/main_profile.dart';
+import '../profile/other_user_profile_screen.dart';
 import 'package:blogapp/models/post_model.dart';
 import 'package:blogapp/models/comment_model.dart';
 import 'package:blogapp/services/comment_service.dart';
@@ -28,6 +29,11 @@ class _CommentUiState extends State<CommentUi> {
     super.initState();
     // Initialize timeago locales
     TimeagoSetup.initialize();
+    
+    // Thêm listener để rebuild khi text thay đổi (cho nút gửi)
+    _controller.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -259,52 +265,48 @@ class _CommentUiState extends State<CommentUi> {
           // ================= INPUT COMMENT =================
           SafeArea(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: colorScheme.background,
-                border: Border(
-                  top: BorderSide(color: colorScheme.surface, width: 0.8),
-                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-            // Avatar người dùng hiện tại
-            ImageUtils.buildAvatar(
-              imageUrl: AuthService.currentUser?.photoURL ?? '',
-              radius: 18,
-              backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
-              child: (AuthService.currentUser?.photoURL ?? '').isEmpty
-                  ? Text(
-                      (AuthService.currentUser?.displayName?.isNotEmpty ?? false)
-                          ? AuthService.currentUser!.displayName![0].toUpperCase()
-                          : '?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
-                      ),
-                    )
-                  : null,
-              context: context,
-            ),
-                  const SizedBox(width: 10),
-
-                  // Ô nhập comment
+                  // Ô nhập comment (không có avatar)
                   Expanded(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                      constraints: const BoxConstraints(minHeight: 48, maxHeight: 120),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                       decoration: BoxDecoration(
                         color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(28),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.shadow.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: TextField(
                         controller: _controller,
-                        style: TextStyle(color: textColor),
+                        style: TextStyle(color: textColor, fontSize: 16),
                         decoration: InputDecoration(
                           hintText: "Feed.Comment hint".tr(),
-                          hintStyle: TextStyle(color: colorScheme.secondary),
+                          hintStyle: TextStyle(
+                            color: colorScheme.secondary.withOpacity(0.5),
+                            fontSize: 16,
+                          ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
+                          isDense: true,
                         ),
                         maxLines: null,
                         textInputAction: TextInputAction.send,
@@ -313,19 +315,33 @@ class _CommentUiState extends State<CommentUi> {
                     ),
                   ),
 
+                  const SizedBox(width: 12),
+
                   // Nút gửi comment
-                  IconButton(
-                    icon: _isSubmitting 
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-                            ),
-                          )
-                        : Icon(Icons.send, color: colorScheme.primary),
-                    onPressed: _isSubmitting ? null : _addComment,
+                  Material(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(24),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: _isSubmitting ? null : _addComment,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        child: _isSubmitting 
+                            ? SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                                ),
+                              )
+                            : Icon(
+                                Icons.send_rounded,
+                                color: colorScheme.onPrimary,
+                                size: 24,
+                              ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -344,24 +360,35 @@ class _CommentUiState extends State<CommentUi> {
 
     final colorScheme = Theme.of(context).colorScheme;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Avatar người comment
           GestureDetector(
             onTap: () {
-              // TODO: Điều hướng đến profile của người comment
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MainProfile()),
-              );
+              // Điều hướng đến profile của người comment
+              if (comment.authorId == currentUserId) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MainProfile()),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OtherUserProfileScreen(userId: comment.authorId),
+                  ),
+                );
+              }
             },
             child: ImageUtils.buildAvatar(
               imageUrl: comment.authorAvatar,
               radius: 18,
-              backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+              backgroundColor: isDark ? Colors.white : Colors.black,
               child: comment.authorAvatar.isEmpty
                   ? Text(
                       comment.authorName.isNotEmpty
@@ -370,7 +397,7 @@ class _CommentUiState extends State<CommentUi> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
+                        color: isDark ? Colors.black : Colors.white,
                       ),
                     )
                   : null,
@@ -382,11 +409,17 @@ class _CommentUiState extends State<CommentUi> {
           // Nội dung comment
           Expanded(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 3, 10, 3),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colorScheme.surface, width: 0.5),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,14 +428,32 @@ class _CommentUiState extends State<CommentUi> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          comment.authorName.isNotEmpty 
-                              ? comment.authorName 
-                              : 'Unknown User',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: textColor,
+                        child: GestureDetector(
+                          onTap: () {
+                            // Điều hướng đến profile của người comment
+                            if (comment.authorId == currentUserId) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const MainProfile()),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => OtherUserProfileScreen(userId: comment.authorId),
+                                ),
+                              );
+                            }
+                          },
+                          child: Text(
+                            comment.authorName.isNotEmpty 
+                                ? comment.authorName 
+                                : 'Unknown User',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: textColor,
+                            ),
                           ),
                         ),
                       ),
@@ -419,12 +470,17 @@ class _CommentUiState extends State<CommentUi> {
                       // Menu xóa comment (chỉ hiện cho tác giả comment hoặc tác giả bài viết)
                       if (isMyComment || isPostAuthor)
                         PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
                           icon: Icon(
-                            Icons.more_vert,
-                            color: colorScheme.secondary.withOpacity(0.4),
-                            size: 16,
+                            Icons.more_horiz,
+                            color: colorScheme.secondary.withOpacity(0.5),
+                            size: 18,
                           ),
                           color: colorScheme.surface,
+                          elevation: 8,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           onSelected: (value) {
                             if (value == 'delete') {
                               _deleteComment(comment);
@@ -433,13 +489,17 @@ class _CommentUiState extends State<CommentUi> {
                           itemBuilder: (context) => [
                             PopupMenuItem<String>(
                               value: 'delete',
+                              height: 40,
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete, color: Colors.red, size: 16),
-                                  const SizedBox(width: 8),
+                                  Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                  const SizedBox(width: 10),
                                   Text(
                                     'General.Delete'.tr(),
-                                    style: TextStyle(color: textColor),
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -448,12 +508,14 @@ class _CommentUiState extends State<CommentUi> {
                         ),
                     ],
                   ),
+                  const SizedBox(height: 4),
                   // Nội dung comment
                   Text(
                     comment.content,
                     style: TextStyle(
-                      fontSize: 13,
-                      color: textColor?.withOpacity(0.7),
+                      fontSize: 14,
+                      height: 1.4,
+                      color: textColor?.withOpacity(0.85),
                     ),
                   ),
                 ],

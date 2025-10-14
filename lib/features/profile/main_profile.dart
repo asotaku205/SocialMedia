@@ -101,6 +101,8 @@ class _MainProfileState extends State<MainProfile> {
                                     child: ImageUtils.buildAvatar(
                                       imageUrl: currentUser?.photoURL,
                                       radius: 40,
+                                      backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                                      context: context,
                                       child: currentUser?.photoURL == null || 
                                              currentUser!.photoURL.isEmpty
                                           ? Text(
@@ -108,10 +110,10 @@ class _MainProfileState extends State<MainProfile> {
                                                       currentUser!.displayName.isNotEmpty
                                                   ? currentUser!.displayName[0].toUpperCase()
                                                   : '?',
-                                              style: textTheme.displayLarge?.copyWith(
+                                              style: TextStyle(
                                                 fontSize: 40,
                                                 fontWeight: FontWeight.bold,
-                                                color: colorScheme.onPrimary,
+                                                color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                               ),
                                             )
                                           : null,

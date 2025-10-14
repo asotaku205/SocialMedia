@@ -9,6 +9,7 @@ import 'friends_screen.dart';
 import 'post_profile.dart';
 import '../../utils/image_utils.dart';
 import '../../widgets/full_screen_image.dart';
+import '../chat/chat_detail.dart';
 class OtherUserProfileScreen extends StatefulWidget {
   final String userId;
   final String? username;
@@ -230,20 +231,46 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
           width: double.infinity,
           child: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.green),
-              const SizedBox(width: 8),
-              Text(
-                'Friend.Friends'.tr(),
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              OutlinedButton(
-                onPressed: _handleFriendAction,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
+              // Nút Nhắn tin
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Chuyển đến chat detail với user này
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatDetail(
+                          otherUserId: widget.userId,
+                          otherUserName: currentUser?.displayName.isNotEmpty == true
+                              ? currentUser!.displayName
+                              : currentUser?.userName ?? widget.username ?? 'User',
+                          otherUserAvatar: currentUser?.photoURL,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.message_rounded),
+                  label: Text('Chat.Message'.tr()),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
                 ),
-                child:  Text('Friend.Unfriend'.tr()),
+              ),
+              const SizedBox(width: 12),
+              // Nút Hủy kết bạn
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _handleFriendAction,
+                  icon: const Icon(Icons.person_remove),
+                  label: Text('Friend.Unfriend'.tr()),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
             ],
           ),
@@ -331,6 +358,8 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                       child: ImageUtils.buildAvatar(
                                         imageUrl: currentUser?.photoURL,
                                         radius: 50, // Tăng radius để vừa với container
+                                        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+                                        context: context,
                                         child: currentUser?.photoURL == null ||
                                                 currentUser!.photoURL.isEmpty
                                             ? Text(
@@ -341,10 +370,10 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
                                                     ? currentUser!.displayName[0]
                                                           .toUpperCase()
                                                     : '?',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 40,
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
+                                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white,
                                                 ),
                                               )
                                             : null,
