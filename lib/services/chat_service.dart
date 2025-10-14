@@ -10,7 +10,7 @@ class ChatService{
   //get user stream
    Stream<List<Map<String,dynamic>>> getUserStream(){
      return _firestore.collection('users').snapshots().map((snapshot) =>
-         snapshot.docs.map((doc) => doc.data() as Map<String,dynamic>).toList());
+         snapshot.docs.map((doc) => doc.data()).toList());
    }
 
    static Future<void> sendMessage(String chatId, String receiverId, String content, String messageType) async {
@@ -24,16 +24,28 @@ class ChatService{
        final chatId = _createChatId(currentUser.uid, receiverId);
        final messageDoc = _firestore.collection('messages').doc();
 
+       // Lấy session key và mã hóa tin nhắn
+       final sessionKey = await EncryptionService.getOrCreateSessionKey(chatId, receiverId);
+       final encryptedData = EncryptionService.encryptMessage(content, sessionKey);
+       
+       // Tạo fingerprint
+       final timestamp = DateTime.now();
+       final fingerprint = EncryptionService.generateFingerprint(content, timestamp.toIso8601String());
+
        final message = MessageModel(
          id: messageDoc.id,
          chatId: chatId,
          senderId: currentUser.uid,
          receiverId: receiverId,
-         content: content,
+         encryptedContent: encryptedData['encryptedContent']!,
+         iv: encryptedData['iv']!,
+         hmac: encryptedData['hmac']!,
+         content: '', // Không lưu plaintext lên server
          messageType: messageType,
-         timestamp: DateTime.now(),
+         timestamp: timestamp,
          isRead: false,
          isDeleted: false,
+         fingerprint: fingerprint,
        );
 
        await messageDoc.set(message.toMap());
@@ -56,10 +68,37 @@ class ChatService{
         .orderBy('timestamp', descending: true)
         .limit(50)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => MessageModel.fromMap(doc.data(), doc.id))
-          .toList();
+        .asyncMap((snapshot) async {
+      // Lấy session key
+      final sessionKey = await EncryptionService.getOrCreateSessionKey(chatId, otherUserId);
+      
+      List<MessageModel> messages = [];
+      for (var doc in snapshot.docs) {
+        final messageData = doc.data();
+        var message = MessageModel.fromMap(messageData, doc.id);
+        
+        // Giải mã tin nhắn nếu có mã hóa
+        if (message.encryptedContent.isNotEmpty && 
+            message.iv != null && 
+            message.hmac != null) {
+          try {
+            final decryptedContent = EncryptionService.decryptMessage(
+              message.encryptedContent,
+              message.iv!,
+              message.hmac!,
+              sessionKey,
+            );
+            message = message.copyWith(content: decryptedContent);
+          } catch (e) {
+            print('Error decrypting message ${message.id}: $e');
+            message = message.copyWith(content: '[Encrypted Message]');
+          }
+        }
+        
+        messages.add(message);
+      }
+      
+      return messages;
     });
   }
 

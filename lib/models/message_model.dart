@@ -5,14 +5,14 @@ class MessageModel {
   final String chatId;
   final String senderId;
   final String receiverId;
-  // final String encryptedContent;
-  // final String hmac;
+  final String encryptedContent;
+  final String? iv;
+  final String? hmac;
   final String content;
   final String messageType; // text, image, file, audio
   final DateTime timestamp;
   final bool isRead;
   final bool isDeleted;
-  // final DateTime? deleteAt;
   final String? fingerprint;
   final Map<String, dynamic>? metadata;
 
@@ -21,14 +21,14 @@ class MessageModel {
     required this.chatId,
     required this.senderId,
     required this.receiverId,
-    // required this.encryptedContent,
-    // required this.hmac,
+    this.encryptedContent = '',
+    this.iv,
+    this.hmac,
     this.content = '',
     required this.messageType,
     required this.timestamp,
     this.isRead = false,
     this.isDeleted = false,
-    // this.deleteAt,
     this.fingerprint,
     this.metadata,
   });
@@ -37,14 +37,14 @@ class MessageModel {
       'chatId': chatId,
       'senderId': senderId,
       'receiverId': receiverId,
-      // 'encryptedContent': encryptedContent,
-      // 'hmac': hmac,
+      'encryptedContent': encryptedContent,
+      'iv': iv,
+      'hmac': hmac,
       'content': content,
       'messageType': messageType,
       'timestamp': Timestamp.fromDate(timestamp),
       'isRead': isRead,
       'isDeleted': isDeleted,
-      // 'deleteAt': deleteAt != null ? Timestamp.fromDate(deleteAt!) : null,
       'fingerprint': fingerprint,
       'metadata': metadata,
     };
@@ -55,16 +55,14 @@ class MessageModel {
       chatId: map['chatId'] ?? '',
       senderId: map['senderId'] ?? '',
       receiverId: map['receiverId'] ?? '',
-      // encryptedContent: map['encryptedContent'] ?? '',
-      // hmac: map['hmac'] ?? '',
+      encryptedContent: map['encryptedContent'] ?? '',
+      iv: map['iv'],
+      hmac: map['hmac'],
       content: map['content'] ?? '',
       messageType: map['messageType'] ?? 'text',
       timestamp: (map['timestamp'] as Timestamp).toDate(),
       isRead: map['isRead'] ?? false,
       isDeleted: map['isDeleted'] ?? false,
-      // deleteAt: map['deleteAt'] != null
-      //     ? (map['deleteAt'] as Timestamp).toDate()
-      //     : null,
       fingerprint: map['fingerprint'],
       metadata: map['metadata'],
     );
@@ -74,13 +72,13 @@ class MessageModel {
     String? senderId,
     String? receiverId,
     String? encryptedContent,
+    String? iv,
     String? hmac,
     String? content,
     String? messageType,
     DateTime? timestamp,
     bool? isRead,
     bool? isDeleted,
-    DateTime? deleteAt,
     String? fingerprint,
     Map<String, dynamic>? metadata,
   })
@@ -90,14 +88,14 @@ class MessageModel {
       chatId: chatId ?? this.chatId,
       senderId: senderId ?? this.senderId,
       receiverId: receiverId ?? this.receiverId,
-      // encryptedContent: encryptedContent ?? this.encryptedContent,
-      // hmac: hmac ?? this.hmac,
+      encryptedContent: encryptedContent ?? this.encryptedContent,
+      iv: iv ?? this.iv,
+      hmac: hmac ?? this.hmac,
       content: content ?? this.content,
       messageType: messageType ?? this.messageType,
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
       isDeleted: isDeleted ?? this.isDeleted,
-      // deleteAt: deleteAt ?? this.deleteAt,
       fingerprint: fingerprint ?? this.fingerprint,
       metadata: metadata ?? this.metadata,
     );

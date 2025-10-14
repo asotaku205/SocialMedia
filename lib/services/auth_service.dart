@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/user_model.dart';
+import 'encryption_service.dart';
 
 // Class AuthService - quản lý tất cả logic xác thực người dùng
 class AuthService {
@@ -114,6 +115,13 @@ class AuthService {
       // Document ID = user.uid để dễ dàng map với Firebase Auth
       await _firestore.collection('users').doc(user.uid).set(newUser.toMap());
 
+      // Khởi tạo keys mã hóa cho user mới
+      try {
+        await EncryptionService.initializeKeys();
+      } catch (e) {
+        print('Warning: Could not initialize encryption keys: $e');
+      }
+
       return 'success';
     } on FirebaseAuthException catch (e) {
       // Xử lý các lỗi cụ thể từ Firebase Auth
@@ -166,6 +174,13 @@ class AuthService {
 
       // Kiểm tra document có tồn tại không
       if (userDoc.exists) {
+        // Khởi tạo keys mã hóa nếu chưa có
+        try {
+          await EncryptionService.initializeKeys();
+        } catch (e) {
+          print('Warning: Could not initialize encryption keys: $e');
+        }
+
         // Convert Firestore data thành UserModel
         return UserModel.fromMap(
           userDoc.data() as Map<String, dynamic>,
@@ -197,6 +212,13 @@ class AuthService {
 
   static Future<void> logout() async {
     try {
+      // Xóa encryption keys trước khi logout
+      try {
+        await EncryptionService.clearKeys();
+      } catch (e) {
+        print('Warning: Could not clear encryption keys: $e');
+      }
+
       // signOut(): xóa authentication state, user sẽ thành null
       await _auth.signOut();
 
