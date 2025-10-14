@@ -4,10 +4,10 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt hide SecureRandom;
 import 'package:pointycastle/export.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'secure_storage_service.dart';
 
 /// Custom exception khi private key không tìm thấy
 class PrivateKeyNotFoundException implements Exception {
@@ -19,7 +19,6 @@ class PrivateKeyNotFoundException implements Exception {
 }
 
 class EncryptionService {
-  static final _secureStorage = FlutterSecureStorage();
   static final _firestore = FirebaseFirestore.instance;
   static final _auth = FirebaseAuth.instance;
 
@@ -37,7 +36,7 @@ class EncryptionService {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return false;
 
-    final existingPrivateKey = await _secureStorage.read(
+    final existingPrivateKey = await SecureStorageService.read(
       key: _getPrivateKeyKey(userId),
     );
     return existingPrivateKey == null;
@@ -51,7 +50,7 @@ class EncryptionService {
         return;
       }
 
-      final existingPrivateKey = await _secureStorage.read(
+      final existingPrivateKey = await SecureStorageService.read(
         key: _getPrivateKeyKey(userId),
       );
       if (existingPrivateKey != null) {
@@ -114,11 +113,11 @@ class EncryptionService {
       }
 
       // Lưu khóa theo userId
-      await _secureStorage.write(
+      await SecureStorageService.write(
         key: _getPrivateKeyKey(userId),
         value: keyPair['privateKey']!,
       );
-      await _secureStorage.write(
+      await SecureStorageService.write(
         key: _getPublicKeyKey(userId),
         value: keyPair['publicKey']!,
       );
@@ -142,10 +141,10 @@ class EncryptionService {
       final userId = _auth.currentUser?.uid;
       if (userId == null) return false;
 
-      final privateKeyPem = await _secureStorage.read(
+      final privateKeyPem = await SecureStorageService.read(
         key: _getPrivateKeyKey(userId),
       );
-      final publicKeyPem = await _secureStorage.read(
+      final publicKeyPem = await SecureStorageService.read(
         key: _getPublicKeyKey(userId),
       );
 
@@ -295,7 +294,7 @@ class EncryptionService {
 
               // Nếu không giải mã được, thử tạo lại session key
               // Nhưng chỉ nếu người dùng hiện tại có private key
-              final privateKey = await _secureStorage.read(
+              final privateKey = await SecureStorageService.read(
                 key: _getPrivateKeyKey(userId),
               );
               if (privateKey == null) {
@@ -326,7 +325,7 @@ class EncryptionService {
       }
 
       // Đảm bảo user hiện tại có keys
-      final currentUserPrivateKey = await _secureStorage.read(
+      final currentUserPrivateKey = await SecureStorageService.read(
         key: _getPrivateKeyKey(currentUserId),
       );
       if (currentUserPrivateKey == null) {
@@ -342,7 +341,7 @@ class EncryptionService {
       final otherUserPublicKey = otherUserDoc.data()?['publicKey'] as String?;
 
       // Lấy public key của user hiện tại
-      final currentUserPublicKey = await _secureStorage.read(
+      final currentUserPublicKey = await SecureStorageService.read(
         key: _getPublicKeyKey(currentUserId),
       );
 
@@ -415,7 +414,7 @@ class EncryptionService {
         throw Exception('User not logged in');
       }
 
-      final privateKeyPem = await _secureStorage.read(
+      final privateKeyPem = await SecureStorageService.read(
         key: _getPrivateKeyKey(currentUserId),
       );
       if (privateKeyPem == null) {
@@ -551,7 +550,7 @@ class EncryptionService {
   static Future<String?> getMyPublicKey() async {
     final userId = _auth.currentUser?.uid;
     if (userId == null) return null;
-    return await _secureStorage.read(key: _getPublicKeyKey(userId));
+    return await SecureStorageService.read(key: _getPublicKeyKey(userId));
   }
 
   static Future<String?> getPublicKey(String userId) async {
@@ -580,10 +579,10 @@ class EncryptionService {
       };
     }
 
-    final privateKey = await _secureStorage.read(
+    final privateKey = await SecureStorageService.read(
       key: _getPrivateKeyKey(userId),
     );
-    final publicKey = await _secureStorage.read(key: _getPublicKeyKey(userId));
+    final publicKey = await SecureStorageService.read(key: _getPublicKeyKey(userId));
     final hasBackup = await _checkHasBackup();
 
     return {

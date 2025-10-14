@@ -1,17 +1,7 @@
 {
-  "version": 2,
-  "buildCommand": "bash build.sh",
   "outputDirectory": "build/web",
-  "installCommand": "",
-  "framework": null,
   "routes": [
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
