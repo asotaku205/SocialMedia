@@ -14,8 +14,9 @@ class EncryptionService {
   static final _firestore = FirebaseFirestore.instance;
   static final _auth = FirebaseAuth.instance;
 
-  static const _privateKeyKey = 'rsa_private_key';
-  static const _publicKeyKey = 'rsa_public_key';
+  // Lưu khóa theo userId để mỗi user có khóa riêng
+  static String _getPrivateKeyKey(String userId) => 'rsa_private_key_$userId';
+  static String _getPublicKeyKey(String userId) => 'rsa_public_key_$userId';
 
   /// Khởi tạo RSA key pair cho user
   /// 
@@ -24,19 +25,28 @@ class EncryptionService {
   /// 
   /// Trả về true nếu cần generate key mới (để UI có thể hiển thị loading)
   static Future<bool> needsKeyGeneration() async {
-    final existingPrivateKey = await _secureStorage.read(key: _privateKeyKey);
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return false;
+    
+    final existingPrivateKey = await _secureStorage.read(key: _getPrivateKeyKey(userId));
     return existingPrivateKey == null;
   }
 
   static Future<void> initializeKeys() async {
     try {
-      final existingPrivateKey = await _secureStorage.read(key: _privateKeyKey);
-      if (existingPrivateKey != null) {
-        print('Keys already exist');
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) {
+        print('No user logged in');
         return;
       }
 
-      print('Generating new RSA key pair...');
+      final existingPrivateKey = await _secureStorage.read(key: _getPrivateKeyKey(userId));
+      if (existingPrivateKey != null) {
+        print('Keys already exist for user $userId');
+        return;
+      }
+
+      print('Generating new RSA key pair for user $userId...');
       
       // Web không hỗ trợ isolates, phải chạy đồng bộ
       // Mobile/Desktop có thể dùng compute() để chạy trong background
@@ -53,17 +63,15 @@ class EncryptionService {
         keyPair = await compute(_generateRSAKeyPairIsolate, 2048);
       }
       
-      await _secureStorage.write(key: _privateKeyKey, value: keyPair['privateKey']!);
-      await _secureStorage.write(key: _publicKeyKey, value: keyPair['publicKey']!);
+      // Lưu khóa theo userId
+      await _secureStorage.write(key: _getPrivateKeyKey(userId), value: keyPair['privateKey']!);
+      await _secureStorage.write(key: _getPublicKeyKey(userId), value: keyPair['publicKey']!);
 
-      final userId = _auth.currentUser?.uid;
-      if (userId != null) {
-        await _firestore.collection('users').doc(userId).update({
-          'publicKey': keyPair['publicKey']!,
-          'publicKeyUpdatedAt': FieldValue.serverTimestamp(),
-        });
-      }
-      print('RSA key pair generated successfully!');
+      await _firestore.collection('users').doc(userId).update({
+        'publicKey': keyPair['publicKey']!,
+        'publicKeyUpdatedAt': FieldValue.serverTimestamp(),
+      });
+      print('RSA key pair generated successfully for user $userId!');
     } catch (e) {
       print('Error initializing keys: $e');
       rethrow;
@@ -179,7 +187,7 @@ class EncryptionService {
 
       final otherUserDoc = await _firestore.collection('users').doc(otherUserId).get();
       final otherUserPublicKey = otherUserDoc.data()?['publicKey'] as String?;
-      final currentUserPublicKey = await _secureStorage.read(key: _publicKeyKey);
+      final currentUserPublicKey = await _secureStorage.read(key: _getPublicKeyKey(currentUserId));
 
       if (otherUserPublicKey == null || currentUserPublicKey == null) {
         throw Exception('Public keys not found');
@@ -211,7 +219,10 @@ class EncryptionService {
   }
 
   static Future<String> _decryptSessionKey(String encryptedData) async {
-    final privateKeyPem = await _secureStorage.read(key: _privateKeyKey);
+    final currentUserId = _auth.currentUser?.uid;
+    if (currentUserId == null) throw Exception('User not logged in');
+    
+    final privateKeyPem = await _secureStorage.read(key: _getPrivateKeyKey(currentUserId));
     if (privateKeyPem == null) throw Exception('Private key not found');
     
     final privateKey = _decodePrivateKeyFromPem(privateKeyPem);
@@ -270,13 +281,22 @@ class EncryptionService {
     return sha256.convert(bytes).toString();
   }
 
-  static Future<void> clearKeys() async {
-    await _secureStorage.delete(key: _privateKeyKey);
-    await _secureStorage.delete(key: _publicKeyKey);
+  /// XÓA KHÓA CHỈ KHI CẦN THIẾT (không nên xóa khi logout thông thường)
+  /// Chỉ xóa khi: reset account, xóa thiết bị tin cậy, etc.
+  static Future<void> clearKeys({String? userId}) async {
+  // Đã vô hiệu hóa: Không bao giờ xóa khóa mã hóa để đảm bảo luôn xem được tin nhắn cũ
+  // final targetUserId = userId ?? _auth.currentUser?.uid;
+  // if (targetUserId == null) return;
+  // print('WARNING: Clearing encryption keys for user $targetUserId');
+  // await _secureStorage.delete(key: _getPrivateKeyKey(targetUserId));
+  // await _secureStorage.delete(key: _getPublicKeyKey(targetUserId));
+  return;
   }
 
   static Future<String?> getMyPublicKey() async {
-    return await _secureStorage.read(key: _publicKeyKey);
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return null;
+    return await _secureStorage.read(key: _getPublicKeyKey(userId));
   }
 
   static Future<String?> getPublicKey(String userId) async {

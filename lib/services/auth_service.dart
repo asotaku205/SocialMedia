@@ -212,17 +212,14 @@ class AuthService {
 
   static Future<void> logout() async {
     try {
-      // Xóa encryption keys trước khi logout
-      try {
-        await EncryptionService.clearKeys();
-      } catch (e) {
-        print('Warning: Could not clear encryption keys: $e');
-      }
-
+      // KHÔNG xóa encryption keys khi logout thông thường
+      // Khóa sẽ được giữ lại để user có thể xem tin nhắn cũ khi đăng nhập lại
+      // Chỉ xóa khóa khi: reset password, xóa thiết bị tin cậy, etc.
+      
       // signOut(): xóa authentication state, user sẽ thành null
       await _auth.signOut();
 
-      print('User logged out successfully');
+      print('User logged out successfully (encryption keys preserved)');
     } catch (e) {
       print('Error during logout: $e');
     }
