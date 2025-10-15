@@ -40,8 +40,6 @@ A full-featured social media application built with **Flutter** and **Firebase**
   </tr>
 </table>
 
-> 📸 *Add your screenshots in the `screenshots/` folder*
-
 ---
 
 ## Features
