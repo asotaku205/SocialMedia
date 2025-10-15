@@ -7,7 +7,6 @@ import '../auth/screens/forgot_password_page.dart';
 import '../../../models/user_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'theme_switcher_tile.dart';
-import '../auth/screens/key_backup_screen.dart';
 import '../../utils/image_utils.dart';
 
 class Setting extends StatefulWidget {
@@ -182,24 +181,6 @@ class _SettingState extends State<Setting> {
                         MaterialPageRoute(
                           builder: (context) => const ForgotPasswordPage(),
                         ),
-                      );
-                    },
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    tileColor: Theme.of(context).colorScheme.surface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                  const SizedBox(height: 10),
-                  
-                  // Backup Private Key
-                  ListTile(
-                    leading: Icon(Icons.backup, color: colorScheme.primary),
-                    title: Text('Backup.Backup Private Key'.tr(), style: TextStyle(fontSize: 16, color: textColor)),
-                    subtitle: Text('Backup.Protect your messages'.tr(), style: TextStyle(fontSize: 12, color: colorScheme.secondary)),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 18, color: colorScheme.secondary),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const KeyBackupScreen()),
                       );
                     },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

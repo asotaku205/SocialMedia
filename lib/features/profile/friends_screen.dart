@@ -241,12 +241,12 @@ class _FriendsScreenState extends State<FriendsScreen>
                     Icon(Icons.people_outline, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
                     const SizedBox(height: 16),
                     Text(
-                      'Friend.You have no friends yet.'.tr(),
+                      'Friend.You have no friends yet'.tr(),
                       style: textTheme.bodyLarge?.copyWith(fontSize: 18, color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Friend.Lets find some!'.tr(),
+                      'Friend.Lets find some'.tr(),
                       style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
                     ),
                   ],

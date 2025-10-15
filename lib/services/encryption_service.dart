@@ -77,6 +77,8 @@ class EncryptionService {
         try {
           _decodePrivateKeyFromPem(existingPrivateKey);
           print('✅ Existing private key is valid');
+          // 🔓 Complete lock trước khi return!
+          lockCompleter.complete();
           return;
         } catch (e) {
           print('⚠️ Existing private key is invalid: $e');
@@ -99,25 +101,11 @@ class EncryptionService {
           key: _getPublicKeyKey(userId),
           value: restoredKeys['publicKey']!,
         );
+        // 🔓 Complete lock trước khi return!
+        lockCompleter.complete();
         return;
       }
       print('ℹ️ No auto-backup found, will generate new keys...');
-
-      // Kiểm tra có backup trên Firebase không
-      print('🔍 Checking for existing backup on Firebase...');
-      final backupDoc = await _firestore
-          .collection('key_backups')
-          .doc(userId)
-          .get();
-      if (backupDoc.exists) {
-        print('⚠️ Found backup on Firebase but no local keys!');
-        print(
-          '💡 User needs to restore keys manually from Settings > Backup Private Key',
-        );
-        // Không tự động restore vì cần password
-        // User sẽ được nhắc qua BackupReminderDialog
-        return;
-      }
 
       print('🔑 Generating new RSA key pair for user $userId...');
 

@@ -7,7 +7,6 @@ import 'chat_list.dart';
 import 'package:blogapp/models/user_model.dart';
 import 'package:blogapp/services/friend_services.dart';
 import '../../features/auth/widgets/bottom_bar.dart';
-import '../auth/widgets/backup_reminder_dialog.dart';
 
 class HomeChat extends StatefulWidget {
   const HomeChat({super.key});
@@ -27,11 +26,6 @@ class _HomeChatState extends State<HomeChat> {
   void initState() {
     super.initState();
     _loadFriends(); // Tải danh sách bạn bè khi màn hình được khởi tạo
-    
-    // Hiển thị reminder backup sau một chút delay để UI load xong
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      BackupReminderDialog.showIfNeeded(context);
-    });
   }
 
   Future<void> _loadFriends() async {
