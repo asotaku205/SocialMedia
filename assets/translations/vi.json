@@ -1,6 +1,7 @@
 {
   "Authentication": {
     "Wellcome": "Chào mừng",
+    "Welcome": "Chào mừng",
     "Login": "Đăng nhập",
     "Dont have an account?": "Chưa có tài khoản?",
     "Register": "Đăng ký",
@@ -76,6 +77,9 @@
     "Type a message": "Nhập tin nhắn",
     "Yesterday": "Hôm qua",
     "Send": "Gửi",
+    "Send Image": "Gửi ảnh",
+    "Add caption": "Thêm chú thích (tùy chọn)",
+    "Image sent successfully": "Gửi ảnh thành công",
     "Online": "Trực tuyến",
     "Offline": "Ngoại tuyến",
     "Last seen": "Lần cuối truy cập",
@@ -201,5 +205,13 @@
     "Delete comment": "Xóa bình luận",
     "Are you sure you want to delete this comment?": "Bạn có chắc chắn muốn xóa bình luận này?",
     "No comments yet": "Chưa có bình luận nào. Hãy là người đầu tiên bình luận!"
+  },
+  "Notification": {
+    "Notifications": "Thông báo",
+    "Mark all read": "Đánh dấu đã đọc hết",
+    "No notifications": "Chưa có thông báo",
+    "liked your post": "đã thích bài viết của bạn",
+    "commented on your post": "đã bình luận bài viết của bạn",
+    "sent you a friend request": "đã gửi lời mời kết bạn"
   }
 }

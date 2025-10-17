@@ -39,23 +39,53 @@ class _ChatListState extends State<ChatList> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ChatDetail(
-              otherUserId: widget.friend.uid,
-              otherUserName: widget.friend.displayName.isNotEmpty
-                  ? widget.friend.displayName
-                  : widget.friend.userName,
-              otherUserAvatar: widget.friend.photoURL,
-              onMessageSent: widget.onChatUpdate, // Truyền callback
-            )),
-          );
-        },
-        child: Container(
-          padding: EdgeInsets.only(left: 16,right: 16,top: 10,bottom: 10),
-          child: Row(
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    return StreamBuilder<List<MessageModel>>(
+      stream: ChatService.getMessages(widget.friend.uid),
+      builder: (context, messageSnapshot) {
+        // Đếm số tin nhắn chưa đọc
+        int unreadCount = 0;
+        if (messageSnapshot.hasData) {
+          unreadCount = messageSnapshot.data!
+              .where((msg) => 
+                msg.receiverId == currentUserId && 
+                !msg.isRead)
+              .length;
+        }
+
+        final hasUnread = unreadCount > 0;
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChatDetail(
+                otherUserId: widget.friend.uid,
+                otherUserName: widget.friend.displayName.isNotEmpty
+                    ? widget.friend.displayName
+                    : widget.friend.userName,
+                otherUserAvatar: widget.friend.photoURL,
+                onMessageSent: widget.onChatUpdate, // Truyền callback
+              )),
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 10),
+            decoration: BoxDecoration(
+              color: hasUnread 
+                  ? colorScheme.primary.withOpacity(0.08)
+                  : Colors.transparent,
+              border: Border(
+                left: BorderSide(
+                  color: hasUnread 
+                      ? colorScheme.primary 
+                      : Colors.transparent,
+                  width: 3,
+                ),
+              ),
+            ),
+            child: Row(
             children: [
               Expanded(
                 child: Row(
@@ -98,7 +128,7 @@ class _ChatListState extends State<ChatList> {
                                   : widget.friend.userName,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: hasUnread ? FontWeight.bold : FontWeight.w600,
                                 color: colorScheme.onSurface,
                               ),
                             ),
@@ -125,8 +155,10 @@ class _ChatListState extends State<ChatList> {
                                   isMe ? '${'Chat.You'.tr()} ${latestMessage.content}' : latestMessage.content,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontSize: 13,
-                                    color: colorScheme.onSurface.withOpacity(0.6),
-                                    fontWeight: FontWeight.bold
+                                    color: hasUnread 
+                                        ? colorScheme.onSurface 
+                                        : colorScheme.onSurface.withOpacity(0.6),
+                                    fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -140,27 +172,55 @@ class _ChatListState extends State<ChatList> {
                   ],
                 ),
               ),
-              StreamBuilder<List<MessageModel>>(
-                stream: ChatService.getMessages(widget.friend.uid),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return SizedBox.shrink(); // Không hiển thị thời gian nếu chưa có tin nhắn
-                  }
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  StreamBuilder<List<MessageModel>>(
+                    stream: ChatService.getMessages(widget.friend.uid),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return SizedBox.shrink();
+                      }
 
-                  final latestMessage = snapshot.data!.first;
-                  return Text(
-                    _formatTime(latestMessage.timestamp),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface.withOpacity(0.6),
+                      final latestMessage = snapshot.data!.first;
+                      return Text(
+                        _formatTime(latestMessage.timestamp),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 12,
+                          fontWeight: hasUnread ? FontWeight.bold : FontWeight.normal,
+                          color: hasUnread 
+                              ? colorScheme.primary
+                              : colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      );
+                    },
+                  ),
+                  if (hasUnread) ...[
+                    SizedBox(height: 6),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        unreadCount > 99 ? '99+' : unreadCount.toString(),
+                        style: TextStyle(
+                          color: colorScheme.onPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  );
-                },
+                  ],
+                ],
               ),
             ],
           ),
         ),
+      );
+      },
     );
   }
 }

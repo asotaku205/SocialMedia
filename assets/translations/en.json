@@ -1,6 +1,7 @@
 {
   "Authentication": {
-    "Wellcome": "Wellcome",
+    "Wellcome": "Welcome",
+    "Welcome": "Welcome",
     "Login": "Login",
     "Dont have an account?": "Don't have an account?",
     "Register": "Register",
@@ -76,6 +77,9 @@
     "Type a message": "Type a message",
     "Yesterday": "Yesterday",
     "Send": "Send",
+    "Send Image": "Send Image",
+    "Add caption": "Add caption (optional)",
+    "Image sent successfully": "Image sent successfully",
     "Online": "Online",
     "Offline": "Offline",
     "Last seen": "Last seen",
@@ -201,5 +205,13 @@
     "Delete comment": "Delete Comment",
     "Are you sure you want to delete this comment?": "Are you sure you want to delete this comment?",
     "No comments yet": "No comments yet. Be the first to comment!"
+  },
+  "Notification": {
+    "Notifications": "Notifications",
+    "Mark all read": "Mark all read",
+    "No notifications": "No notifications yet",
+    "liked your post": "liked your post",
+    "commented on your post": "commented on your post",
+    "sent you a friend request": "sent you a friend request"
   }
 }

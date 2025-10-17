@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:blogapp/features/feed_Screen/single_post.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../profile/main_profile.dart';
 import '../profile/other_user_profile_screen.dart';
 import 'package:blogapp/models/post_model.dart';
@@ -13,7 +16,7 @@ import '../../widgets/full_screen_image.dart';
 
 class CommentUi extends StatefulWidget {
   //truyen doi tuong bai viet v day
-  final PostModel post; 
+  final PostModel post;
   const CommentUi({super.key, required this.post});
 
   @override
@@ -22,14 +25,16 @@ class CommentUi extends StatefulWidget {
 
 class _CommentUiState extends State<CommentUi> {
   final TextEditingController _controller = TextEditingController();
+  final ImagePicker _imagePicker = ImagePicker();
   bool _isSubmitting = false;
+  XFile? _selectedImage;
 
   @override
   void initState() {
     super.initState();
     // Initialize timeago locales
     TimeagoSetup.initialize();
-    
+
     // Thêm listener để rebuild khi text thay đổi (cho nút gửi)
     _controller.addListener(() {
       setState(() {});
@@ -44,20 +49,38 @@ class _CommentUiState extends State<CommentUi> {
 
   // Hàm để thêm comment mới
   Future<void> _addComment() async {
-    if (_controller.text.trim().isEmpty || _isSubmitting) return;
+    if ((_controller.text.trim().isEmpty && _selectedImage == null) ||
+        _isSubmitting)
+      return;
 
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      String result = await CommentService.createComment(
-        postId: widget.post.id,
-        content: _controller.text.trim(),
-      );
+      String result;
+
+      if (_selectedImage != null) {
+        // Gửi comment với ảnh
+        result = await CommentService.createCommentWithImage(
+          postId: widget.post.id,
+          content: _controller.text.trim(),
+          imageFile: _selectedImage!,
+        );
+      } else {
+        // Gửi comment text thông thường
+        result = await CommentService.createComment(
+          postId: widget.post.id,
+          content: _controller.text.trim(),
+        );
+      }
 
       if (result == 'success') {
         _controller.clear();
+        setState(() {
+          _selectedImage = null;
+        });
+
         // Hiển thị thông báo thành công
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -71,10 +94,7 @@ class _CommentUiState extends State<CommentUi> {
         // Hiển thị thông báo lỗi
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(result), backgroundColor: Colors.red),
           );
         }
       }
@@ -96,6 +116,32 @@ class _CommentUiState extends State<CommentUi> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${"Authentication.Error".tr()} $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   // Hàm để xóa comment
   Future<void> _deleteComment(CommentModel comment) async {
     // Hiển thị dialog xác nhận
@@ -112,16 +158,26 @@ class _CommentUiState extends State<CommentUi> {
         ),
         content: Text(
           'Comment.Are you sure you want to delete this comment?'.tr(),
-          style: theme.textTheme.bodyMedium?.copyWith(color: textColor?.withOpacity(0.7)),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: textColor?.withOpacity(0.7),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('General.Cancel'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.secondary)),
+            child: Text(
+              'General.Cancel'.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.secondary,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('General.Delete'.tr(), style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red)),
+            child: Text(
+              'General.Delete'.tr(),
+              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -146,10 +202,7 @@ class _CommentUiState extends State<CommentUi> {
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result),
-                backgroundColor: Colors.red,
-              ),
+              SnackBar(content: Text(result), backgroundColor: Colors.red),
             );
           }
         }
@@ -165,9 +218,9 @@ class _CommentUiState extends State<CommentUi> {
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
-  
     final colorScheme = Theme.of(context).colorScheme;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     return Scaffold(
@@ -177,10 +230,7 @@ class _CommentUiState extends State<CommentUi> {
         centerTitle: false,
         title: Text(
           "Feed.Comment".tr(),
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
         ),
       ),
       body: Column(
@@ -200,12 +250,14 @@ class _CommentUiState extends State<CommentUi> {
                   stream: CommentService.getCommentsStream(widget.post.id),
                   builder: (context, snapshot) {
                     // Chỉ hiển thị loading khi đang kết nối lần đầu và chưa có data
-                    if (snapshot.connectionState == ConnectionState.waiting && 
+                    if (snapshot.connectionState == ConnectionState.waiting &&
                         !snapshot.hasData) {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
-                          child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                       );
                     }
@@ -216,7 +268,9 @@ class _CommentUiState extends State<CommentUi> {
                           padding: const EdgeInsets.all(20.0),
                           child: Text(
                             '${'General.Error'.tr()}: ${snapshot.error}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
                           ),
                         ),
                       );
@@ -253,7 +307,9 @@ class _CommentUiState extends State<CommentUi> {
                             ),
                           )
                         else
-                          ...comments.map((comment) => _buildCommentItem(comment)),
+                          ...comments.map(
+                            (comment) => _buildCommentItem(comment),
+                          ),
                       ],
                     );
                   },
@@ -276,72 +332,162 @@ class _CommentUiState extends State<CommentUi> {
                   ),
                 ],
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Ô nhập comment (không có avatar)
-                  Expanded(
-                    child: Container(
-                      constraints: const BoxConstraints(minHeight: 48, maxHeight: 120),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  // Preview ảnh đã chọn
+                  if (_selectedImage != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.shadow.withOpacity(0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          FutureBuilder<Uint8List>(
+                            future: _selectedImage!.readAsBytes(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.memory(
+                                    snapshot.data!,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              }
+                              return Container(
+                                width: 60,
+                                height: 60,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _selectedImage!.name,
+                              style: TextStyle(color: textColor, fontSize: 14),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _selectedImage = null;
+                              });
+                            },
                           ),
                         ],
                       ),
-                      child: TextField(
-                        controller: _controller,
-                        style: TextStyle(color: textColor, fontSize: 16),
-                        decoration: InputDecoration(
-                          hintText: "Feed.Comment hint".tr(),
-                          hintStyle: TextStyle(
-                            color: colorScheme.secondary.withOpacity(0.5),
-                            fontSize: 16,
+                    ),
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Nút chọn ảnh
+                      Material(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(24),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: _isSubmitting ? null : _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.image_outlined,
+                              color: _isSubmitting
+                                  ? colorScheme.secondary.withOpacity(0.5)
+                                  : colorScheme.primary,
+                              size: 24,
+                            ),
                           ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
                         ),
-                        maxLines: null,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (value) => _addComment(),
                       ),
-                    ),
-                  ),
 
-                  const SizedBox(width: 12),
+                      const SizedBox(width: 8),
 
-                  // Nút gửi comment
-                  Material(
-                    color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(24),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: _isSubmitting ? null : _addComment,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        child: _isSubmitting 
-                            ? SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
-                                ),
-                              )
-                            : Icon(
-                                Icons.send_rounded,
-                                color: colorScheme.onPrimary,
-                                size: 24,
+                      // Ô nhập comment
+                      Expanded(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minHeight: 48,
+                            maxHeight: 120,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(28),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.shadow.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
                               ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _controller,
+                            style: TextStyle(color: textColor, fontSize: 16),
+                            decoration: InputDecoration(
+                              hintText: "Feed.Comment hint".tr(),
+                              hintStyle: TextStyle(
+                                color: colorScheme.secondary.withOpacity(0.5),
+                                fontSize: 16,
+                              ),
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                            ),
+                            maxLines: null,
+                            textInputAction: TextInputAction.send,
+                            onSubmitted: (value) => _addComment(),
+                          ),
+                        ),
                       ),
-                    ),
+
+                      const SizedBox(width: 12),
+
+                      // Nút gửi comment
+                      Material(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(24),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: _isSubmitting ? null : _addComment,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: _isSubmitting
+                                ? SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.send_rounded,
+                                    color: colorScheme.onPrimary,
+                                    size: 24,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -361,7 +507,7 @@ class _CommentUiState extends State<CommentUi> {
     final colorScheme = Theme.of(context).colorScheme;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
       child: Row(
@@ -380,7 +526,8 @@ class _CommentUiState extends State<CommentUi> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => OtherUserProfileScreen(userId: comment.authorId),
+                    builder: (context) =>
+                        OtherUserProfileScreen(userId: comment.authorId),
                   ),
                 );
               }
@@ -434,20 +581,24 @@ class _CommentUiState extends State<CommentUi> {
                             if (comment.authorId == currentUserId) {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const MainProfile()),
+                                MaterialPageRoute(
+                                  builder: (context) => const MainProfile(),
+                                ),
                               );
                             } else {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => OtherUserProfileScreen(userId: comment.authorId),
+                                  builder: (context) => OtherUserProfileScreen(
+                                    userId: comment.authorId,
+                                  ),
                                 ),
                               );
                             }
                           },
                           child: Text(
-                            comment.authorName.isNotEmpty 
-                                ? comment.authorName 
+                            comment.authorName.isNotEmpty
+                                ? comment.authorName
                                 : 'Unknown User',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
@@ -459,8 +610,8 @@ class _CommentUiState extends State<CommentUi> {
                       ),
                       Text(
                         TimeagoSetup.formatTime(
-                          comment.createdAt, 
-                          context.locale.languageCode
+                          comment.createdAt,
+                          context.locale.languageCode,
                         ),
                         style: TextStyle(
                           fontSize: 11,
@@ -492,7 +643,11 @@ class _CommentUiState extends State<CommentUi> {
                               height: 40,
                               child: Row(
                                 children: [
-                                  Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                  Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                    size: 18,
+                                  ),
                                   const SizedBox(width: 10),
                                   Text(
                                     'General.Delete'.tr(),
@@ -518,6 +673,57 @@ class _CommentUiState extends State<CommentUi> {
                       color: textColor?.withOpacity(0.85),
                     ),
                   ),
+
+                  // Hiển thị ảnh nếu có
+                  if (comment.imageUrl != null && comment.imageUrl!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Show full screen image
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FullScreenImage(imageUrl: comment.imageUrl!),
+                            ),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            comment.imageUrl!,
+                            fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                height: 150,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value:
+                                        loadingProgress.expectedTotalBytes !=
+                                            null
+                                        ? loadingProgress
+                                                  .cumulativeBytesLoaded /
+                                              loadingProgress
+                                                  .expectedTotalBytes!
+                                        : null,
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                height: 150,
+                                child: Center(
+                                  child: Icon(Icons.broken_image, size: 48),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

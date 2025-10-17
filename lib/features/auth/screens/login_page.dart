@@ -44,7 +44,9 @@ class _LoginPageState extends State<LoginPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Authentication.Wellcome, ${user.displayName}!'.tr()),
+              content: Text(
+                '${'Authentication.Wellcome'.tr()}, ${user.displayName}!',
+              ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
@@ -148,9 +150,11 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => const ForgotPasswordPage(),
                         ),
                       ),
-                      child:Text(
+                      child: Text(
                         'Authentication.Forgot Password'.tr(),
-                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -163,7 +167,10 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       foregroundColor: colorScheme.onBackground,
-                      side: BorderSide(color: colorScheme.onBackground, width: 1.5),
+                      side: BorderSide(
+                        color: colorScheme.onBackground,
+                        width: 1.5,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -178,7 +185,12 @@ class _LoginPageState extends State<LoginPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        :  Text('Authentication.Login'.tr(), style: textTheme.bodyLarge?.copyWith(color: colorScheme.onBackground)),
+                        : Text(
+                            'Authentication.Login'.tr(),
+                            style: textTheme.bodyLarge?.copyWith(
+                              color: colorScheme.onBackground,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -187,19 +199,24 @@ class _LoginPageState extends State<LoginPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                       Text(
+                      Text(
                         "Authentication.Dont have an account?".tr(),
-                        style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onBackground,
+                        ),
                       ),
                       TextButton(
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const RegisterPage()),
+                            builder: (context) => const RegisterPage(),
+                          ),
                         ),
                         child: Text(
                           'Authentication.Register'.tr(),
-                          style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary),
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.primary,
+                          ),
                         ),
                       ),
                     ],

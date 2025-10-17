@@ -2,28 +2,25 @@ import 'package:blogapp/features/createpost/createpost.dart';
 import 'package:blogapp/features/search_page/search_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../profile/setting.dart';
 import '../../feed_Screen/main_feed.dart';
 import '../../profile/main_profile.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../../profile/friends_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../../services/friend_services.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({super.key});
 
   @override
-  State<BottomNavigation> createState() =>
-      _BottomNavigationState();
+  State<BottomNavigation> createState() => _BottomNavigationState();
 }
 
 int currentIndex = 0;
 
-class _BottomNavigationState
-    extends State<BottomNavigation> {
+class _BottomNavigationState extends State<BottomNavigation> {
   late PageController pageController;
-  final FirebaseAuth _auth =
-      FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   void initState() {
     super.initState();
@@ -44,6 +41,44 @@ class _BottomNavigationState
 
   navigatePage(int page) {
     pageController.jumpToPage(page);
+  }
+
+  Widget _buildIconWithBadge(IconData icon, Stream<int> countStream) {
+    return StreamBuilder<int>(
+      stream: countStream,
+      builder: (context, snapshot) {
+        final count = snapshot.data ?? 0;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Icon(icon),
+            if (count > 0)
+              Positioned(
+                right: -6,
+                top: -6,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Center(
+                    child: Text(
+                      count > 99 ? '99+' : count.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -67,11 +102,14 @@ class _BottomNavigationState
               label: 'Search.Search'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(BoxIcons.bx_plus,),
+              icon: Icon(BoxIcons.bx_plus),
               label: 'Navigation.Add'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(BoxIcons.bx_group),
+              icon: _buildIconWithBadge(
+                BoxIcons.bx_group,
+                FriendService.getPendingRequestsCount(),
+              ),
               label: 'Friend.Friends'.tr(),
             ),
             BottomNavigationBarItem(
@@ -93,9 +131,7 @@ class _BottomNavigationState
           WidgetSearch(),
           CreatePost(),
           FriendsScreen(),
-          MainProfile(
-            uid: _auth.currentUser!.uid,
-          ),
+          MainProfile(uid: _auth.currentUser!.uid),
         ],
       ),
     );

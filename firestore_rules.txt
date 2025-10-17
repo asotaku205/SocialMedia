@@ -90,14 +90,14 @@ service cloud.firestore {
       allow read: if request.auth != null &&
                  request.auth.uid == resource.data.userId;
 
-      // Tạo: System tạo notification, user không tự tạo
-      allow create: if false;
+      // Tạo: Authenticated user có thể tạo notification cho user khác
+      allow create: if request.auth != null &&
+                   request.auth.uid == request.resource.data.fromUserId &&
+                   request.resource.data.keys().hasAll(['userId', 'type', 'fromUserId', 'createdAt', 'isRead']);
 
       // Sửa: User có thể đánh dấu đã đọc notification của mình
       allow update: if request.auth != null &&
-                   request.auth.uid == resource.data.userId &&
-                   // Chỉ cho phép thay đổi isRead
-                   request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'updatedAt']);
+                   request.auth.uid == resource.data.userId;
 
       // Xóa: User có thể xóa notification của mình
       allow delete: if request.auth != null &&

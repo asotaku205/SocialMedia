@@ -11,6 +11,7 @@ import '../models/post_model.dart'; // Import model bạn vừa tạo
 import '../models/user_model.dart'; // Import UserModel để lấy thông tin tác giả
 import '../models/comment_model.dart'; // Import CommentModel
 import './auth_service.dart'; // Import AuthService để lấy thông tin user
+import './notification_service.dart'; // Import NotificationService
 
 class PostService {
   // Khởi tạo các instance của Firestore và Storage
@@ -81,10 +82,7 @@ class PostService {
       // Lấy bạn bè từ trường friends trong user document thay vì subcollection
       DocumentSnapshot userDoc;
       try {
-        userDoc = await _firestore
-            .collection('users')
-            .doc(currentUserId)
-            .get();
+        userDoc = await _firestore.collection('users').doc(currentUserId).get();
       } catch (e) {
         print('Error fetching user document: $e');
         yield [];
@@ -125,7 +123,9 @@ class PostService {
   }
 
   // Method mới để lấy posts mà không cần composite index
-  static Stream<List<PostModel>> _getPostsWithoutCompositeIndex(List<String> friendIds) async* {
+  static Stream<List<PostModel>> _getPostsWithoutCompositeIndex(
+    List<String> friendIds,
+  ) async* {
     try {
       // Lấy tất cả posts trước, sau đó filter và sort trong code
       yield* _firestore
@@ -136,29 +136,29 @@ class PostService {
             return <QuerySnapshot>[];
           })
           .map((snapshot) {
-        List<PostModel> allPosts = [];
+            List<PostModel> allPosts = [];
 
-        for (var doc in snapshot.docs) {
-          try {
-            Map<String, dynamic> data = doc.data();
-            data['id'] = doc.id;
+            for (var doc in snapshot.docs) {
+              try {
+                Map<String, dynamic> data = doc.data();
+                data['id'] = doc.id;
 
-            // Chỉ lấy posts từ bạn bè
-            String authorId = data['authorId'] ?? '';
-            if (friendIds.contains(authorId)) {
-              PostModel post = PostModel.fromMap(data, doc.id);
-              allPosts.add(post);
+                // Chỉ lấy posts từ bạn bè
+                String authorId = data['authorId'] ?? '';
+                if (friendIds.contains(authorId)) {
+                  PostModel post = PostModel.fromMap(data, doc.id);
+                  allPosts.add(post);
+                }
+              } catch (e) {
+                print('Error parsing post: $e');
+              }
             }
-          } catch (e) {
-            print('Error parsing post: $e');
-          }
-        }
 
-        // Sort theo thời gian tạo (mới nhất lên đầu)
-        allPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            // Sort theo thời gian tạo (mới nhất lên đầu)
+            allPosts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-        return allPosts;
-      });
+            return allPosts;
+          });
     } catch (e) {
       print('Error in _getPostsWithoutCompositeIndex: $e');
       yield [];
@@ -175,24 +175,45 @@ class PostService {
           return <QuerySnapshot>[];
         })
         .map((snapshot) {
-      List<PostModel> posts = [];
+          List<PostModel> posts = [];
 
-      for (var doc in snapshot.docs) {
-        try {
-          Map<String, dynamic> data = doc.data();
-          data['id'] = doc.id;
-          PostModel post = PostModel.fromMap(data, doc.id);
-          posts.add(post);
-        } catch (e) {
-          print('Error parsing post in getPostsStream: $e');
-        }
+          for (var doc in snapshot.docs) {
+            try {
+              Map<String, dynamic> data = doc.data();
+              data['id'] = doc.id;
+              PostModel post = PostModel.fromMap(data, doc.id);
+              posts.add(post);
+            } catch (e) {
+              print('Error parsing post in getPostsStream: $e');
+            }
+          }
+
+          // Sort theo thời gian tạo
+          posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+          return posts;
+        });
+  }
+
+  // Lấy một post theo ID
+  static Future<PostModel?> getPostById(String postId) async {
+    try {
+      DocumentSnapshot doc = await _firestore
+          .collection('posts')
+          .doc(postId)
+          .get();
+
+      if (!doc.exists) {
+        return null;
       }
 
-      // Sort theo thời gian tạo
-      posts.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-      return posts;
-    });
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      data['id'] = doc.id;
+      return PostModel.fromMap(data, doc.id);
+    } catch (e) {
+      print('Error getting post by ID: $e');
+      return null;
+    }
   }
 
   // Method để kiểm tra và debug friendship data
@@ -239,6 +260,8 @@ class PostService {
   static Future<String> toggleLike(String postId, String userId) async {
     try {
       DocumentReference postRef = _firestore.collection('posts').doc(postId);
+      bool isLiking = false;
+      String? authorId;
 
       await _firestore.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(postRef);
@@ -248,6 +271,7 @@ class PostService {
         }
 
         List<String> likedBy = List<String>.from(snapshot['likedBy'] ?? []);
+        authorId = snapshot['authorId'];
 
         if (likedBy.contains(userId)) {
           // Nếu đã like -> Unlike
@@ -255,14 +279,31 @@ class PostService {
             'likedBy': FieldValue.arrayRemove([userId]),
             'likes': FieldValue.increment(-1),
           });
+          isLiking = false;
         } else {
           // Nếu chưa like -> Like
           transaction.update(postRef, {
             'likedBy': FieldValue.arrayUnion([userId]),
             'likes': FieldValue.increment(1),
           });
+          isLiking = true;
         }
       });
+
+      // Tạo thông báo nếu là like (không phải unlike) và không phải tự like
+      if (isLiking && authorId != null && authorId != userId) {
+        final currentUser = await AuthService.getUser();
+        if (currentUser != null) {
+          await NotificationService.createNotification(
+            userId: authorId!,
+            type: 'like',
+            fromUserName: currentUser.displayName,
+            fromUserAvatar: currentUser.photoURL,
+            postId: postId,
+          );
+        }
+      }
+
       return 'success';
     } catch (e) {
       return 'Lỗi: $e';
@@ -274,7 +315,10 @@ class PostService {
   static Future<String> deletePost(String postId) async {
     try {
       // Lấy thông tin bài viết trước khi xóa để biết authorId
-      DocumentSnapshot postDoc = await _firestore.collection('posts').doc(postId).get();
+      DocumentSnapshot postDoc = await _firestore
+          .collection('posts')
+          .doc(postId)
+          .get();
 
       if (!postDoc.exists) {
         return 'Bài viết không tồn tại';
@@ -299,22 +343,28 @@ class PostService {
 
   // --- HÀM HỖ TRỢ UPLOAD ẢNH ---
   /// Hàm riêng tư để upload ảnh lên Firebase Storage.
-  static Future<String?> _uploadImage(XFile imageFile, String folderPath) async {
+  static Future<String?> _uploadImage(
+    XFile imageFile,
+    String folderPath,
+  ) async {
     try {
       // Trên web, sử dụng base64 fallback ngay để tránh CORS
       if (kIsWeb) {
         print('Using base64 fallback for web post image upload');
-        
+
         final Uint8List imageBytes = await imageFile.readAsBytes();
-        
+
         // Giới hạn kích thước để tránh base64 quá lớn
-        if (imageBytes.length > 2 * 1024 * 1024) { // 2MB cho post images
-          throw Exception('Ảnh quá lớn cho web upload. Vui lòng chọn ảnh nhỏ hơn 2MB');
+        if (imageBytes.length > 2 * 1024 * 1024) {
+          // 2MB cho post images
+          throw Exception(
+            'Ảnh quá lớn cho web upload. Vui lòng chọn ảnh nhỏ hơn 2MB',
+          );
         }
-        
+
         final String base64String = base64Encode(imageBytes);
         final String dataUrl = 'data:image/jpeg;base64,$base64String';
-        
+
         print('Base64 post image upload completed');
         return dataUrl;
       }
@@ -342,7 +392,10 @@ class PostService {
   /// Cập nhật số lượng comments của một post
   /// [postId] - ID của post cần cập nhật
   /// [increment] - Số lượng cần tăng/giảm (dương để tăng, âm để giảm)
-  static Future<String> updateCommentsCount(String postId, int increment) async {
+  static Future<String> updateCommentsCount(
+    String postId,
+    int increment,
+  ) async {
     try {
       await _firestore.collection('posts').doc(postId).update({
         'comments': FieldValue.increment(increment),
@@ -363,7 +416,7 @@ class PostService {
           .collection('comments')
           .where('postId', isEqualTo: postId)
           .get();
-      
+
       return snapshot.docs.length;
     } catch (e) {
       print('Lỗi lấy actual comments count: $e');
@@ -377,12 +430,12 @@ class PostService {
   static Future<String> syncCommentsCount(String postId) async {
     try {
       int actualCount = await getActualCommentsCount(postId);
-      
+
       await _firestore.collection('posts').doc(postId).update({
         'comments': actualCount,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      
+
       return 'success';
     } catch (e) {
       print('Lỗi sync comments count: $e');

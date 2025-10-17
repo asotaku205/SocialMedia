@@ -1,14 +1,21 @@
 // File: lib/services/comment_service.dart
 // Service để xử lý tất cả logic liên quan đến comments
 
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:image_picker/image_picker.dart';
 import '../models/comment_model.dart';
 import '../models/user_model.dart';
 import './auth_service.dart';
+import './notification_service.dart';
 
 class CommentService {
   // Khởi tạo instance của Firestore
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // --- 1. CREATE (TẠO COMMENT MỚI) ---
   /// Hàm tạo một comment mới cho bài viết
@@ -36,6 +43,9 @@ class CommentService {
         return 'Bài viết không tồn tại';
       }
 
+      final postData = postDoc.data() as Map<String, dynamic>;
+      final postAuthorId = postData['authorId'];
+
       // Tạo comment model mới
       CommentModel newComment = CommentModel(
         id: '', // Firestore sẽ tự tạo ID
@@ -55,6 +65,18 @@ class CommentService {
         'comments': FieldValue.increment(1),
         'updatedAt': FieldValue.serverTimestamp(),
       });
+
+      // Tạo thông báo cho tác giả bài viết (nếu không phải tự comment)
+      if (postAuthorId != null && postAuthorId != currentUser.uid) {
+        await NotificationService.createNotification(
+          userId: postAuthorId,
+          type: 'comment',
+          fromUserName: currentUser.displayName,
+          fromUserAvatar: currentUser.photoURL,
+          postId: postId,
+          content: content,
+        );
+      }
 
       return 'success';
     } catch (e) {
@@ -78,20 +100,20 @@ class CommentService {
           return <QuerySnapshot>[];
         })
         .map((snapshot) {
-      List<CommentModel> comments = [];
+          List<CommentModel> comments = [];
 
-      for (var doc in snapshot.docs) {
-        try {
-          Map<String, dynamic> data = doc.data();
-          CommentModel comment = CommentModel.fromMap(data, doc.id);
-          comments.add(comment);
-        } catch (e) {
-          print('Lỗi parse comment: $e');
-        }
-      }
+          for (var doc in snapshot.docs) {
+            try {
+              Map<String, dynamic> data = doc.data();
+              CommentModel comment = CommentModel.fromMap(data, doc.id);
+              comments.add(comment);
+            } catch (e) {
+              print('Lỗi parse comment: $e');
+            }
+          }
 
-      return comments;
-    });
+          return comments;
+        });
   }
 
   /// Lấy danh sách comments một lần (không real-time)
@@ -154,7 +176,8 @@ class CommentService {
         return 'Comment không tồn tại';
       }
 
-      Map<String, dynamic> commentData = commentDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> commentData =
+          commentDoc.data() as Map<String, dynamic>;
       String commentAuthorId = commentData['authorId'] ?? '';
 
       // Lấy thông tin bài viết để kiểm tra quyền
@@ -217,7 +240,8 @@ class CommentService {
         return 'Comment không tồn tại';
       }
 
-      Map<String, dynamic> commentData = commentDoc.data() as Map<String, dynamic>;
+      Map<String, dynamic> commentData =
+          commentDoc.data() as Map<String, dynamic>;
       String commentAuthorId = commentData['authorId'] ?? '';
 
       // Kiểm tra quyền: chỉ tác giả comment mới được sửa
@@ -281,6 +305,122 @@ class CommentService {
     } catch (e) {
       print('Lỗi lấy user comments: $e');
       return [];
+    }
+  }
+
+  // --- 6. IMAGE UPLOAD ---
+  /// Hàm upload ảnh lên Firebase Storage hoặc convert sang base64 cho web
+  static Future<String?> _uploadCommentImage(XFile imageFile) async {
+    try {
+      // Trên web, sử dụng base64 fallback
+      if (kIsWeb) {
+        print('Using base64 fallback for web comment image upload');
+
+        final Uint8List imageBytes = await imageFile.readAsBytes();
+
+        // Giới hạn kích thước để tránh base64 quá lớn
+        if (imageBytes.length > 1 * 1024 * 1024) {
+          // 1MB cho comment images
+          throw Exception(
+            'Ảnh quá lớn cho web upload. Vui lòng chọn ảnh nhỏ hơn 1MB',
+          );
+        }
+
+        final String base64String = base64Encode(imageBytes);
+        final String dataUrl = 'data:image/jpeg;base64,$base64String';
+
+        print('Base64 comment image upload completed');
+        return dataUrl;
+      }
+
+      // Mobile approach - Firebase Storage
+      String fileName = 'comment_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      Reference ref = _storage.ref().child('comments_images/$fileName');
+
+      // Đọc file thành bytes
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+
+      // Upload
+      UploadTask uploadTask = ref.putData(imageBytes);
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Lấy URL
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Lỗi upload ảnh comment: $e');
+      return null;
+    }
+  }
+
+  /// Tạo comment với ảnh đính kèm
+  static Future<String> createCommentWithImage({
+    required String postId,
+    required String content,
+    required XFile imageFile,
+  }) async {
+    try {
+      // Lấy thông tin người dùng hiện tại
+      UserModel? currentUser = await AuthService.getUser();
+      if (currentUser == null) {
+        return 'Người dùng chưa đăng nhập';
+      }
+
+      // Kiểm tra bài viết có tồn tại không
+      DocumentSnapshot postDoc = await _firestore
+          .collection('posts')
+          .doc(postId)
+          .get();
+
+      if (!postDoc.exists) {
+        return 'Bài viết không tồn tại';
+      }
+
+      final postData = postDoc.data() as Map<String, dynamic>;
+      final postAuthorId = postData['authorId'];
+
+      // Upload ảnh trước
+      String? imageUrl = await _uploadCommentImage(imageFile);
+      if (imageUrl == null) {
+        return 'Lỗi upload ảnh';
+      }
+
+      // Tạo comment model mới với ảnh
+      CommentModel newComment = CommentModel(
+        id: '', // Firestore sẽ tự tạo ID
+        postId: postId,
+        authorId: currentUser.uid,
+        authorName: currentUser.displayName,
+        authorAvatar: currentUser.photoURL,
+        content: content,
+        imageUrl: imageUrl,
+        createdAt: DateTime.now(),
+      );
+
+      // Thêm comment vào collection comments
+      await _firestore.collection('comments').add(newComment.toMap());
+
+      // Tăng số lượng comments trong bài viết
+      await _firestore.collection('posts').doc(postId).update({
+        'comments': FieldValue.increment(1),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Tạo thông báo cho tác giả bài viết (nếu không phải tự comment)
+      if (postAuthorId != null && postAuthorId != currentUser.uid) {
+        await NotificationService.createNotification(
+          userId: postAuthorId,
+          type: 'comment',
+          fromUserName: currentUser.displayName,
+          fromUserAvatar: currentUser.photoURL,
+          postId: postId,
+          content: content,
+        );
+      }
+
+      return 'success';
+    } catch (e) {
+      print('Lỗi tạo comment với ảnh: $e');
+      return 'Đã có lỗi xảy ra khi tạo comment: $e';
     }
   }
 }

@@ -3,13 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommentModel {
   final String id;
-  final String postId;        // ID của bài viết chứa comment
-  final String authorId;      // ID người comment
-  final String authorName;    // Tên người comment
-  final String authorAvatar;  // Avatar người comment
-  final String content;       // Nội dung comment
-  final DateTime createdAt;   // Thời gian tạo comment
-  final DateTime? updatedAt;  // Thời gian cập nhật comment (nếu có)
+  final String postId; // ID của bài viết chứa comment
+  final String authorId; // ID người comment
+  final String authorName; // Tên người comment
+  final String authorAvatar; // Avatar người comment
+  final String content; // Nội dung comment
+  final String? imageUrl; // URL của ảnh đính kèm (nếu có)
+  final DateTime createdAt; // Thời gian tạo comment
+  final DateTime? updatedAt; // Thời gian cập nhật comment (nếu có)
 
   CommentModel({
     required this.id,
@@ -18,6 +19,7 @@ class CommentModel {
     required this.authorName,
     this.authorAvatar = '',
     required this.content,
+    this.imageUrl,
     required this.createdAt,
     this.updatedAt,
   });
@@ -31,9 +33,10 @@ class CommentModel {
       authorName: map['authorName'] ?? '',
       authorAvatar: map['authorAvatar'] ?? '',
       content: map['content'] ?? '',
+      imageUrl: map['imageUrl'],
       createdAt: (map['createdAt'] as Timestamp).toDate(),
-      updatedAt: map['updatedAt'] != null 
-          ? (map['updatedAt'] as Timestamp).toDate() 
+      updatedAt: map['updatedAt'] != null
+          ? (map['updatedAt'] as Timestamp).toDate()
           : null,
     );
   }
@@ -46,6 +49,7 @@ class CommentModel {
       'authorName': authorName,
       'authorAvatar': authorAvatar,
       'content': content,
+      if (imageUrl != null) 'imageUrl': imageUrl,
       'createdAt': Timestamp.fromDate(createdAt),
       if (updatedAt != null) 'updatedAt': Timestamp.fromDate(updatedAt!),
     };
@@ -59,6 +63,7 @@ class CommentModel {
     String? authorName,
     String? authorAvatar,
     String? content,
+    String? imageUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -69,6 +74,7 @@ class CommentModel {
       authorName: authorName ?? this.authorName,
       authorAvatar: authorAvatar ?? this.authorAvatar,
       content: content ?? this.content,
+      imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

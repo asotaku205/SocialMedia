@@ -1,21 +1,16 @@
-
 import 'package:blogapp/features/feed_Screen/post_card.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
 import '../chat/home_chat.dart';
-import '../../models/user_model.dart';
-import '../../services/friend_services.dart';
-import '../../services/auth_service.dart';
-import '../feed_Screen/post_card.dart';
-import '../../models/post_model.dart';
+import '../../services/chat_service.dart';
 import '../auth/widgets/bottom_bar.dart';
+import '../../services/notification_service.dart';
+import '../notifications/notifications_screen.dart';
 
 class FeedScreen extends StatefulWidget {
-
   const FeedScreen({super.key});
   @override
-  State<FeedScreen> createState() =>
-      _FeedScreenState();
+  State<FeedScreen> createState() => _FeedScreenState();
 }
 
 class _FeedScreenState extends State<FeedScreen> {
@@ -30,26 +25,116 @@ class _FeedScreenState extends State<FeedScreen> {
         centerTitle: false,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const BottomNavigation()), (route) => false);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const BottomNavigation()),
+              (route) => false,
+            );
           },
-          child: Image.asset(
-            logoPath,
-            fit: BoxFit.cover,
-          ),
+          child: Image.asset(logoPath, fit: BoxFit.cover),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeChat()),
+          // Icon chat với badge
+          StreamBuilder<int>(
+            stream: ChatService.getUnreadMessagesCount(),
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? 0;
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeChat(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(BoxIcons.bxs_chat),
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Center(
+                          child: Text(
+                            count > 99 ? '99+' : count.toString(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
-            icon: const Icon(BoxIcons.bxs_chat),
+          ),
+          // Icon thông báo với badge
+          StreamBuilder<int>(
+            stream: NotificationService.getUnreadCountStream(),
+            builder: (context, snapshot) {
+              final count = snapshot.data ?? 0;
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(BoxIcons.bx_bell),
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Center(
+                          child: Text(
+                            count > 99 ? '99+' : count.toString(),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
-      body:PostCard(),
+      body: PostCard(),
     );
   }
 }

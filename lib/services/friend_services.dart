@@ -4,6 +4,7 @@ import '../models/post_model.dart';
 import '../models/friend_model.dart';
 import '../models/user_model.dart';
 import 'auth_service.dart';
+import 'notification_service.dart';
 
 class FriendService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -11,11 +12,11 @@ class FriendService {
 
   static Future<String> SendFriendRequest(String receiverId) async {
     try {
-      String? currentUser = AuthService.currentUser?.uid;
-      if (currentUser == null) {
+      String? currentUserId = AuthService.currentUser?.uid;
+      if (currentUserId == null) {
         return 'User not logged in';
       }
-      String senderId = currentUser;
+      String senderId = currentUserId;
       if (senderId == receiverId) {
         return 'You cannot send a friend request to yourself';
       }
@@ -63,6 +64,18 @@ class FriendService {
       );
 
       await _firestore.collection('friendships').add(newRequest.toMap());
+
+      // Tạo thông báo cho người nhận
+      final userInfo = await AuthService.getUser();
+      if (userInfo != null) {
+        await NotificationService.createNotification(
+          userId: receiverId,
+          type: 'friend_request',
+          fromUserName: userInfo.displayName,
+          fromUserAvatar: userInfo.photoURL,
+        );
+      }
+
       return 'success';
     } catch (e) {
       print('Error sending friend request: $e');
@@ -77,7 +90,10 @@ class FriendService {
       if (currentUser == null) {
         return 'User not logged in';
       }
-      DocumentSnapshot friendshipDoc = await _firestore.collection('friendships').doc(requestId).get();
+      DocumentSnapshot friendshipDoc = await _firestore
+          .collection('friendships')
+          .doc(requestId)
+          .get();
       if (!friendshipDoc.exists) {
         return 'Friend request not found';
       }
@@ -99,14 +115,18 @@ class FriendService {
         'updatedAt': DateTime.now(),
       });
       // Update sender's friends list
-      DocumentReference senderRef = _firestore.collection('users').doc(friendship.senderId);
+      DocumentReference senderRef = _firestore
+          .collection('users')
+          .doc(friendship.senderId);
       await senderRef.update({
         'friends': FieldValue.arrayUnion([friendship.receiverId]),
         'friendCount': FieldValue.increment(1),
         'updatedAt': DateTime.now(),
       });
       // Update receiver's friends list
-      DocumentReference receiverRef = _firestore.collection('users').doc(friendship.receiverId);
+      DocumentReference receiverRef = _firestore
+          .collection('users')
+          .doc(friendship.receiverId);
       await receiverRef.update({
         'friends': FieldValue.arrayUnion([friendship.senderId]),
         'friendCount': FieldValue.increment(1),
@@ -127,7 +147,10 @@ class FriendService {
         return 'Bạn chưa đăng nhập';
       }
 
-      DocumentSnapshot friendshipDoc = await _firestore.collection('friendships').doc(friendshipId).get();
+      DocumentSnapshot friendshipDoc = await _firestore
+          .collection('friendships')
+          .doc(friendshipId)
+          .get();
 
       if (!friendshipDoc.exists) {
         return 'Lời mời không tồn tại';
@@ -157,6 +180,21 @@ class FriendService {
     }
   }
 
+  // ĐẾM SỐ LƯỢNG LỜI MỜI KẾT BẠN ĐANG CHỜ
+  static Stream<int> getPendingRequestsCount() {
+    User? currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      return Stream.value(0);
+    }
+
+    return _firestore
+        .collection('friendships')
+        .where('receiverId', isEqualTo: currentUser.uid)
+        .where('status', isEqualTo: 'pending')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
   // LẤY DANH SÁCH LỜI MỜI ĐANG CHỜ
   //Query friendships where receiverId = currentUser.uid AND status = 'pending'
   // Join với users collection để lấy thông tin sender
@@ -181,8 +219,8 @@ class FriendService {
       //  Lấy thông tin chi tiết của từng sender
       for (QueryDocumentSnapshot doc in friendshipSnapshot.docs) {
         friendShipModel friendship = friendShipModel.fromMap(
-            doc.data() as Map<String, dynamic>,
-            doc.id
+          doc.data() as Map<String, dynamic>,
+          doc.id,
         );
 
         // Lấy thông tin sender
@@ -193,8 +231,8 @@ class FriendService {
 
         if (senderDoc.exists) {
           UserModel sender = UserModel.fromMap(
-              senderDoc.data() as Map<String, dynamic>,
-              senderDoc.id
+            senderDoc.data() as Map<String, dynamic>,
+            senderDoc.id,
           );
           pendingRequests.add({
             'friendship': friendship.toMap(),
